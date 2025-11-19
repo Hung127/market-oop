@@ -1,0 +1,31 @@
+name: Build & Compile Check (CMake)
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install GCC (g++-14)
+      run: |
+        sudo apt update
+        sudo apt install -y g++-14
+
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_CXX_COMPILER=g++-14
+
+    - name: Build project
+      run: |
+        cd build
+        cmake --build .
