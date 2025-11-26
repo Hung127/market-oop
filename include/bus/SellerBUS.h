@@ -3,6 +3,7 @@
 
 #include <expected>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "../User.h"
@@ -11,12 +12,38 @@
 class Market;
 class Product;
 
+/**
+ * Business error codes returned by SellerBUS.
+ */
+enum class BusError { ValidationFailed, NotFound, Conflict, MarketError, InternalError };
+
+std::string getErrorString(BusError e) {
+    switch (e) {
+        case BusError::ValidationFailed:
+            return "ValidationFailed";
+        case BusError::NotFound:
+            return "NotFound";
+        case BusError::Conflict:
+            return "Conflict";
+        case BusError::MarketError:
+            return "MarketError";
+        case BusError::InternalError:
+        default:
+            return "InternalError";
+    }
+}
+
 class SellerBUS {
    private:
     std::shared_ptr<SellerDTO> _seller;
 
     // Helper
-    std::shared_ptr<Product> findProductInInventory(const std::string& id);
+    std::shared_ptr<Product> findProductInInventory(const std::string& id) const;
+
+   private:
+    SellerBUS(const std::shared_ptr<SellerDTO>& seller) : _seller(seller) {
+        // Do nothing
+    }
 
    public:
     // ========== PRODUCT MANAGEMENT ==========
@@ -31,10 +58,10 @@ class SellerBUS {
      * @param name Tên sản phẩm
      * @param price Giá sản phẩm (phải > 0)
      * @param stock Số lượng tồn kho
-     * @return shared_ptr tới product vừa tạo, nullptr nếu ID trùng
+     * @return expected chứa shared_ptr tới product vừa tạo, hoặc BusError on failure
      */
-    std::shared_ptr<Product> createProduct(const std::string& id, const std::string& name,
-                                           double price, int stock);
+    std::expected<std::shared_ptr<Product>, BusError>
+    createProduct(const std::string& id, const std::string& name, double price, int stock);
 
     /**
      * @brief Xóa sản phẩm khỏi inventory
@@ -43,9 +70,9 @@ class SellerBUS {
      *
      * @param market Market instance
      * @param productId ID sản phẩm cần xóa
-     * @return true nếu xóa thành công
+     * @return expected<void, BusError>
      */
-    bool deleteProduct(Market& market, const std::string& productId);
+    std::expected<void, BusError> deleteProduct(Market& market, const std::string& productId);
 
     /**
      * @brief Cập nhật thông tin sản phẩm
@@ -53,27 +80,26 @@ class SellerBUS {
      * @param productId ID sản phẩm
      * @param newName Tên mới (để trống nếu không đổi)
      * @param newPrice Giá mới (-1 nếu không đổi)
-     * @return true nếu cập nhật thành công
+     * @return expected<void, BusError>
      */
-    bool updateProduct(const std::string& productId, const std::string& newName = "",
-                       double newPrice = -1);
+    std::expected<void, BusError> updateProduct(const std::string& productId,
+                                                const std::string& newName = "",
+                                                double newPrice = -1);
 
     /**
      * @brief Cập nhật stock
      */
-    bool updateStock(const std::string& productId, int newStock);
+    std::expected<void, BusError> updateStock(const std::string& productId, int newStock);
 
     /**
      * @brief Lấy tất cả products trong inventory (bao gồm cả chưa publish)
      */
-    std::vector<std::shared_ptr<Product>> getMyProducts() const;
+    std::expected<std::vector<std::shared_ptr<Product>>, BusError> getMyProducts() const;
 
     /**
      * @brief Lấy số lượng products trong inventory
      */
-    int getProductCount() const {  // TODO: Make it work
-        return 0;
-    }
+    std::expected<int, BusError> getProductCount() const;
 
     // ========== MARKET INTERACTION ==========
 
@@ -84,9 +110,9 @@ class SellerBUS {
      *
      * @param market Market instance
      * @param productId ID sản phẩm cần publish
-     * @return true nếu publish thành công
+     * @return expected<void, BusError>
      */
-    bool publishToMarket(Market& market, const std::string& productId);
+    std::expected<void, BusError> publishToMarket(Market& market, const std::string& productId);
 
     /**
      * @brief Unpublish sản phẩm khỏi market
@@ -96,21 +122,22 @@ class SellerBUS {
      *
      * @param market Market instance
      * @param productId ID sản phẩm cần unpublish
-     * @return true nếu unpublish thành công
+     * @return expected<void, BusError>
      */
-    bool unpublishFromMarket(Market& market, const std::string& productId);
-
-    // ========== SEARCH IN INVENTORY ==========
+    std::expected<void, BusError> unpublishFromMarket(Market& market, const std::string& productId);
 
     /**
      * @brief Tìm sản phẩm trong inventory theo tên
      */
-    std::vector<std::shared_ptr<Product>> searchMyProductsByName(const std::string& keyword) const;
+    std::vector<std::shared_ptr<Product>>  // NOLINT
+    searchMyProductsByName(const std::string& keyword) const;
 
     /**
      * @brief Tìm sản phẩm gần đúng nhất trong inventory (fuzzy search)
      */
-    std::shared_ptr<Product> searchMyClosestProduct(const std::string& keyword) const;
+    std::shared_ptr<Product> searchMyClosestProduct(const std::string& keyword) const;  // NOLINT
+
+    static std::expected<SellerBUS, BusError> create(std::shared_ptr<SellerDTO> seller);
 };
 
 #endif

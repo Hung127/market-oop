@@ -7,11 +7,11 @@
 #include <sstream>
 #include <string>
 
-class Seller;  // Forward declaration
+class SellerDTO;  // Forward declaration
 
 class Product {
    private:
-    std::weak_ptr<Seller> _owner;
+    std::weak_ptr<SellerDTO> _owner;
     std::string _id;
     std::string _name;
     double _price;
@@ -19,21 +19,21 @@ class Product {
 
    public:
     Product(const std::string& id, const std::string& name, double price, int stock,
-            const std::shared_ptr<Seller>& owner);
+            const std::shared_ptr<SellerDTO>& owner);
 
     // ========== GETTERS (Non-const) ==========
     std::string getName();
     std::string getID();
     double getPrice();
     int getStock();
-    std::shared_ptr<Seller> getOwner();
+    std::shared_ptr<SellerDTO> getOwner();
 
     // ========== GETTERS (Const) ==========
     std::string getName() const;
     std::string getID() const;
     double getPrice() const;
     int getStock() const;
-    std::shared_ptr<Seller> getOwner() const;
+    std::shared_ptr<SellerDTO> getOwner() const;
 
     // ========== SETTERS ==========
     void setName(const std::string& name) {
@@ -60,7 +60,7 @@ class Product {
     bool hasEnoughStock(int quantity);
 
     // ========== OWNER MANAGEMENT ==========
-    void setOwner(const std::shared_ptr<Seller>& owner);
+    void setOwner(const std::shared_ptr<SellerDTO>& owner);
     bool hasOwner() const;
 
     // ========== DISPLAY ✅ THÊM MỚI ==========

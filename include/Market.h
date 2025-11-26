@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "./bus/SellerBUS.h"
 #include "Product.h"
 #include "SearchHelper.h"
 
@@ -16,8 +17,8 @@ class Market {
 
    public:
     // ========== EXISTING METHODS (giữ nguyên) ==========
-    bool listProduct(std::shared_ptr<Product> product);
-    bool unlistProduct(const std::string& productId);
+    std::expected<void, BusError> listProduct(std::shared_ptr<Product> product);
+    std::expected<void, BusError> unlistProduct(const std::string& productId);
     void cleanup();
 
     std::vector<std::shared_ptr<Product>> searchProductsByName(const std::string& keyword) const;

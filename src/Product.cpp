@@ -3,10 +3,10 @@
 #include <format>
 #include <iostream>
 
-#include "../include/Seller.h"
+#include "../include/dto/SellerDTO.h"
 
 Product::Product(const std::string& id, const std::string& name, double price, int stock,
-                 const std::shared_ptr<Seller>& owner)
+                 const std::shared_ptr<SellerDTO>& owner)
     : _owner(owner), _id(id), _name(name), _price(price), _stock(stock) {}
 
 // ========== GETTERS (Non-const) ==========
@@ -22,7 +22,7 @@ double Product::getPrice() {
 int Product::getStock() {
     return this->_stock;
 }
-std::shared_ptr<Seller> Product::getOwner() {
+std::shared_ptr<SellerDTO> Product::getOwner() {
     return _owner.lock();
 }
 
@@ -39,7 +39,7 @@ double Product::getPrice() const {
 int Product::getStock() const {
     return this->_stock;
 }
-std::shared_ptr<Seller> Product::getOwner() const {
+std::shared_ptr<SellerDTO> Product::getOwner() const {
     return _owner.lock();
 }
 
@@ -69,7 +69,7 @@ void Product::addStock(int quantity) {
 }
 
 // ========== OWNER METHODS ==========
-void Product::setOwner(const std::shared_ptr<Seller>& owner) {
+void Product::setOwner(const std::shared_ptr<SellerDTO>& owner) {
     this->_owner = owner;
 }
 
@@ -90,7 +90,7 @@ std::string Product::toString() const {
 
     // Thêm thông tin seller nếu có
     if (auto seller = _owner.lock()) {
-        ss << " | Seller: " << seller->getName();
+        ss << " | SellerDTO: " << seller->getName();
     }
 
     return ss.str();
