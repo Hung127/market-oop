@@ -7,19 +7,18 @@
 #include <vector>
 
 #include "../Product.h"
-#include "../SearchHelper.h"
-#include "../bus/SellerBUS.h"
 
 class MarketDTO {
    private:
     std::map<std::string, std::weak_ptr<Product>> _listedProducts;
 
    public:
-    bool addProduct(const std::weak_ptr<Product>& product);
+    bool addProduct(const std::shared_ptr<Product>& product);
     bool removeProduct(const std::string& id);
-    std::shared_ptr<Product> findProduct(const std::string& id);
-    std::vector<std::weak_ptr<Product>> getAllProducts();
-    int countAllProducts();
+    [[nodiscard]] std::shared_ptr<Product> findProduct(const std::string& id) const;
+    [[nodiscard]] std::vector<std::shared_ptr<Product>> getAllProducts() const;
+    [[nodiscard]] int countAllProducts() const;
+    void cleanupExpired();
 
     MarketDTO();
 };
