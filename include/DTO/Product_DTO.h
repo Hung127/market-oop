@@ -14,6 +14,8 @@ class ProductDTO {
     double _price;
     int _stock;
 
+    std::string _sellerId;
+
    public:
     ProductDTO(const std::string& id, const std::string& name, double price, int stock,
                const std::shared_ptr<Seller>& owner);
@@ -25,6 +27,7 @@ class ProductDTO {
     int getStock();
     std::shared_ptr<Seller> getOwner();
 
+    std::string getSellerId() const;
     // ========== GETTERS (Const) ==========
     std::string getName() const;
     std::string getID() const;
