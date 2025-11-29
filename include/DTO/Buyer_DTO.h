@@ -19,8 +19,9 @@ class BuyerDto : public User {
 
     // ===== BALANCE =====
     double getBalance() const;
-    void addBalance(double amount);
-    bool hasEnoughBalance(double price);
+    void setBalance(double amount);  //{
+                                     // _balance = amount;
+                                     // }
 
     // ===== CART =====
     CartDto& getCart();
@@ -29,6 +30,8 @@ class BuyerDto : public User {
     // ===== PURCHASE HISTORY =====
     PurchaseHistory& getPurchasesHistory();
     const PurchaseHistory& getPurchasesHistory() const;
+
+    ~BuyerDto() override = default;
 };
 
 #endif

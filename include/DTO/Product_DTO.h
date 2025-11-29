@@ -6,7 +6,7 @@
 
 class Seller;
 
-class ProductDTO {
+class ProductDto {
    private:
     std::weak_ptr<Seller> _owner;
     std::string _id;
@@ -17,7 +17,7 @@ class ProductDTO {
     std::string _sellerId;
 
    public:
-    ProductDTO(const std::string& id, const std::string& name, double price, int stock,
+    ProductDto(const std::string& id, const std::string& name, double price, int stock,
                const std::shared_ptr<Seller>& owner);
 
     // ========== GETTERS (Non-const) ==========

@@ -19,6 +19,7 @@ class BuyerBus : public User {
 
     // ========== BALANCE LOGIC ==========
     // Thay thế cho Buyer::addBalance
+    static void addBalance(BuyerDto& buyer, double amount);
 
     // Thay thế cho Buyer::hasEnoughBalance
     static bool hasEnoughBalance(const BuyerDto& BuyerDto, double price);
@@ -27,7 +28,7 @@ class BuyerBus : public User {
     // Các hàm này nhận vào đối tượng BuyerDto để thao tác trên Cart của nó
 
     static std::expected<void, std::string>
-    addToCart(BuyerDto& BuyerDto, const std::shared_ptr<Product>& p, int qty = 1);
+    addToCart(BuyerDto& BuyerDto, const std::shared_ptr<ProductDto>& p, int qty = 1);
 
     static bool removeFromCart(BuyerDto& BuyerDto, const std::string& productId);
 
