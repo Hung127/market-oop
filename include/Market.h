@@ -16,7 +16,6 @@ class Market {
     static Market* _instance;
 
    public:
-    // ========== EXISTING METHODS (giữ nguyên) ==========
     std::expected<void, BusError> listProduct(std::shared_ptr<Product> product);
     std::expected<void, BusError> unlistProduct(const std::string& productId);
     void cleanup();
