@@ -9,8 +9,7 @@ protected:
     std::string _id;
     std::string _name;
     std::string _email;
-    std::string _password; // Lưu password thô hoặc đã hash tùy logic login
-
+    std::string _password;
 public:
     UserDto(const std::string& id, const std::string& name, const std::string& email, const std::string& password)
         : _id(id), _name(name), _email(email), _password(password) {}
