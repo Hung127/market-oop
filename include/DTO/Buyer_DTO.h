@@ -18,7 +18,6 @@ public:
         : UserDto(id, name, email, password), _balance(balance) {}
 
     std::string getRole() const override { return "Buyer"; }
--
     double getBalance() const { return _balance; }
 
     void addBalance(double amount) {
