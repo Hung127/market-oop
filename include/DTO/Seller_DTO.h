@@ -35,7 +35,7 @@ public:
         auto it = std::remove_if(_myProducts.begin(), _myProducts.end(),
             [&](const std::shared_ptr<ProductDto>& p) {
                 return p->getId() == productId;
-
+            };
         if (it != _myProducts.end()) {
             _myProducts.erase(it, _myProducts.end());
             std::cout << " >> Da xoa san pham ID: " << productId << "\n";
