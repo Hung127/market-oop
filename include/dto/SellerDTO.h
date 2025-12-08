@@ -32,7 +32,6 @@ class SellerDTO : public User {
     SellerDTO(const std::string& id, const std::string& name, const std::string& email,
               const std::string& password);
 
-    // // Non-copyable? (tuỳ bạn; nếu muốn unique ownership, disable copy)
     // SellerDTO(const SellerDTO&) = delete;
     // SellerDTO& operator=(const SellerDTO&) = delete;
 
