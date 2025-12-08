@@ -6,26 +6,26 @@
 #include <string>
 #include <vector>
 
-#include "../DTO/Product_DTO.h"
+#include "../DTO/ProductDTO.h"
 
-class ProductDao {
+class ProductDAO {
    public:
     // Tìm sản phẩm theo ID
-    static std::expected<std::shared_ptr<ProductDto>, std::string>
+    static std::expected<std::shared_ptr<ProductDTO>, std::string>
     getProductById(const std::string& id);
 
     // Lấy tất cả sản phẩm
-    static std::vector<std::shared_ptr<ProductDto>> getAllProducts();
+    static std::vector<std::shared_ptr<ProductDTO>> getAllProducts();
 
     // Lấy tất cả sản phẩm của một Seller cụ thể
-    static std::vector<std::shared_ptr<ProductDto>>
+    static std::vector<std::shared_ptr<ProductDTO>>
     getProductsBySeller(const std::string& sellerId);
 
     // Lưu sản phẩm mới vào DB
-    static bool insert(const ProductDto& product);
+    static bool insert(const ProductDTO& product);
 
     // Cập nhật thông tin sản phẩm (ví dụ sau khi giảm stock)
-    static bool update(const ProductDto& product);
+    static bool update(const ProductDTO& product);
 
     // Xóa sản phẩm
     static bool remove(const std::string& productId);

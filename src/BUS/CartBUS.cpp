@@ -1,15 +1,15 @@
-#include "../../include/BUS/Cart_BUS.h"
+#include "../../include/BUS/CartBUS.h"
 
 #include <expected>
 #include <iostream>
 #include <memory>
 #include <string>
 
-#include "../../include/DTO/Cart_DTO.h"
-#include "../../include/DTO/Product_DTO.h"
+#include "../../include/DTO/CartDTO.h"
+#include "../../include/DTO/ProductDTO.h"
 
 // Hàm nội bộ giúp tính lại tổng tiền và cập nhật vào DTO
-std::expected<void, std::string> CartBus::recalculateTotal(CartDto& cart) {
+std::expected<void, std::string> CartBUS::recalculateTotal(CartDTO& cart) {
     double total = 0.0;
     auto& items = cart.getItems();
 
@@ -29,12 +29,14 @@ std::expected<void, std::string> CartBus::recalculateTotal(CartDto& cart) {
     cart.setTotalPrice(total);
     return {};
 }
-std::expected<void, std::string> CartBus::add(CartDto& cart, const std::shared_ptr<ProductDto>& p,
+std::expected<void, std::string> CartBUS::add(CartDTO& cart, const std::shared_ptr<ProductDTO>& p,
                                               int quantity) {
-    if (!p)
+    if (!p) {
         return std::unexpected("Product is invalid");
-    if (quantity <= 0)
+    }
+    if (quantity <= 0) {
         return std::unexpected("Quantity must be positive");
+    }
 
     auto& items = cart.getItems();
     bool found = false;
@@ -58,14 +60,16 @@ std::expected<void, std::string> CartBus::add(CartDto& cart, const std::shared_p
 }
 
 // Xóa sản phẩm
-bool CartBus::removeItem(CartDto& cart, const std::string& productId) {
+bool CartBUS::removeItem(CartDTO& cart, const std::string& productId) {
     auto& items = cart.getItems();
     for (auto it = items.begin(); it != items.end(); ++it) {
         if (auto product = std::get<0>(*it).lock()) {
             if (product->getID() == productId) {
                 items.erase(it);
-                recalculateTotal(cart);
-                return true;
+                std::expected<void, std::string> result = recalculateTotal(cart);
+                if (result.has_value()) {
+                    return true;
+                }
             }
         }
     }
@@ -74,9 +78,10 @@ bool CartBus::removeItem(CartDto& cart, const std::string& productId) {
 
 // Giảm số lượng
 std::expected<void, std::string>
-CartBus::reduceQuantity(CartDto& cart, const std::string& productId, int quantity) {
-    if (quantity <= 0)
+CartBUS::reduceQuantity(CartDTO& cart, const std::string& productId, int quantity) {
+    if (quantity <= 0) {
         return std::unexpected("Reduction quantity must be positive");
+    }
 
     auto& items = cart.getItems();
     for (auto it = items.begin(); it != items.end(); ++it) {
@@ -89,7 +94,11 @@ CartBus::reduceQuantity(CartDto& cart, const std::string& productId, int quantit
                     items.erase(it);  // Hết số lượng thì xóa luôn
                 }
 
-                recalculateTotal(cart);
+                std::expected<void, std::string> result = recalculateTotal(cart);
+                if (!result.has_value()) {
+                    return std::unexpected("Can not recalculateTotal");
+                }
+
                 return {};
             }
         }
@@ -98,14 +107,14 @@ CartBus::reduceQuantity(CartDto& cart, const std::string& productId, int quantit
 }
 
 // Xóa sạch giỏ
-void CartBus::clear(CartDto& cart) {
+void CartBUS::clear(CartDTO& cart) {
     cart.getItems().clear();
     cart.setTotalPrice(0.0);
 }
 
 // ========== CÁC HÀM TRA CỨU (READ-ONLY) ==========
 
-int CartBus::getQuantity(const CartDto& cart, const std::string& productId) {
+int CartBUS::getQuantity(const CartDTO& cart, const std::string& productId) {
     for (const auto& [weakProduct, qty] : cart.getItems()) {
         if (auto product = weakProduct.lock()) {
             if (product->getID() == productId)
@@ -115,12 +124,12 @@ int CartBus::getQuantity(const CartDto& cart, const std::string& productId) {
     return 0;
 }
 
-bool CartBus::hasProduct(const CartDto& cart, const std::string& productId) {
+bool CartBUS::hasProduct(const CartDTO& cart, const std::string& productId) {
     return getQuantity(cart, productId) > 0;
 }
 
 // Hiển thị giỏ hàng
-void CartBus::displayCart(const CartDto& cart) {
+void CartBUS::displayCart(const CartDTO& cart) {
     std::cout << "--- Shopping Cart ---\n";
     if (cart.getItems().empty()) {
         std::cout << "(Empty)\n";
@@ -138,7 +147,11 @@ void CartBus::displayCart(const CartDto& cart) {
     std::cout << "Total: " << cart.getTotalPrice() << "\n";
 }
 
-std::expected<double, std::string> CartBus::getTotal(CartDto& cart) {
-    recalculateTotal(cart);
+std::expected<double, std::string> CartBUS::getTotal(CartDTO& cart) {
+    std::expected<void, std::string> result = recalculateTotal(cart);
+    if (!result.has_value()) {
+        return std::unexpected("Can not recalculate total");
+    }
+
     return cart.getTotalPrice();
 }

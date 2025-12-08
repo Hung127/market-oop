@@ -1,20 +1,19 @@
-#include "../../include/BUS/Buyer_BUS.h"
+#include "../../include/BUS/BuyerBUS.h"
 
 #include <expected>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "../../include/BUS/Buyer_BUS.h"
-#include "../../include/BUS/Cart_BUS.h"
-#include "../../include/BUS/Product_BUS.h"
-#include "../../include/DAO/Buyer_DAO.h"
-#include "../../include/DTO/Buyer_DTO.h"
+#include "../../include/BUS/CartBUS.h"
+#include "../../include/BUS/ProductBUS.h"
+#include "../../include/DAO/BuyerDAO.h"
+#include "../../include/DTO/BuyerDTO.h"
 #include "../../include/User.h"
 #include "../../include/Utils/Utils.h"
 
-std::expected<std::unique_ptr<BuyerDto>, std::string>
-BuyerBus::create(const std::string& id, const std::string& name, const std::string& email,
+std::expected<std::unique_ptr<BuyerDTO>, std::string>
+BuyerBUS::create(const std::string& id, const std::string& name, const std::string& email,
                  const std::string& password, double balance) {
     // check and add id
     for (const std::string& usedId : User::_ids) {
@@ -26,12 +25,12 @@ BuyerBus::create(const std::string& id, const std::string& name, const std::stri
     // add to used id
     User::_ids.insert(id);
 
-    return std::unique_ptr<BuyerDto>(new BuyerDto(id, name, email, password, balance));
+    return std::unique_ptr<BuyerDTO>(new BuyerDTO(id, name, email, password, balance));
 }
 
 // ========== BALANCE LOGIC ==========
 // Thay thế cho Buyer::addBalance
-void BuyerBus::addBalance(BuyerDto& buyer, double amount) {
+void BuyerBUS::addBalance(BuyerDTO& buyer, double amount) {
     if (amount > 0) {
         // DTO chỉ chứa dữ liệu, ta dùng getter/setter
         buyer.setBalance(buyer.getBalance() + amount);
@@ -39,40 +38,40 @@ void BuyerBus::addBalance(BuyerDto& buyer, double amount) {
 }
 
 // Thay thế cho Buyer::hasEnoughBalance
-bool BuyerBus::hasEnoughBalance(const BuyerDto& buyer, double price) {
+bool BuyerBUS::hasEnoughBalance(const BuyerDTO& buyer, double price) {
     return buyer.getBalance() >= price;
 }
 
 // ========== CART LOGIC ==========
-// Các hàm này nhận vào đối tượng BuyerDto để thao tác trên Cart của nó
+// Các hàm này nhận vào đối tượng BuyerDTO để thao tác trên Cart của nó
 
 std::expected<void, std::string>
-BuyerBus::addToCart(BuyerDto& BuyerDto, const std::shared_ptr<ProductDto>& p, int qty = 1) {
-    return CartBus::add(BuyerDto.getCart(), p, qty);
+BuyerBUS::addToCart(BuyerDTO& buyerDTO, const std::shared_ptr<ProductDTO>& p, int qty) {
+    return CartBUS::add(buyerDTO.getCart(), p, qty);
 }
 
-bool BuyerBus::removeFromCart(BuyerDto& BuyerDto, const std::string& productId) {
-    return CartBus::removeItem(BuyerDto.getCart(), productId);
+bool BuyerBUS::removeFromCart(BuyerDTO& BuyerDTO, const std::string& productId) {
+    return CartBUS::removeItem(BuyerDTO.getCart(), productId);
 }
 
 std::expected<void, std::string>
-BuyerBus::reduceCartQuantity(BuyerDto& BuyerDto, const std::string& productId, int qty) {
-    return CartBus::reduceQuantity(BuyerDto.getCart(), productId, qty);
+BuyerBUS::reduceCartQuantity(BuyerDTO& BuyerDTO, const std::string& productId, int qty) {
+    return CartBUS::reduceQuantity(BuyerDTO.getCart(), productId, qty);
 }
 
-void BuyerBus::clearCart(BuyerDto& BuyerDto) {
-    return CartBus::clear(BuyerDto.getCart());
+void BuyerBUS::clearCart(BuyerDTO& BuyerDTO) {
+    return CartBUS::clear(BuyerDTO.getCart());
 }
 
 // View Cart (Logic hiển thị, hoặc chỉ gọi getter của Model)
-void BuyerBus::viewCart(const BuyerDto& BuyerDto) {
-    return CartBus::displayCart(BuyerDto.getCart());
+void BuyerBUS::viewCart(const BuyerDTO& BuyerDTO) {
+    return CartBUS::displayCart(BuyerDTO.getCart());
 }
 
 // ========== CHECKOUT LOGIC ==========
-// Hàm logic phức tạp nhất, chuyển từ BuyerDto::checkout
-std::expected<void, std::string> BuyerBus::checkout(BuyerDto& buyer) {
-    CartDto& cart = buyer.getCart();
+// Hàm logic phức tạp nhất, chuyển từ BuyerDTO::checkout
+std::expected<void, std::string> BuyerBUS::checkout(BuyerDTO& buyer) {
+    CartDTO& cart = buyer.getCart();
 
     // 1. Kiểm tra giỏ hàng rỗng (Nghiệp vụ)
     if (cart.getItems().empty()) {
@@ -106,7 +105,7 @@ std::expected<void, std::string> BuyerBus::checkout(BuyerDto& buyer) {
     }
 
     // 4. Tính tổng tiền
-    auto totalPricePack = CartBus::getTotal(cart);
+    auto totalPricePack = CartBUS::getTotal(cart);
     if (!totalPricePack.has_value()) {
         return std::unexpected(totalPricePack.error());
     }
@@ -125,7 +124,8 @@ std::expected<void, std::string> BuyerBus::checkout(BuyerDto& buyer) {
     std::vector<OrderItem> orderItems;
     for (const auto& [product, quantity] : items) {
         if (auto p = product.lock()) {
-            orderItems.emplace_back(p, quantity);
+            // FIXME: Order Item get (shared_ptr<Product>, int) but p is shared_ptr(ProductDTO)
+            // orderItems.emplace_back(OrderItem(p, quantity));
         }
     }
 
@@ -133,10 +133,10 @@ std::expected<void, std::string> BuyerBus::checkout(BuyerDto& buyer) {
     buyer.getPurchasesHistory().addOrder(order);
 
     // 7. Clear cart
-    CartBus::clear(cart);
+    CartBUS::clear(cart);
 
     return {};
 }
 
 // ========== HISTORY LOGIC ==========
-static void viewPurchaseHistory(const BuyerDto& BuyerDto);
+static void viewPurchaseHistory(const BuyerDTO& BuyerDTO);

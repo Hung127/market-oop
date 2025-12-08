@@ -1,10 +1,10 @@
 
-#include "../../include/DTO/Buyer_DTO.h"
+#include "../../include/DTO/BuyerDTO.h"
 
 #include <memory>
 #include <string>
 
-#include "../../include/DTO/Cart_DTO.h"
+#include "../../include/DTO/CartDTO.h"
 #include "../../include/PurchaseHistory.h"
 #include "../../include/User.h"
 

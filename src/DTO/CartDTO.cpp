@@ -1,6 +1,6 @@
-#include "../../include/DTO/Cart_DTO.h"
+#include "../../include/DTO/CartDTO.h"
 
-#include "../../include/Product.h"
+#include "../../include/DTO/ProductDTO.h"
 
 CartDto::CartDto() : _totalPrice(0.0) {}
 

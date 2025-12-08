@@ -5,33 +5,31 @@
 
 #include "../PurchaseHistory.h"
 #include "../User.h"
-#include "Cart_DTO.h"
+#include "CartDTO.h"
 
-class BuyerDto : public User {
+class BuyerDTO : public User {
    private:
     double _balance;
-    CartDto _cart;
+    CartDTO _cart;
     PurchaseHistory _purchasesHistory;
 
    public:
-    BuyerDto(const std::string& id, const std::string& name, const std::string& email,
+    BuyerDTO(const std::string& id, const std::string& name, const std::string& email,
              const std::string& password, double balance = 0.0);
 
     // ===== BALANCE =====
     double getBalance() const;
-    void setBalance(double amount);  //{
-                                     // _balance = amount;
-                                     // }
+    void setBalance(double amount);
 
     // ===== CART =====
-    CartDto& getCart();
-    const CartDto& getCart() const;
+    CartDTO& getCart();
+    const CartDTO& getCart() const;
 
     // ===== PURCHASE HISTORY =====
     PurchaseHistory& getPurchasesHistory();
     const PurchaseHistory& getPurchasesHistory() const;
 
-    ~BuyerDto() override = default;
+    ~BuyerDTO() override = default;
 };
 
 #endif

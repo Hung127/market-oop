@@ -1,5 +1,5 @@
 
-#include "../../include/DTO/Product_DTO.h"
+#include "../../include/DTO/ProductDTO.h"
 
 #include "../../include/Seller.h"
 
