@@ -8,33 +8,33 @@
 #include "../../include/PurchaseHistory.h"
 #include "../../include/User.h"
 
-BuyerDto::BuyerDto(const std::string& id, const std::string& name, const std::string& email,
+BuyerDTO::BuyerDTO(const std::string& id, const std::string& name, const std::string& email,
                    const std::string& password, double balance)
     : User(id, name, email, password), _balance(balance) {}
 
 // ===== BALANCE =====
-double BuyerDto::getBalance() const {
+double BuyerDTO::getBalance() const {
     return this->_balance;
 }
 
-void BuyerDto::setBalance(double amount) {
+void BuyerDTO::setBalance(double amount) {
     this->_balance = amount;
 }
 
 // ===== CART =====
 
-CartDto& BuyerDto::getCart() {
+CartDTO& BuyerDTO::getCart() {
     return this->_cart;
 }
 
-const CartDto& BuyerDto::getCart() const {
+const CartDTO& BuyerDTO::getCart() const {
     return this->_cart;
 }
 // ===== PURCHASE HISTORY =====
-PurchaseHistory& BuyerDto::getPurchasesHistory() {
+PurchaseHistory& BuyerDTO::getPurchasesHistory() {
     return _purchasesHistory;
 }
 
-const PurchaseHistory& BuyerDto::getPurchasesHistory() const {
+const PurchaseHistory& BuyerDTO::getPurchasesHistory() const {
     return _purchasesHistory;
 }

@@ -122,10 +122,11 @@ std::expected<void, std::string> BuyerBUS::checkout(BuyerDTO& buyer) {
 
     // 6. CREATE ORDER AND SAVE TO HISTORY
     std::vector<OrderItem> orderItems;
-    for (const auto& [product, quantity] : items) {
-        if (auto p = product.lock()) {
-            // FIXME: Order Item get (shared_ptr<Product>, int) but p is shared_ptr(ProductDTO)
-            // orderItems.emplace_back(OrderItem(p, quantity));
+    for (const auto& [weakProduct, quantity] : items) {
+        // Lấy ProductDTO từ Cart ra
+        if (auto p = weakProduct.lock()) {
+            // Trích xuất dữ liệu từ ProductDTO nạp vào OrderItem
+            orderItems.emplace_back(p->getID(), p->getName(), p->getPrice(), quantity);
         }
     }
 
