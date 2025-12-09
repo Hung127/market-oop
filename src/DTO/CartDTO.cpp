@@ -9,7 +9,7 @@ CartDTO::CartDTO(const std::vector<std::tuple<std::weak_ptr<ProductDTO>, int>>& 
 
 // ====== GETTERS / SETTERS ======
 double CartDTO::getTotalPrice() const {
-    return _totalPrice;
+    return this->_totalPrice;
 }
 
 void CartDTO::setTotalPrice(double total) {
@@ -17,9 +17,9 @@ void CartDTO::setTotalPrice(double total) {
 }
 
 std::vector<std::tuple<std::weak_ptr<ProductDTO>, int>>& CartDTO::getItems() {
-    return _items;
+    return this->_items;
 }
 
 const std::vector<std::tuple<std::weak_ptr<ProductDTO>, int>>& CartDTO::getItems() const {
-    return _items;
+    return this->_items;
 }

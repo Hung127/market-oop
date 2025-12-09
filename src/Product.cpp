@@ -23,7 +23,7 @@ int Product::getStock() {
     return this->_stock;
 }
 std::shared_ptr<Seller> Product::getOwner() {
-    return _owner.lock();
+    return this->_owner.lock();
 }
 
 // ========== GETTERS (Const) ==========

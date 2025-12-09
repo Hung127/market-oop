@@ -32,9 +32,9 @@ const CartDTO& BuyerDTO::getCart() const {
 }
 // ===== PURCHASE HISTORY =====
 PurchaseHistory& BuyerDTO::getPurchasesHistory() {
-    return _purchasesHistory;
+    return this->_purchasesHistory;
 }
 
 const PurchaseHistory& BuyerDTO::getPurchasesHistory() const {
-    return _purchasesHistory;
+    return this->_purchasesHistory;
 }

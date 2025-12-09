@@ -6,8 +6,6 @@
 #include <vector>
 
 #include "../../include/BUS/CartBUS.h"
-#include "../../include/BUS/ProductBUS.h"
-#include "../../include/DAO/BuyerDAO.h"
 #include "../../include/DTO/BuyerDTO.h"
 #include "../../include/User.h"
 #include "../../include/Utils/Utils.h"
@@ -50,22 +48,22 @@ BuyerBUS::addToCart(BuyerDTO& buyerDTO, const std::shared_ptr<ProductDTO>& p, in
     return CartBUS::add(buyerDTO.getCart(), p, qty);
 }
 
-bool BuyerBUS::removeFromCart(BuyerDTO& BuyerDTO, const std::string& productId) {
-    return CartBUS::removeItem(BuyerDTO.getCart(), productId);
+bool BuyerBUS::removeFromCart(BuyerDTO& buyerDTO, const std::string& productId) {
+    return CartBUS::removeItem(buyerDTO.getCart(), productId);
 }
 
 std::expected<void, std::string>
-BuyerBUS::reduceCartQuantity(BuyerDTO& BuyerDTO, const std::string& productId, int qty) {
-    return CartBUS::reduceQuantity(BuyerDTO.getCart(), productId, qty);
+BuyerBUS::reduceCartQuantity(BuyerDTO& buyerDTO, const std::string& productId, int qty) {
+    return CartBUS::reduceQuantity(buyerDTO.getCart(), productId, qty);
 }
 
-void BuyerBUS::clearCart(BuyerDTO& BuyerDTO) {
-    return CartBUS::clear(BuyerDTO.getCart());
+void BuyerBUS::clearCart(BuyerDTO& buyerDTO) {
+    CartBUS::clear(buyerDTO.getCart());
 }
 
 // View Cart (Logic hiển thị, hoặc chỉ gọi getter của Model)
-void BuyerBUS::viewCart(const BuyerDTO& BuyerDTO) {
-    return CartBUS::displayCart(BuyerDTO.getCart());
+void BuyerBUS::viewCart(const BuyerDTO& buyerDTO) {
+    CartBUS::displayCart(buyerDTO.getCart());
 }
 
 // ========== CHECKOUT LOGIC ==========
@@ -140,4 +138,6 @@ std::expected<void, std::string> BuyerBUS::checkout(BuyerDTO& buyer) {
 }
 
 // ========== HISTORY LOGIC ==========
-static void viewPurchaseHistory(const BuyerDTO& BuyerDTO);
+static void viewPurchaseHistory(const BuyerDTO& buyerDTO) {
+    // TODO: Complete or delete this function
+}

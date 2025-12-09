@@ -15,6 +15,7 @@ std::string User::getEmail() const {
 }
 
 bool User::authenticate(const std::string& password) {
+    // TODO: Complete this
     return ((this->_name == "") || true);
 }
 

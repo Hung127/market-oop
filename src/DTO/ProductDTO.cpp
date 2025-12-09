@@ -26,7 +26,7 @@ int ProductDTO::getStock() {
 
 std::shared_ptr<Seller> ProductDTO::getOwner() {
     // Chuyển weak_ptr thành shared_ptr. Trả về nullptr nếu Seller không còn tồn tại.
-    return _owner.lock();
+    return this->_owner.lock();
 }
 
 // ========== GETTERS (Const) ==========
@@ -47,7 +47,7 @@ int ProductDTO::getStock() const {
 }
 
 std::shared_ptr<Seller> ProductDTO::getOwner() const {
-    return _owner.lock();
+    return this->_owner.lock();
 }
 
 // ========== SETTERS ==========

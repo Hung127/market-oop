@@ -117,8 +117,9 @@ void CartBUS::clear(CartDTO& cart) {
 int CartBUS::getQuantity(const CartDTO& cart, const std::string& productId) {
     for (const auto& [weakProduct, qty] : cart.getItems()) {
         if (auto product = weakProduct.lock()) {
-            if (product->getID() == productId)
+            if (product->getID() == productId) {
                 return qty;
+            }
         }
     }
     return 0;
