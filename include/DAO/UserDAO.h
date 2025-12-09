@@ -1,5 +1,5 @@
-#ifndef USER_DAO_H
-#define USER_DAO_H
+#ifndef USERDAO_H
+#define USERDAO_H
 
 #include <string>
 #include <memory>
