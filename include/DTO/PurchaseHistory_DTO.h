@@ -1,5 +1,5 @@
-#ifndef PURCHASE_HISTORY_H
-#define PURCHASE_HISTORY_H
+#ifndef PURCHASEHISTORY_H
+#define PURCHASEHISTORY_H
 
 #include <vector>
 #include <iostream>
