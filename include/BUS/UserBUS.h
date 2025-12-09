@@ -1,5 +1,5 @@
-#ifndef USER_BUS_H
-#define USER_BUS_H
+#ifndef USERBUS_H
+#define USERBUS_H
 
 #include <string>
 #include <expected>
