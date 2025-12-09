@@ -1,5 +1,5 @@
-#ifndef BUYER_DTO_H
-#define BUYER_DTO_H
+#ifndef BUYERDTO_H
+#define BUYERDTO_H
 
 #include "User_DTO.h"
 #include "Cart_DTO.h"
