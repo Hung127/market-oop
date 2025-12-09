@@ -1,5 +1,5 @@
-#ifndef SELLER_BUS_H
-#define SELLER_BUS_H
+#ifndef SELLERBUS_H
+#define SELLERBUS_H
 
 #include <expected>
 #include <string>
