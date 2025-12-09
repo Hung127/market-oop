@@ -1,5 +1,5 @@
-#ifndef USER_DTO_H
-#define USER_DTO_H
+#ifndef USERDTO_H
+#define USERDTO_H
 
 #include <string>
 #include "Utils.h"
