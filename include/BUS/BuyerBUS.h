@@ -1,5 +1,5 @@
-#ifndef BUYER_BUS_H
-#define BUYER_BUS_H
+#ifndef BUYERBUS_H
+#define BUYERBUS_H
 
 #include <expected>
 #include <string>
