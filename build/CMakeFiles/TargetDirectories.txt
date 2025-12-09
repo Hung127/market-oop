@@ -1,0 +1,3 @@
+C:/Users/Phong/source/repos/local_repos_caro/market-oop/build/CMakeFiles/app.dir
+C:/Users/Phong/source/repos/local_repos_caro/market-oop/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/Phong/source/repos/local_repos_caro/market-oop/build/CMakeFiles/ZERO_CHECK.dir

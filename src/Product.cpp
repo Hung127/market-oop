@@ -22,8 +22,11 @@ double Product::getPrice() {
 int Product::getStock() {
     return this->_stock;
 }
+<<<<<<< HEAD
 std::shared_ptr<SellerDTO> Product::getOwner() {
     return _owner.lock();
+=======
+>>>>>>> refactor-buyer-cart-product
 }
 
 // ========== GETTERS (Const) ==========

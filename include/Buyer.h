@@ -54,6 +54,8 @@ class Buyer : public User {
 
     // ========== HISTORY ==========
     void viewPurchaseHistory() const;
+
+    ~Buyer() override = default;
 };
 
 #endif  // BUYER_H

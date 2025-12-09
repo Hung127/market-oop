@@ -3,17 +3,31 @@
 #include "Product.h"
 class OrderItem {
    private:
-    std::shared_ptr<Product> _product;
+    std::string _productId;
+    std::string _productName;
+    double _price;
     int _quantity;
 
    public:
-    OrderItem(std::shared_ptr<Product> p, int qty) : _product(p), _quantity(qty) {}
+    OrderItem(const std::string& id, const std::string& name, double price, int qty)
+        : _productId(id), _productName(name), _price(price), _quantity(qty) {}
 
-    std::shared_ptr<Product> product() const {
-        return _product;
+    std::string getProductId() const {
+        return _productId;
     }
-    int quantity() const {
+    std::string getProductName() const {
+        return _productName;
+    }
+    double getPrice() const {
+        return _price;
+    }
+    int getQuantity() const {
         return _quantity;
+    }
+
+    // Tính tổng tiền của item này
+    double getSubtotal() const {
+        return _price * _quantity;
     }
 };
 

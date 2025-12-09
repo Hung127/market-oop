@@ -107,13 +107,13 @@ std::expected<void, std::string> Buyer::checkout() {
     this->_balance -= totalPrice;
 
     // 6. CREATE ORDER AND SAVE TO HISTORY
-    std::vector<OrderItem> orderItems;
-    for (const auto& [product, quantity] : items) {
-        orderItems.push_back(OrderItem(product, quantity));
-    }
+    // std::vector<OrderItem> orderItems;
+    // for (const auto& [product, quantity] : items) {
+    //    orderItems.push_back(OrderItem(product, quantity));
+    //}
 
-    Order order(orderItems, totalPrice, getCurrentDate());
-    this->_purchasesHistory.addOrder(order);
+    // Order order(orderItems, totalPrice, getCurrentDate());
+    // this->_purchasesHistory.addOrder(order);
 
     // 7. Clear cart
     this->_cart.clear();
