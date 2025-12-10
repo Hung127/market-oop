@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "../User.h"
+#include "UserDTO.h"
 
 class Product;
 
@@ -17,7 +17,7 @@ class Product;
  *  - Quản lý danh sách product (add/remove/find) dưới dạng thao tác đơn giản
  *  - Không thực hiện validation phức tạp hay business logic (để Service xử lý)
  */
-class SellerDTO : public User {
+class SellerDTO : public UserDTO {
    private:
     // Seller owns products in inventory (choose shared_ptr or unique_ptr based on design)
     std::vector<std::shared_ptr<Product>> _myProducts;

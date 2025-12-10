@@ -1,4 +1,3 @@
-
 #ifndef BUS_BUYER_BUS_H_
 #define BUS_BUYER_BUS_H_
 

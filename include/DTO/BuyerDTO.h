@@ -3,11 +3,11 @@
 
 #include <memory>
 
+#include "../DTO/UserDTO.h"
 #include "../PurchaseHistory.h"
-#include "../User.h"
 #include "CartDTO.h"
 
-class BuyerDTO : public User {
+class BuyerDTO : public UserDTO {
    private:
     double _balance;
     CartDTO _cart;

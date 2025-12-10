@@ -1,18 +1,19 @@
 #ifndef USERDAO_H
 #define USERDAO_H
 
-#include <string>
-#include <memory>
 #include <expected>
-#include "User_DTO.h"
-#include "Buyer_DAO.h"
+#include <memory>
+#include <string>
 
+#include "../DTO/UserDTO.h"
+#include "BuyerDAO.h"
 
 class UserDao {
-public:
-    static std::expected<std::unique_ptr<UserDto>, std::string> 
-    login(const std::string& email, const std::string& password) {
-        return std::unexpected("Email hoac mat khau khong dung (Hoac chuc nang Login chua noi Database)");
+   public:
+    static std::expected<std::unique_ptr<UserDTO>, std::string> login(const std::string& email,
+                                                                      const std::string& password) {
+        return std::unexpected(
+            "Email hoac mat khau khong dung (Hoac chuc nang Login chua noi Database)");
     }
 };
 

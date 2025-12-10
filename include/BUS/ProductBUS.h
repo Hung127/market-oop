@@ -8,8 +8,7 @@
 #include <sstream>
 #include <string>
 
-#include "../DTO/ProductDTO.h"
-#include "../Seller.h"  // Cần để hiển thị thông tin Owner nếu cần
+class ProductDTO;
 
 class ProductBUS {
    public:
