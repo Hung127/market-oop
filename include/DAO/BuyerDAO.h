@@ -6,6 +6,7 @@
 #include <string>
 
 #include "../DTO/BuyerDTO.h"
+class BuyerDTO;
 
 class BuyerDAO {
    public:

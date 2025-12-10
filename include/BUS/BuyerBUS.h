@@ -1,13 +1,14 @@
-#ifndef BUS_BuyerDTO_BUS_H
-    #define BUS_BUYER_BUS_H
 
-    #include <expected>
-    #include <memory>
-    #include <string>
-    #include <vector>
+#ifndef BUS_BUYER_BUS_H_
+#define BUS_BUYER_BUS_H_
 
-    #include "../DAO/BuyerDAO.h"
-    #include "../DTO/BuyerDTO.h"
+#include <expected>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "../DAO/BuyerDAO.h"
+#include "../DTO/BuyerDTO.h"
 
 class BuyerBUS : public User {
    public:

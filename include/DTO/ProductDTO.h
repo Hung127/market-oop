@@ -13,7 +13,6 @@ class ProductDTO {
     std::string _name;
     double _price;
     int _stock;
-
     std::string _sellerId;
 
    public:
