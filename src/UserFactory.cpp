@@ -1,14 +1,19 @@
 #include "../include/UserFactory.h"
 
-std::expected<std::unique_ptr<User>, std::string>
+#include <memory>
+
+#include "../include/DTO/BuyerDTO.h"
+#include "../include/DTO/SellerDTO.h"
+
+std::expected<std::unique_ptr<UserDTO>, std::string>
 UserFactory::createUser(UserRole role, const std::string& id, const std::string& name,
                         const std::string& email, const std::string& password, double balance) {
     switch (role) {
         case UserRole::SELLER:
-            return Seller::create(id, name, email, password);
+            return std::make_unique<SellerDTO>(SellerDTO(id, name, email, password));
 
         case UserRole::BUYER:
-            return Buyer::create(id, name, email, password, balance);
+            return std::make_unique<BuyerDTO>(BuyerDTO(id, name, email, password, balance));
 
         default:
             return std::unexpected("Unknown user role");

@@ -43,6 +43,7 @@ class SellerDTO : public UserDTO {
     const std::string& getId() const;
     const std::string& getName() const;
     const std::string& getEmail() const;
+    std::string getRole() const override;
 
     // Products accessors (read-only view)
     const std::vector<std::shared_ptr<Product>>& products() const;

@@ -5,12 +5,12 @@
 #include <string>
 
 #include "../../include/DTO/CartDTO.h"
+#include "../../include/DTO/UserDTO.h"
 #include "../../include/PurchaseHistory.h"
-#include "../../include/User.h"
 
 BuyerDTO::BuyerDTO(const std::string& id, const std::string& name, const std::string& email,
                    const std::string& password, double balance)
-    : User(id, name, email, password), _balance(balance) {}
+    : UserDTO(id, name, email, password), _balance(balance) {}
 
 // ===== BALANCE =====
 double BuyerDTO::getBalance() const {

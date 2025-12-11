@@ -1,21 +1,25 @@
 #ifndef PURCHASEHISTORY_H
 #define PURCHASEHISTORY_H
 
-#include "Order.h"
+#include <vector>
+
+class OrderDTO;
 
 class PurchaseHistory {
    private:
-    std::vector<Order> _orders;
+    std::vector<OrderDTO> _orders;
 
    public:
-    void addOrder(const Order& order) {
-        _orders.push_back(order);
-    }
-    const std::vector<Order>& orders() const {
-        return _orders;
-    }
+    PurchaseHistory() = default;
 
-   public:
-    void printHistory() const;  // Hàm in ra lịch sử đây nha
+    // Add an order to history
+    void addOrder(const OrderDTO& order);
+
+    // Read-only access to orders
+    const std::vector<OrderDTO>& orders() const;
+
+    // Print a human-readable purchase history to stdout
+    void printHistory() const;
 };
+
 #endif  // PURCHASEHISTORY_H

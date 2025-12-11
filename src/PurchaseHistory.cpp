@@ -3,6 +3,17 @@
 #include <iomanip>
 #include <iostream>
 
+#include "../include/DTO/OrderDTO.h"  // Full definition is needed to inspect contents in printHistory
+#include "../include/DTO/OrderItemDTO.h"  // Full definition is needed to inspect contents in printHistory
+
+void PurchaseHistory::addOrder(const OrderDTO& order) {
+    _orders.push_back(order);
+}
+
+const std::vector<OrderDTO>& PurchaseHistory::orders() const {
+    return _orders;
+}
+
 void PurchaseHistory::printHistory() const {
     if (_orders.empty()) {
         std::cout << "Chưa có đơn hàng nào trong lịch sử mua.\n";
@@ -12,7 +23,7 @@ void PurchaseHistory::printHistory() const {
     std::cout << "===== LỊCH SỬ MUA HÀNG =====\n";
 
     for (size_t i = 0; i < _orders.size(); i++) {
-        const Order& order = _orders[i];
+        const OrderDTO& order = _orders[i];
 
         std::cout << "Đơn hàng #" << (i + 1) << "\n";
         std::cout << "Ngày mua: " << order.date() << "\n\n";
@@ -25,12 +36,12 @@ void PurchaseHistory::printHistory() const {
 
         double total = 0;
         for (auto& item : order.items()) {
-            double price = item.product()->getPrice();
-            int qty = item.quantity();
+            double price = item.getPrice();
+            int qty = item.getQuantity();
             float amount = price * qty;
             total += amount;
 
-            std::cout << std::left << std::setw(25) << item.product()->getName() << std::right
+            std::cout << std::left << std::setw(25) << item.getProductName() << std::right
                       << std::setw(10) << qty << std::right << std::setw(15) << price << std::right
                       << std::setw(15) << amount << "\n";
         }

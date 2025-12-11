@@ -6,18 +6,18 @@
 #include <string>
 #include <vector>
 
-#include "../Product.h"
+class ProductDTO;
 
 class MarketDTO {
    private:
-    std::map<std::string, std::weak_ptr<Product>> _listedProducts;
+    std::map<std::string, std::weak_ptr<ProductDTO>> _listedProducts;
 
    public:
-    bool addProduct(const std::shared_ptr<Product>& product);
-    bool removeProduct(const std::string& id);
-    [[nodiscard]] std::shared_ptr<Product> findProduct(const std::string& id) const;
-    [[nodiscard]] std::vector<std::shared_ptr<Product>> getAllProducts() const;
-    [[nodiscard]] int countAllProducts() const;
+    bool addProductDTO(const std::shared_ptr<ProductDTO>& product);
+    bool removeProductDTO(const std::string& id);
+    [[nodiscard]] std::shared_ptr<ProductDTO> findProduct(const std::string& id) const;
+    [[nodiscard]] std::vector<std::shared_ptr<ProductDTO>> getAllProducts() const;
+    [[nodiscard]] int countAllProductDTOs() const;
     void cleanupExpired();
 
     MarketDTO();

@@ -5,7 +5,7 @@
 #include <tuple>
 #include <vector>
 
-#include "ProductDTO.h"
+class ProductDTO;
 
 class CartDTO {
    private:

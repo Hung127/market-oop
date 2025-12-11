@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "../Utils.h"
+#include "../Utils/Utils.h"
 
 class UserDTO {
    protected:
@@ -14,28 +14,18 @@ class UserDTO {
 
    public:
     UserDTO(const std::string& id, const std::string& name, const std::string& email,
-            const std::string& password)
-        : _id(id), _name(name), _email(email), _password(password) {}
+            const std::string& password);
 
-    virtual ~UserDTO() = default;
+    virtual ~UserDTO();
 
-    std::string getId() const {
-        return _id;
-    }
-    std::string getName() const {
-        return _name;
-    }
-    std::string getEmail() const {
-        return _email;
-    }
-    std::string getPassword() const {
-        return _password;
-    }
+    std::string getId() const;
+    std::string getName() const;
+    std::string getEmail() const;
+    std::string getPassword() const;
+
     virtual std::string getRole() const = 0;
 
-    bool authenticate(const std::string& inputPass) const {
-        return _password == inputPass;
-    }
+    bool authenticate(const std::string& inputPass) const;
 };
 
-#endif
+#endif  // USERDTO_H

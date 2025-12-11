@@ -1,7 +1,9 @@
-#ifndef ORDERITEM_H
-#define ORDERITEM_H
-#include "Product.h"
-class OrderItem {
+#ifndef ORDERITEMDTO_H
+#define ORDERITEMDTO_H
+
+#include <string>
+
+class OrderItemDTO {
    private:
     std::string _productId;
     std::string _productName;
@@ -9,7 +11,7 @@ class OrderItem {
     int _quantity;
 
    public:
-    OrderItem(const std::string& id, const std::string& name, double price, int qty)
+    OrderItemDTO(const std::string& id, const std::string& name, double price, int qty)
         : _productId(id), _productName(name), _price(price), _quantity(qty) {}
 
     std::string getProductId() const {
@@ -31,4 +33,4 @@ class OrderItem {
     }
 };
 
-#endif  // ORDERITEM_H
+#endif  // ORDERITEMDTO_H
