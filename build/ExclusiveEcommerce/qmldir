@@ -1,0 +1,17 @@
+module ExclusiveEcommerce
+typeinfo ExclusiveEcommerce.qmltypes
+prefer :/ExclusiveEcommerce/
+Main 1.0 qml/Main.qml
+HeaderBar 1.0 qml/HeaderBar.qml
+FooterBar 1.0 qml/FooterBar.qml
+CategoryPanel 1.0 qml/CategoryPanel.qml
+HeroBanner 1.0 qml/HeroBanner.qml
+FlashSaleSection 1.0 qml/FlashSaleSection.qml
+FlashSaleTimer 1.0 qml/FlashSaleTimer.qml
+BestSellingSection 1.0 qml/BestSellingSection.qml
+BrowseCategorySection 1.0 qml/BrowseCategorySection.qml
+ExploreProductsSection 1.0 qml/ExploreProductsSection.qml
+ProductCard 1.0 qml/ProductCard.qml
+ServicesStrip 1.0 qml/ServicesStrip.qml
+depends QtQuick
+
