@@ -77,3 +77,30 @@ void ProductDTO::setOwner(const std::shared_ptr<SellerDTO>& owner) {
 std::string ProductDTO::getSellerId() const {
     return this->_sellerId;
 }
+std::shared_ptr<ProductExtraInfoDTO> ProductDTO::getExtraInfo() {
+    return _extraInfo;
+}
+
+std::shared_ptr<const ProductExtraInfoDTO> ProductDTO::getExtraInfo() const {
+    return _extraInfo;
+}
+
+void ProductDTO::setExtraInfo(const std::shared_ptr<ProductExtraInfoDTO>& extra) {
+    _extraInfo = extra;
+}
+
+//==================PRODUCT_EXTRA_INFOR_DTO=================
+
+const string& ProductExtraInfoDTO::getDescription() const {
+    return this->_description;
+}
+const vector<string>& ProductExtraInfoDTO::getExtraImagePaths() const {
+    return this->_extraImagePaths;
+}
+
+void ProductExtraInfoDTO::setDescription(const string& description) {
+    this->_description = description;
+}
+void ProductExtraInfoDTO::addImagePath(const string& path) {
+    this->_extraImagePaths.emplace_back(path);
+}

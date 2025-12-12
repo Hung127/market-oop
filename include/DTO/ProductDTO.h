@@ -10,6 +10,22 @@ using std::vector;
 
 class SellerDTO;
 
+class ProductExtraInfoDTO {
+   private:
+    std::string _description;
+    vector<string> _extraImagePaths;
+
+   public:
+    ProductExtraInfoDTO(const std::string& description, const std::vector<std::string>& imagePaths)
+        : _description(description), _extraImagePaths(imagePaths) {}
+
+    const string& getDescription() const;
+    const vector<string>& getExtraImagePaths() const;
+
+    void setDescription(const string& description);
+    void addImagePath(const string& path);
+};
+
 class ProductDTO {
    private:
     std::weak_ptr<SellerDTO> _owner;
@@ -18,6 +34,8 @@ class ProductDTO {
     std::string _name;
     double _price;
     int _stock;
+
+    std::shared_ptr<ProductExtraInfoDTO> _extraInfo;
 
    public:
     ProductDTO(const std::string& id, const std::string& name, double price, int stock,
@@ -31,6 +49,9 @@ class ProductDTO {
     std::shared_ptr<SellerDTO> getOwner();
 
     std::string getSellerId() const;
+
+    std::shared_ptr<ProductExtraInfoDTO> getExtraInfo();
+    std::shared_ptr<const ProductExtraInfoDTO> getExtraInfo() const;
     // ========== GETTERS (Const) ==========
     std::string getName() const;
     std::string getID() const;
@@ -43,22 +64,8 @@ class ProductDTO {
     void setPrice(double price);
     void setStock(int stock);
     void setOwner(const std::shared_ptr<SellerDTO>& owner);
-};
 
-class ProductExtraInfoDTO {
-   private:
-    std::string _description;
-    vector<string> _extraImagePaths;
-
-   public:
-    ProductExtraInfoDTO(const std::string& description, const std::vector<std::string>& imagePaths)
-        : _description(description), _extraImagePaths(imagePaths) {}
-
-    const string getDescription() const;
-    const vector<string> getExtraImagePaths() const;
-
-    void setDescription(string description);
-    void addImagePath(const string& path);
+    void setExtraInfo(const std::shared_ptr<ProductExtraInfoDTO>& extra);
 };
 
 #endif
