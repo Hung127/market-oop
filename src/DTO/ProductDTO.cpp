@@ -4,103 +4,122 @@
 
 #include "../../include/DTO/SellerDTO.h"
 
+//================== PRODUCT_DTO ==================
+
 ProductDTO::ProductDTO(const std::string& id, const std::string& name, double price, int stock,
                        const std::shared_ptr<SellerDTO>& owner)
-    : _owner(owner), _sellerId(owner->getId()), _id(id), _name(name), _price(price), _stock(stock) {
-    // Do nothing
-}
+    : _owner(owner),
+      _sellerId(owner ? owner->getId() : ""),
+      _id(id),
+      _name(name),
+      _price(price),
+      _stock(stock) {}
 
 // ========== GETTERS (Non-const) ==========
 std::string ProductDTO::getName() {
-    return this->_name;
+    return _name;
 }
 
 std::string ProductDTO::getID() {
-    return this->_id;
+    return _id;
 }
 
 double ProductDTO::getPrice() {
-    return this->_price;
+    return _price;
 }
 
 int ProductDTO::getStock() {
-    return this->_stock;
+    return _stock;
 }
 
 std::shared_ptr<SellerDTO> ProductDTO::getOwner() {
-    // Chuyển weak_ptr thành shared_ptr. Trả về nullptr nếu Seller không còn tồn tại.
-    return this->_owner.lock();
-}
-
-// ========== GETTERS (Const) ==========
-std::string ProductDTO::getName() const {
-    return this->_name;
-}
-
-std::string ProductDTO::getID() const {
-    return this->_id;
-}
-
-double ProductDTO::getPrice() const {
-    return this->_price;
-}
-
-int ProductDTO::getStock() const {
-    return this->_stock;
-}
-
-std::shared_ptr<SellerDTO> ProductDTO::getOwner() const {
-    return this->_owner.lock();
-}
-
-// ========== SETTERS ==========
-void ProductDTO::setName(const std::string& name) {
-    this->_name = name;
-}
-
-void ProductDTO::setPrice(double price) {
-    if (price >= 0) {
-        this->_price = price;
-    }
-}
-
-void ProductDTO::setStock(int stock) {
-    if (stock >= 0) {
-        this->_stock = stock;
-    }
-}
-
-void ProductDTO::setOwner(const std::shared_ptr<SellerDTO>& owner) {
-    this->_owner = owner;
+    return _owner.lock();
 }
 
 std::string ProductDTO::getSellerId() const {
-    return this->_sellerId;
+    return _sellerId;
 }
+
 std::shared_ptr<ProductExtraInfoDTO> ProductDTO::getExtraInfo() {
     return _extraInfo;
 }
 
-std::shared_ptr<ProductExtraInfoDTO> ProductDTO::getExtraInfo() const {
+// ========== GETTERS (Const) ==========
+std::string ProductDTO::getName() const {
+    return _name;
+}
+
+std::string ProductDTO::getID() const {
+    return _id;
+}
+
+double ProductDTO::getPrice() const {
+    return _price;
+}
+
+int ProductDTO::getStock() const {
+    return _stock;
+}
+
+std::shared_ptr<SellerDTO> ProductDTO::getOwner() const {
+    return _owner.lock();
+}
+
+std::shared_ptr<const ProductExtraInfoDTO> ProductDTO::getExtraInfo() const {
     return _extraInfo;
+}
+
+// ========== SETTERS ==========
+void ProductDTO::setName(const std::string& name) {
+    _name = name;
+}
+
+void ProductDTO::setPrice(double price) {
+    if (price >= 0)
+        _price = price;
+}
+
+void ProductDTO::setStock(int stock) {
+    if (stock >= 0)
+        _stock = stock;
+}
+
+void ProductDTO::setOwner(const std::shared_ptr<SellerDTO>& owner) {
+    _owner = owner;
+    _sellerId = owner ? owner->getId() : "";
 }
 
 void ProductDTO::setExtraInfo(const std::shared_ptr<ProductExtraInfoDTO>& extra) {
     _extraInfo = extra;
 }
 
-//==================PRODUCT_EXTRA_INFOR_DTO=================
+//================== PRODUCT_EXTRA_INFO_DTO ==================
 
-const string& ProductExtraInfoDTO::getDescription() const {
-    return this->_description;
-}
-const vector<string>& ProductExtraInfoDTO::getExtraImagePaths() const {
-    return this->_extraImagePaths;
+const std::string& ProductExtraInfoDTO::getDescription() const {
+    return _description;
 }
 
-void ProductExtraInfoDTO::setDescription(const string& description) {
-    this->_description = description;
+const std::vector<std::vector<uint8_t>>& ProductExtraInfoDTO::getImageRawData() const {
+    return _imageRawData;
 }
-void ProductExtraInfoDTO::addImagePath(const string& path) {
-    this->_extraImagePaths.emplace_back(path);
+
+const std::vector<uint8_t>& ProductExtraInfoDTO::getImageAt(size_t index) const {
+    if (index < _imageRawData.size()) {
+        return _imageRawData[index];
+    }
+    throw std::out_of_range("Index anh khong hop le!");
+}
+
+void ProductExtraInfoDTO::setDescription(const std::string& description) {
+    _description = description;
+}
+
+void ProductExtraInfoDTO::addImageData(const std::vector<uint8_t>& data) {
+    if (!data.empty()) {
+        _imageRawData.push_back(data);
+    }
+}
+
+size_t ProductExtraInfoDTO::getImageCount() const {
+    return _imageRawData.size();
 }

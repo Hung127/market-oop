@@ -10,7 +10,7 @@
 using std::string;
 using std::vector;
 
-class SellerDTO;
+class Seller;
 
 // ================= PRODUCT EXTRA INFO DTO =================
 class ProductExtraInfoDTO {
@@ -53,14 +53,11 @@ class ProductDTO {
     double getPrice();
     int getStock();
     std::shared_ptr<SellerDTO> getOwner();
-    string getSellerId() const;
 
-    std::shared_ptr<ProductExtraInfoDTO> getExtraInfo();
-    std::shared_ptr<const ProductExtraInfoDTO> getExtraInfo() const;
-
-    // ===== GETTERS (const) =====
-    string getName() const;
-    string getID() const;
+    std::string getSellerId() const;
+    // ========== GETTERS (Const) ==========
+    std::string getName() const;
+    std::string getID() const;
     double getPrice() const;
     int getStock() const;
     std::shared_ptr<SellerDTO> getOwner() const;
@@ -70,6 +67,10 @@ class ProductDTO {
     void setPrice(double price);
     void setStock(int stock);
     void setOwner(const std::shared_ptr<SellerDTO>& owner);
+
+    // Extra info
+    std::shared_ptr<ProductExtraInfoDTO> getExtraInfo();
+    std::shared_ptr<const ProductExtraInfoDTO> getExtraInfo() const;
     void setExtraInfo(const std::shared_ptr<ProductExtraInfoDTO>& extra);
 };
 
