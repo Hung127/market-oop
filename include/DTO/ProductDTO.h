@@ -51,7 +51,7 @@ class ProductDTO {
     std::string getSellerId() const;
 
     std::shared_ptr<ProductExtraInfoDTO> getExtraInfo();
-    std::shared_ptr<const ProductExtraInfoDTO> getExtraInfo() const;
+    std::shared_ptr<ProductExtraInfoDTO> getExtraInfo() const;
     // ========== GETTERS (Const) ==========
     std::string getName() const;
     std::string getID() const;

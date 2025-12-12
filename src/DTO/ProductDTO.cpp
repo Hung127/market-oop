@@ -81,7 +81,7 @@ std::shared_ptr<ProductExtraInfoDTO> ProductDTO::getExtraInfo() {
     return _extraInfo;
 }
 
-std::shared_ptr<const ProductExtraInfoDTO> ProductDTO::getExtraInfo() const {
+std::shared_ptr<ProductExtraInfoDTO> ProductDTO::getExtraInfo() const {
     return _extraInfo;
 }
 
