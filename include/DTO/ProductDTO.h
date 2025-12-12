@@ -3,6 +3,10 @@
 
 #include <memory>
 #include <string>
+#include <vector>
+
+using std::string;
+using std::vector;
 
 class SellerDTO;
 
@@ -39,6 +43,22 @@ class ProductDTO {
     void setPrice(double price);
     void setStock(int stock);
     void setOwner(const std::shared_ptr<SellerDTO>& owner);
+};
+
+class ProductExtraInfoDTO {
+   private:
+    std::string _description;
+    vector<string> _extraImagePaths;
+
+   public:
+    ProductExtraInfoDTO(const std::string& description, const std::vector<std::string>& imagePaths)
+        : _description(description), _extraImagePaths(imagePaths) {}
+
+    const string getDescription() const;
+    const vector<string> getExtraImagePaths() const;
+
+    void setDescription(string description);
+    void addImagePath(const string& path);
 };
 
 #endif
