@@ -8,8 +8,9 @@
 
 #include "../DAO/BuyerDAO.h"
 #include "../DTO/BuyerDTO.h"
+#include "UserBUS.h"
 
-class BuyerBUS : public User {
+class BuyerBUS : public UserBUS {
    public:
     // Logic tạo Buyer (Validation -> gọi DAO save -> trả về Buyer)
     // Thay thế cho Buyer::create cũ

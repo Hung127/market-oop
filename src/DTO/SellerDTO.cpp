@@ -1,22 +1,20 @@
-#include "../../include/dto/SellerDTO.h"
+#include "../../include/DTO/SellerDTO.h"
 
 #include <memory>
 
-#include "../../include/Product.h"
-
 SellerDTO::SellerDTO(const std::string& id, const std::string& name, const std::string& email,
                      const std::string& password)
-    : User::User(id, name, email, password) {
+    : UserDTO::UserDTO(id, name, email, password) {
     // Do nothing
 }
 
 // Products accessors (read-only view)
-const std::vector<std::shared_ptr<Product>>& SellerDTO::products() const {
+const std::vector<std::shared_ptr<ProductDTO>>& SellerDTO::products() const {
     return this->_myProducts;
 }
 
 // Lightweight product operations (no heavy validation)
-void SellerDTO::addProduct(std::shared_ptr<Product> product) {
+void SellerDTO::addProduct(std::shared_ptr<ProductDTO> product) {
     this->_myProducts.push_back(product);
 }
 
@@ -28,7 +26,7 @@ bool SellerDTO::removeProductById(const std::string& productId) {
             continue;
         }
 
-        if (this->_myProducts[i]->getID() == productId) {
+        if (this->_myProducts[i].getID() == productId) {
             this->_myProducts.erase(this->_myProducts.begin() + i);
             return true;
         }
@@ -37,7 +35,7 @@ bool SellerDTO::removeProductById(const std::string& productId) {
     return false;
 }  // returns true if removed
 
-std::shared_ptr<Product> SellerDTO::findProductById(const std::string& productId) const {
+std::shared_ptr<ProductDTO> SellerDTO::findProductById(const std::string& productId) const {
     int len = static_cast<int>(this->_myProducts.size());
 
     for (int i = 0; i < len; ++i) {

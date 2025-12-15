@@ -3,9 +3,9 @@
 
 #include <memory>
 
-#include "../DTO/CartDTO.h"
-#include "../DTO/UserDTO.h"
-#include "../PurchaseHistory.h"
+#include "CartDTO.h"
+#include "PurchaseHistoryDTO.h"
+#include "UserDTO.h"
 
 class BuyerDTO : public UserDTO {
    private:

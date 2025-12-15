@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-class Market;
-class Product;
+#include "../DTO/ProductDTO.h"
+
 class SellerDTO;
 
 /**
@@ -36,7 +36,7 @@ class SellerBUS {
     std::shared_ptr<SellerDTO> _seller;
 
     // Helper
-    std::shared_ptr<Product> findProductInInventory(const std::string& id) const;
+    std::shared_ptr<ProductDTO> findProductInInventory(const std::string& id) const;
 
    private:
     SellerBUS(const std::shared_ptr<SellerDTO>& seller) : _seller(seller) {
@@ -58,7 +58,7 @@ class SellerBUS {
      * @param stock Số lượng tồn kho
      * @return expected chứa shared_ptr tới product vừa tạo, hoặc BusError on failure
      */
-    std::expected<std::shared_ptr<Product>, BusError>
+    std::expected<std::shared_ptr<ProductDTO>, BusError>
     createProduct(const std::string& id, const std::string& name, double price, int stock);
 
     /**
@@ -70,7 +70,7 @@ class SellerBUS {
      * @param productId ID sản phẩm cần xóa
      * @return expected<void, BusError>
      */
-    std::expected<void, BusError> deleteProduct(Market& market, const std::string& productId);
+    // std::expected<void, BusError> deleteProduct(Market& market, const std::string& productId);
 
     /**
      * @brief Cập nhật thông tin sản phẩm
@@ -92,7 +92,7 @@ class SellerBUS {
     /**
      * @brief Lấy tất cả products trong inventory (bao gồm cả chưa publish)
      */
-    std::expected<std::vector<std::shared_ptr<Product>>, BusError> getMyProducts() const;
+    std::expected<std::vector<std::shared_ptr<ProductDTO>>, BusError> getMyProducts() const;
 
     /**
      * @brief Lấy số lượng products trong inventory
@@ -110,7 +110,7 @@ class SellerBUS {
      * @param productId ID sản phẩm cần publish
      * @return expected<void, BusError>
      */
-    std::expected<void, BusError> publishToMarket(Market& market, const std::string& productId);
+    // std::expected<void, BusError> publishToMarket(Market& market, const std::string& productId);
 
     /**
      * @brief Unpublish sản phẩm khỏi market
@@ -122,18 +122,19 @@ class SellerBUS {
      * @param productId ID sản phẩm cần unpublish
      * @return expected<void, BusError>
      */
-    std::expected<void, BusError> unpublishFromMarket(Market& market, const std::string& productId);
+    // std::expected<void, BusError> unpublishFromMarket(Market& market, const std::string&
+    // productId);
 
     /**
      * @brief Tìm sản phẩm trong inventory theo tên
      */
-    std::vector<std::shared_ptr<Product>>  // NOLINT
+    std::vector<std::shared_ptr<ProductDTO>>  // NOLINT
     searchMyProductsByName(const std::string& keyword) const;
 
     /**
      * @brief Tìm sản phẩm gần đúng nhất trong inventory (fuzzy search)
      */
-    std::shared_ptr<Product> searchMyClosestProduct(const std::string& keyword) const;  // NOLINT
+    std::shared_ptr<ProductDTO> searchMyClosestProduct(const std::string& keyword) const;  // NOLINT
 
     static std::expected<SellerBUS, BusError> create(std::shared_ptr<SellerDTO> seller);
 };

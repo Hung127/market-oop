@@ -1,14 +1,10 @@
-#include "../../include/bus/SellerBUS.h"
+#include "../../include/BUS/SellerBUS.h"
 
 #include <algorithm>
 #include <expected>
 #include <memory>
 #include <string>
 #include <vector>
-
-#include "../../include/Market.h"
-#include "../../include/Product.h"
-#include "../../include/SearchHelper.h"
 
 // Helper
 std::shared_ptr<Product> SellerBUS::findProductInInventory(const std::string& id) const {
@@ -17,7 +13,7 @@ std::shared_ptr<Product> SellerBUS::findProductInInventory(const std::string& id
 
 // ========== PRODUCT MANAGEMENT ==========
 
-std::expected<std::shared_ptr<Product>, BusError>
+std::expected<std::shared_ptr<ProductDTO>, BusError>
 SellerBUS::createProduct(const std::string& id, const std::string& name, double price, int stock) {
     // clang-format off
     if (
@@ -34,43 +30,43 @@ SellerBUS::createProduct(const std::string& id, const std::string& name, double 
         return std::unexpected(BusError::Conflict);
     }
 
-    auto p = std::make_shared<Product>(id, name, price, stock, _seller);
+    auto p = std::make_shared<ProductDTO>(id, name, price, stock, _seller);
     _seller->addProduct(p);
     return p;
 }
 
-std::expected<void, BusError> SellerBUS::deleteProduct(Market& market,
-                                                       const std::string& productId) {
-    if (productId.empty()) {
-        return std::unexpected(BusError::ValidationFailed);
-    }
-
-    std::shared_ptr<Product> prod = findProductInInventory(productId);
-    if (!prod) {
-        return std::unexpected(BusError::NotFound);
-    }
-
-    auto listed = market.findProductById(productId);
-    if (listed) {
-        std::expected<void, BusError> unlistPack = market.unlistProduct(productId);
-        if (!unlistPack.has_value()) {
-            // Propagate market error from Market directly
-            return std::unexpected(unlistPack.error());
-        }
-    }
-
-    bool removed = _seller->removeProductById(productId);
-    if (!removed) {
-        return std::unexpected(BusError::InternalError);
-    }
-
-    return {};
-}
+// std::expected<void, BusError> SellerBUS::deleteProduct(Market& market,
+//                                                        const std::string& productId) {
+//     if (productId.empty()) {
+//         return std::unexpected(BusError::ValidationFailed);
+//     }
+//
+//     std::shared_ptr<Product> prod = findProductInInventory(productId);
+//     if (!prod) {
+//         return std::unexpected(BusError::NotFound);
+//     }
+//
+//     auto listed = market.findProductById(productId);
+//     if (listed) {
+//         std::expected<void, BusError> unlistPack = market.unlistProduct(productId);
+//         if (!unlistPack.has_value()) {
+//             // Propagate market error from Market directly
+//             return std::unexpected(unlistPack.error());
+//         }
+//     }
+//
+//     bool removed = _seller->removeProductById(productId);
+//     if (!removed) {
+//         return std::unexpected(BusError::InternalError);
+//     }
+//
+//     return {};
+// }
 
 std::expected<void, BusError> SellerBUS::updateProduct(const std::string& productId,
                                                        const std::string& newName,
                                                        double newPrice) {
-    std::shared_ptr<Product> prod = findProductInInventory(productId);
+    std::shared_ptr<ProductDTO> prod = findProductInInventory(productId);
     if (!prod) {
         return std::unexpected(BusError::NotFound);
     }
@@ -101,7 +97,7 @@ std::expected<void, BusError> SellerBUS::updateStock(const std::string& productI
         return std::unexpected(BusError::ValidationFailed);
     }
 
-    std::shared_ptr<Product> prod = findProductInInventory(productId);
+    std::shared_ptr<ProductDTO> prod = findProductInInventory(productId);
     if (!prod) {
         return std::unexpected(BusError::NotFound);
     }
@@ -110,7 +106,7 @@ std::expected<void, BusError> SellerBUS::updateStock(const std::string& productI
     return {};
 }
 
-std::expected<std::vector<std::shared_ptr<Product>>, BusError> SellerBUS::getMyProducts() const {
+std::expected<std::vector<std::shared_ptr<ProductDTO>>, BusError> SellerBUS::getMyProducts() const {
     return _seller->products();  // copy of vector of shared_ptrs
 }
 
@@ -119,49 +115,50 @@ std::expected<int, BusError> SellerBUS::getProductCount() const {
 }
 
 // ========== MARKET INTERACTION ==========
+// TODO: implement market
 
-std::expected<void, BusError> SellerBUS::publishToMarket(Market& market,
-                                                         const std::string& productId) {
-    std::shared_ptr<Product> prod = findProductInInventory(productId);
-    if (!prod) {
-        return std::unexpected(BusError::NotFound);
-    }
+// std::expected<void, BusError> SellerBUS::publishToMarket(Market& market,
+//                                                          const std::string& productId) {
+//     std::shared_ptr<Product> prod = findProductInInventory(productId);
+//     if (!prod) {
+//         return std::unexpected(BusError::NotFound);
+//     }
+//
+//     // Market API returns std::expected<void, BusError>
+//     std::expected<void, BusError> listPack = market.listProduct(prod);
+//     if (!listPack.has_value()) {
+//         return std::unexpected(listPack.error());
+//     }
+//
+//     return {};
+// }
 
-    // Market API returns std::expected<void, BusError>
-    std::expected<void, BusError> listPack = market.listProduct(prod);
-    if (!listPack.has_value()) {
-        return std::unexpected(listPack.error());
-    }
-
-    return {};
-}
-
-std::expected<void, BusError> SellerBUS::unpublishFromMarket(Market& market,
-                                                             const std::string& productId) {
-    // clang-format off
-    if (productId.empty()) {
-        return std::unexpected(BusError::ValidationFailed);
-    }
-    // clang-format on
-
-    std::shared_ptr<Product> prod = findProductInInventory(productId);
-    if (!prod) {
-        return std::unexpected(BusError::NotFound);
-    }
-
-    std::expected<void, BusError> res = market.unlistProduct(productId);
-    if (!res.has_value()) {
-        return std::unexpected(res.error());
-    }
-
-    return {};
-}
+// std::expected<void, BusError> SellerBUS::unpublishFromMarket(Market& market,
+//                                                              const std::string& productId) {
+//     // clang-format off
+//     if (productId.empty()) {
+//         return std::unexpected(BusError::ValidationFailed);
+//     }
+//     // clang-format on
+//
+//     std::shared_ptr<Product> prod = findProductInInventory(productId);
+//     if (!prod) {
+//         return std::unexpected(BusError::NotFound);
+//     }
+//
+//     std::expected<void, BusError> res = market.unlistProduct(productId);
+//     if (!res.has_value()) {
+//         return std::unexpected(res.error());
+//     }
+//
+//     return {};
+// }
 
 // ========== SEARCH IN INVENTORY ==========
 
-std::vector<std::shared_ptr<Product>>
+std::vector<std::shared_ptr<ProductDTO>>
 SellerBUS::searchMyProductsByName(const std::string& keyword) const {
-    std::vector<std::shared_ptr<Product>> out;
+    std::vector<std::shared_ptr<ProductDTO>> out;
     if (keyword.empty()) {
         return out;
     }
@@ -177,7 +174,7 @@ SellerBUS::searchMyProductsByName(const std::string& keyword) const {
     }
 
     // Compute similarity scores once to avoid repeated expensive computations
-    std::vector<std::pair<std::shared_ptr<Product>, double>> scored;
+    std::vector<std::pair<std::shared_ptr<ProductDTO>, double>> scored;
     scored.reserve(out.size());
     for (const auto& p : out) {
         scored.emplace_back(p, SearchHelper::similarityScore(p->getName(), keyword));
@@ -204,7 +201,7 @@ std::shared_ptr<Product> SellerBUS::searchMyClosestProduct(const std::string& ke
         return nullptr;
     }
 
-    std::shared_ptr<Product> best = nullptr;
+    std::shared_ptr<ProductDTO> best = nullptr;
     double bestScore = -1.0;
 
     // Use similarity score (based on edit distance) to pick the closest match.

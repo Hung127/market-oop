@@ -2,37 +2,24 @@
 #define PURCHASEHISTORY_H
 
 #include <vector>
-#include <iostream>
-#include <iomanip>
-#include "Order.h"
+
+#include "OrderDTO.h"
 
 class PurchaseHistory {
-private:
-    std::vector<Order> _orders;
+   private:
+    std::vector<OrderDTO> _orders;
 
-public:
+   public:
     PurchaseHistory() = default;
 
-    void addOrder(const Order& order) {
-        _orders.push_back(order);
-    }
+    // Add an order to history
+    void addOrder(const OrderDTO& order);
 
-    const std::vector<Order>& orders() const {
-        return _orders;
-    }
+    // Read-only access to orders
+    const std::vector<OrderDTO>& orders() const;
 
-    void printHistory() const {
-        std::cout << "\n=== LICH SU MUA HANG ===\n";
-        if (_orders.empty()) {
-            std::cout << "(Trong)\n";
-            return;
-        }
-        for (const auto& ord : _orders) {
-            std::cout << "Ngay: " << ord.date() 
-                      << " | Tong: " << std::fixed << std::setprecision(2) << ord.totalPrice() << " VND\n";
-        }
-        std::cout << "========================\n";
-    }
+    // Print a human-readable purchase history to stdout
+    void printHistory() const;
 };
 
-#endif
+#endif  // PURCHASEHISTORY_H

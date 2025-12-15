@@ -1,10 +1,9 @@
-#include "../include/PurchaseHistory.h"
-
 #include <iomanip>
 #include <iostream>
 
 #include "../include/DTO/OrderDTO.h"  // Full definition is needed to inspect contents in printHistory
 #include "../include/DTO/OrderItemDTO.h"  // Full definition is needed to inspect contents in printHistory
+#include "../include/DTO/PurchaseHistoryDTO.h"
 
 void PurchaseHistory::addOrder(const OrderDTO& order) {
     _orders.push_back(order);

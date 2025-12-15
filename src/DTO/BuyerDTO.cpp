@@ -1,12 +1,12 @@
-
 #include "../../include/DTO/BuyerDTO.h"
 
-#include <memory>
 #include <string>
 
 #include "../../include/DTO/CartDTO.h"
+#include "../../include/DTO/OrderDTO.h"
+#include "../../include/DTO/OrderItemDTO.h"
+#include "../../include/DTO/PurchaseHistoryDTO.h"
 #include "../../include/DTO/UserDTO.h"
-#include "../../include/PurchaseHistory.h"
 
 BuyerDTO::BuyerDTO(const std::string& id, const std::string& name, const std::string& email,
                    const std::string& password, double balance)

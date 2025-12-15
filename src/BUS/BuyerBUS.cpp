@@ -7,23 +7,21 @@
 
 #include "../../include/BUS/CartBUS.h"
 #include "../../include/DTO/BuyerDTO.h"
-#include "../../include/User.h"
+#include "../../include/DTO/OrderDTO.h"
+#include "../../include/DTO/OrderItemDTO.h"
 #include "../../include/Utils/Utils.h"
 
 std::expected<std::unique_ptr<BuyerDTO>, std::string>
 BuyerBUS::create(const std::string& id, const std::string& name, const std::string& email,
                  const std::string& password, double balance) {
     // check and add id
-    for (const std::string& usedId : User::_ids) {
+    for (const std::string& usedId : UserDTO::getIDS()) {
         if (usedId == id) {
             return std::unexpected("User id is already used");
         }
     }
 
-    // add to used id
-    User::_ids.insert(id);
-
-    return std::unique_ptr<BuyerDTO>(new BuyerDTO(id, name, email, password, balance));
+    return std::make_unique<BuyerDTO>(BuyerDTO(id, name, email, password, balance));
 }
 
 // ========== BALANCE LOGIC ==========
@@ -119,7 +117,7 @@ std::expected<void, std::string> BuyerBUS::checkout(BuyerDTO& buyer) {
     buyer.setBalance(buyer.getBalance() - totalPrice);
 
     // 6. CREATE ORDER AND SAVE TO HISTORY
-    std::vector<OrderItem> orderItems;
+    std::vector<OrderItemDTO> orderItems;
     for (const auto& [weakProduct, quantity] : items) {
         // Lấy ProductDTO từ Cart ra
         if (auto p = weakProduct.lock()) {
@@ -128,7 +126,7 @@ std::expected<void, std::string> BuyerBUS::checkout(BuyerDTO& buyer) {
         }
     }
 
-    Order order(orderItems, totalPrice, Utils::getCurrentDate());
+    OrderDTO order(orderItems, totalPrice, Utils::getCurrentDate());
     buyer.getPurchasesHistory().addOrder(order);
 
     // 7. Clear cart

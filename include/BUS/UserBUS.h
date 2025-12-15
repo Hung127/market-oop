@@ -8,7 +8,7 @@
 #include "../DAO/UserDAO.h"
 #include "../UserFactory.h"
 
-class UserBus {
+class UserBUS {
    public:
     static std::expected<std::unique_ptr<UserDTO>, std::string> login(const std::string& email,
                                                                       const std::string& password) {

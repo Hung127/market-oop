@@ -1,10 +1,9 @@
-
 #include "../../include/DTO/ProductDTO.h"
 
-#include "../../include/Seller.h"
+#include "../../include/DTO/SellerDTO.h"
 
 ProductDTO::ProductDTO(const std::string& id, const std::string& name, double price, int stock,
-                       const std::shared_ptr<Seller>& owner)
+                       const std::shared_ptr<SellerDTO>& owner)
     : _id(id), _name(name), _price(price), _stock(stock), _owner(owner) {}
 
 // ========== GETTERS (Non-const) ==========

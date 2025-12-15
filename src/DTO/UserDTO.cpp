@@ -2,7 +2,9 @@
 
 UserDTO::UserDTO(const std::string& id, const std::string& name, const std::string& email,
                  const std::string& password)
-    : _id(id), _name(name), _email(email), _password(password) {}
+    : _id(id), _name(name), _email(email), _password(password) {
+    UserDTO::ids.push_back(id);
+}
 
 UserDTO::~UserDTO() = default;
 
@@ -12,6 +14,10 @@ std::string UserDTO::getId() const {
 
 std::string UserDTO::getName() const {
     return _name;
+}
+
+const std::vector<std::string>& UserDTO::getIDS() {
+    return UserDTO::ids;
 }
 
 std::string UserDTO::getEmail() const {

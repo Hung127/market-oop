@@ -6,8 +6,7 @@
 #include <vector>
 
 #include "UserDTO.h"
-
-class Product;
+class ProductDTO;
 
 /**
  * @brief Simple data-transfer object for Seller (POJO).
@@ -20,7 +19,7 @@ class Product;
 class SellerDTO : public UserDTO {
    private:
     // Seller owns products in inventory (choose shared_ptr or unique_ptr based on design)
-    std::vector<std::shared_ptr<Product>> _myProducts;
+    std::vector<std::shared_ptr<ProductDTO>> _myProducts;
 
    public:
     /**
@@ -46,12 +45,12 @@ class SellerDTO : public UserDTO {
     std::string getRole() const override;
 
     // Products accessors (read-only view)
-    const std::vector<std::shared_ptr<Product>>& products() const;
+    const std::vector<std::shared_ptr<ProductDTO>>& products() const;
 
     // Lightweight product operations (no heavy validation)
-    void addProduct(std::shared_ptr<Product> product);
+    void addProduct(std::shared_ptr<ProductDTO> product);
     bool removeProductById(const std::string& productId);  // returns true if removed
-    std::shared_ptr<Product> findProductById(const std::string& productId) const;
+    std::shared_ptr<ProductDTO> findProductById(const std::string& productId) const;
 };
 
 #endif  // SELLER_DTO_H_

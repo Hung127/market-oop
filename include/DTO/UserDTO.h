@@ -11,12 +11,14 @@ class UserDTO {
     std::string _name;
     std::string _email;
     std::string _password;
+    static std::vector<std::string> ids;
 
    public:
     UserDTO(const std::string& id, const std::string& name, const std::string& email,
             const std::string& password);
 
     virtual ~UserDTO();
+    const static std::vector<std::string>& getIDS();
 
     std::string getId() const;
     std::string getName() const;
