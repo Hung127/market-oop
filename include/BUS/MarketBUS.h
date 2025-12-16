@@ -6,6 +6,7 @@
 #include <string>
 
 #include "../interface/IMarketRepository.h"
+class ProductDTO;
 
 enum class MarketBusError { ValidationFailed, NotFound, Conflict, RepositoryError, InternalError };
 
@@ -29,11 +30,11 @@ class MarketBUS {
     std::shared_ptr<IMarketRepository> _repo;
 
    public:
-    std::expected<void, MarketBusError> addProduct(const std::shared_ptr<Product>& p);
+    std::expected<void, MarketBusError> addProduct(const std::shared_ptr<ProductDTO>& p);
     std::expected<void, MarketBusError> removeProduct(const std::string& id);
-    std::shared_ptr<Product> findProductById(const std::string& id) const;
-    std::vector<std::shared_ptr<Product>> searchByName(const std::string& keyword) const;
-    std::vector<std::shared_ptr<Product>> getAllProducts() const;
+    std::shared_ptr<ProductDTO> findProductById(const std::string& id) const;
+    std::vector<std::shared_ptr<ProductDTO>> searchByName(const std::string& keyword) const;
+    std::vector<std::shared_ptr<ProductDTO>> getAllProducts() const;
     int getProductCount() const;
 
     MarketBUS(const std::shared_ptr<IMarketRepository>& repo);

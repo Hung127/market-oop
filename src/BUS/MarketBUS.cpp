@@ -3,7 +3,9 @@
 #include <expected>
 #include <memory>
 
-std::expected<void, MarketBusError> MarketBUS::addProduct(const std::shared_ptr<Product>& p) {
+#include "../../include/DTO/ProductDTO.h"
+
+std::expected<void, MarketBusError> MarketBUS::addProduct(const std::shared_ptr<ProductDTO>& p) {
     if (!p) {
         return std::unexpected(MarketBusError::ValidationFailed);
     }
@@ -29,7 +31,7 @@ std::expected<void, MarketBusError> MarketBUS::removeProduct(const std::string& 
     return {};
 }
 
-std::shared_ptr<Product> MarketBUS::findProductById(const std::string& id) const {
+std::shared_ptr<ProductDTO> MarketBUS::findProductById(const std::string& id) const {
     if (id.empty()) {
         return nullptr;
     }
@@ -37,7 +39,7 @@ std::shared_ptr<Product> MarketBUS::findProductById(const std::string& id) const
     return this->_repo->findProductById(id);
 }
 
-std::vector<std::shared_ptr<Product>> MarketBUS::searchByName(const std::string& keyword) const {
+std::vector<std::shared_ptr<ProductDTO>> MarketBUS::searchByName(const std::string& keyword) const {
     if (keyword.empty()) {
         return {};
     }
@@ -45,7 +47,7 @@ std::vector<std::shared_ptr<Product>> MarketBUS::searchByName(const std::string&
     return this->_repo->searchByName(keyword);
 }
 
-std::vector<std::shared_ptr<Product>> MarketBUS::getAllProducts() const {
+std::vector<std::shared_ptr<ProductDTO>> MarketBUS::getAllProducts() const {
     return this->_repo->getAllProducts();
 }
 

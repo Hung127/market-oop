@@ -1,10 +1,14 @@
 #include "../../include/DTO/ProductDTO.h"
 
+#include <memory>
+
 #include "../../include/DTO/SellerDTO.h"
 
 ProductDTO::ProductDTO(const std::string& id, const std::string& name, double price, int stock,
                        const std::shared_ptr<SellerDTO>& owner)
-    : _id(id), _name(name), _price(price), _stock(stock), _owner(owner) {}
+    : _owner(owner), _sellerId(owner->getId()), _id(id), _name(name), _price(price), _stock(stock) {
+    // Do nothing
+}
 
 // ========== GETTERS (Non-const) ==========
 std::string ProductDTO::getName() {
@@ -23,7 +27,7 @@ int ProductDTO::getStock() {
     return this->_stock;
 }
 
-std::shared_ptr<Seller> ProductDTO::getOwner() {
+std::shared_ptr<SellerDTO> ProductDTO::getOwner() {
     // Chuyển weak_ptr thành shared_ptr. Trả về nullptr nếu Seller không còn tồn tại.
     return this->_owner.lock();
 }
@@ -45,7 +49,7 @@ int ProductDTO::getStock() const {
     return this->_stock;
 }
 
-std::shared_ptr<Seller> ProductDTO::getOwner() const {
+std::shared_ptr<SellerDTO> ProductDTO::getOwner() const {
     return this->_owner.lock();
 }
 
@@ -66,6 +70,10 @@ void ProductDTO::setStock(int stock) {
     }
 }
 
-void ProductDTO::setOwner(const std::shared_ptr<Seller>& owner) {
+void ProductDTO::setOwner(const std::shared_ptr<SellerDTO>& owner) {
     this->_owner = owner;
+}
+
+std::string ProductDTO::getSellerId() const {
+    return this->_sellerId;
 }

@@ -3,6 +3,8 @@
 #include <memory>
 
 #include "../include/DTO/BuyerDTO.h"
+#include "../include/DTO/OrderDTO.h"
+#include "../include/DTO/OrderItemDTO.h"
 #include "../include/DTO/SellerDTO.h"
 
 std::expected<std::unique_ptr<UserDTO>, std::string>

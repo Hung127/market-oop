@@ -1,9 +1,12 @@
 
 #include "../../include/DAO/BuyerDAO.h"
 
-#include <expected>
+#include <algorithm>
 #include <memory>
 #include <string>
+
+#include "../../include/DTO/OrderDTO.h"
+#include "../../include/DTO/OrderItemDTO.h"
 
 static std::vector<BuyerDTO> mockDatabase;
 

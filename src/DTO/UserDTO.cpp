@@ -6,8 +6,6 @@ UserDTO::UserDTO(const std::string& id, const std::string& name, const std::stri
     UserDTO::ids.push_back(id);
 }
 
-UserDTO::~UserDTO() = default;
-
 std::string UserDTO::getId() const {
     return _id;
 }

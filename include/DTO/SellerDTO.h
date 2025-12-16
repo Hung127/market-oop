@@ -31,6 +31,8 @@ class SellerDTO : public UserDTO {
     SellerDTO(const std::string& id, const std::string& name, const std::string& email,
               const std::string& password);
 
+    ~SellerDTO() override = default;
+
     // SellerDTO(const SellerDTO&) = delete;
     // SellerDTO& operator=(const SellerDTO&) = delete;
 
@@ -38,10 +40,6 @@ class SellerDTO : public UserDTO {
     // SellerDTO(SellerDTO&&) noexcept = default;
     // SellerDTO& operator=(SellerDTO&&) noexcept = default;
 
-    // Basic accessors
-    const std::string& getId() const;
-    const std::string& getName() const;
-    const std::string& getEmail() const;
     std::string getRole() const override;
 
     // Products accessors (read-only view)

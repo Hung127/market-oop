@@ -4,11 +4,11 @@
 #include <memory>
 #include <string>
 
-class Seller;
+class SellerDTO;
 
 class ProductDTO {
    private:
-    std::weak_ptr<Seller> _owner;
+    std::weak_ptr<SellerDTO> _owner;
     std::string _id;
     std::string _name;
     double _price;
@@ -17,14 +17,14 @@ class ProductDTO {
 
    public:
     ProductDTO(const std::string& id, const std::string& name, double price, int stock,
-               const std::shared_ptr<Seller>& owner);
+               const std::shared_ptr<SellerDTO>& owner);
 
     // ========== GETTERS (Non-const) ==========
     std::string getName();
     std::string getID();
     double getPrice();
     int getStock();
-    std::shared_ptr<Seller> getOwner();
+    std::shared_ptr<SellerDTO> getOwner();
 
     std::string getSellerId() const;
     // ========== GETTERS (Const) ==========
@@ -32,13 +32,13 @@ class ProductDTO {
     std::string getID() const;
     double getPrice() const;
     int getStock() const;
-    std::shared_ptr<Seller> getOwner() const;
+    std::shared_ptr<SellerDTO> getOwner() const;
 
     // ========== SETTERS ==========
     void setName(const std::string& name);
     void setPrice(double price);
     void setStock(int stock);
-    void setOwner(const std::shared_ptr<Seller>& owner);
+    void setOwner(const std::shared_ptr<SellerDTO>& owner);
 };
 
 #endif

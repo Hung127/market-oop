@@ -38,3 +38,7 @@ PurchaseHistory& BuyerDTO::getPurchasesHistory() {
 const PurchaseHistory& BuyerDTO::getPurchasesHistory() const {
     return this->_purchasesHistory;
 }
+
+std::string BuyerDTO::getRole() const {
+    return std::string("BUYER");
+}

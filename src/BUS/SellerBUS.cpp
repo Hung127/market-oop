@@ -6,9 +6,13 @@
 #include <string>
 #include <vector>
 
+#include "../../include/DTO/ProductDTO.h"
+#include "../../include/DTO/SellerDTO.h"
+#include "../../include/SearchHelper.h"
+
 // Helper
-std::shared_ptr<Product> SellerBUS::findProductInInventory(const std::string& id) const {
-    return _seller->findProductById(id);
+std::shared_ptr<ProductDTO> SellerBUS::findProductInInventory(const std::string& id) const {
+    return this->_seller->findProductById(id);
 }
 
 // ========== PRODUCT MANAGEMENT ==========
@@ -30,7 +34,7 @@ SellerBUS::createProduct(const std::string& id, const std::string& name, double 
         return std::unexpected(BusError::Conflict);
     }
 
-    auto p = std::make_shared<ProductDTO>(id, name, price, stock, _seller);
+    auto p = std::make_shared<ProductDTO>(ProductDTO(id, name, price, stock, this->_seller));
     _seller->addProduct(p);
     return p;
 }
@@ -41,7 +45,7 @@ SellerBUS::createProduct(const std::string& id, const std::string& name, double 
 //         return std::unexpected(BusError::ValidationFailed);
 //     }
 //
-//     std::shared_ptr<Product> prod = findProductInInventory(productId);
+//     std::shared_ptr<ProductDTO> prod = findProductInInventory(productId);
 //     if (!prod) {
 //         return std::unexpected(BusError::NotFound);
 //     }
@@ -119,7 +123,7 @@ std::expected<int, BusError> SellerBUS::getProductCount() const {
 
 // std::expected<void, BusError> SellerBUS::publishToMarket(Market& market,
 //                                                          const std::string& productId) {
-//     std::shared_ptr<Product> prod = findProductInInventory(productId);
+//     std::shared_ptr<ProductDTO> prod = findProductInInventory(productId);
 //     if (!prod) {
 //         return std::unexpected(BusError::NotFound);
 //     }
@@ -141,7 +145,7 @@ std::expected<int, BusError> SellerBUS::getProductCount() const {
 //     }
 //     // clang-format on
 //
-//     std::shared_ptr<Product> prod = findProductInInventory(productId);
+//     std::shared_ptr<ProductDTO> prod = findProductInInventory(productId);
 //     if (!prod) {
 //         return std::unexpected(BusError::NotFound);
 //     }
@@ -196,7 +200,7 @@ SellerBUS::searchMyProductsByName(const std::string& keyword) const {
     return out;
 }
 
-std::shared_ptr<Product> SellerBUS::searchMyClosestProduct(const std::string& keyword) const {
+std::shared_ptr<ProductDTO> SellerBUS::searchMyClosestProduct(const std::string& keyword) const {
     if (keyword.empty()) {
         return nullptr;
     }

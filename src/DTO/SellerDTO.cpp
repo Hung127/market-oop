@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include "../../include/DTO/ProductDTO.h"
+
 SellerDTO::SellerDTO(const std::string& id, const std::string& name, const std::string& email,
                      const std::string& password)
     : UserDTO::UserDTO(id, name, email, password) {
@@ -26,7 +28,7 @@ bool SellerDTO::removeProductById(const std::string& productId) {
             continue;
         }
 
-        if (this->_myProducts[i].getID() == productId) {
+        if (this->_myProducts[i]->getID() == productId) {
             this->_myProducts.erase(this->_myProducts.begin() + i);
             return true;
         }
@@ -44,9 +46,13 @@ std::shared_ptr<ProductDTO> SellerDTO::findProductById(const std::string& produc
         }
 
         if (this->_myProducts[i]->getID() == productId) {
-            this->_myProducts[i];
+            return this->_myProducts[i];
         }
     }
 
     return nullptr;
+}
+
+std::string SellerDTO::getRole() const {
+    return std::string("SELLER");
 }

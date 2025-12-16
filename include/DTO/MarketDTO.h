@@ -13,11 +13,11 @@ class MarketDTO {
     std::map<std::string, std::weak_ptr<ProductDTO>> _listedProducts;
 
    public:
-    bool addProductDTO(const std::shared_ptr<ProductDTO>& product);
-    bool removeProductDTO(const std::string& id);
+    bool addProduct(const std::shared_ptr<ProductDTO>& product);
+    bool removeProduct(const std::string& id);
     [[nodiscard]] std::shared_ptr<ProductDTO> findProduct(const std::string& id) const;
     [[nodiscard]] std::vector<std::shared_ptr<ProductDTO>> getAllProducts() const;
-    [[nodiscard]] int countAllProductDTOs() const;
+    [[nodiscard]] int countAllProducts() const;
     void cleanupExpired();
 
     MarketDTO();

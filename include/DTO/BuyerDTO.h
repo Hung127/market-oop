@@ -16,6 +16,7 @@ class BuyerDTO : public UserDTO {
    public:
     BuyerDTO(const std::string& id, const std::string& name, const std::string& email,
              const std::string& password, double balance = 0.0);
+    ~BuyerDTO() override = default;
 
     double getBalance() const;
     void setBalance(double amount);
@@ -26,8 +27,6 @@ class BuyerDTO : public UserDTO {
     PurchaseHistory& getPurchasesHistory();
     const PurchaseHistory& getPurchasesHistory() const;
     std::string getRole() const override;
-
-    ~BuyerDTO() override = default;
 };
 
 #endif
