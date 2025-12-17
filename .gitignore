@@ -20,6 +20,7 @@
 main
 *.exe
 *.out
+build
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
