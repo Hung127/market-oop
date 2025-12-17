@@ -49,6 +49,25 @@ bool ProductDAO::insert(const ProductDTO& product) {
     return true;
 }
 
+// 4. Thêm sản phẩm mới (Insert)
+bool ProductDAO::insert(const std::shared_ptr<ProductDTO>& product) {
+    if (!product) {
+        std::cerr << "[Error] Invalid product";
+        return false;
+    }
+    // Kiểm tra trùng ID
+    for (const auto& p : mockProductDB) {
+        if (p->getID() == product->getID()) {
+            std::cerr << "[Error] Duplicate Product ID: " << product->getID() << "\n";
+            return false;
+        }
+    }
+
+    // Tạo bản sao của product, đóng gói vào shared_ptr và lưu vào vector
+    mockProductDB.push_back(product);
+    return true;
+}
+
 // 5. Cập nhật thông tin (Update)
 bool ProductDAO::update(const ProductDTO& product) {
     for (auto& p : mockProductDB) {

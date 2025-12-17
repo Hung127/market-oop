@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-class OrderItemDTO;
+#include "OrderItemDTO.h"
 
 class OrderDTO {
    private:

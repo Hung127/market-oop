@@ -134,8 +134,3 @@ std::expected<void, std::string> BuyerBUS::checkout(BuyerDTO& buyer) {
 
     return {};
 }
-
-// ========== HISTORY LOGIC ==========
-static void viewPurchaseHistory(const BuyerDTO& buyerDTO) {
-    // TODO: Complete or delete this function
-}

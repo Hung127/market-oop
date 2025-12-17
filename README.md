@@ -8,6 +8,7 @@
 - Quản lý sản phẩm, giỏ hàng, đơn hàng, lịch sử mua.
 - Tìm kiếm sản phẩm (theo tên, khoảng giá).
 
+
 ## 🛠️ Cách build & chạy
 
 ```bash
@@ -22,6 +23,17 @@ $ cmake ..
 $ cmake --build .
 
 ./app
+```
+
+## Cách build test và chạy
+
+```bash
+rm -rf build
+mkdir -p build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Debug
+cmake --build . -- -j$(nproc)
+
 ```
 
 ## 📂 Các file chính

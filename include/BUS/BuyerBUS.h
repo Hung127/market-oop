@@ -45,8 +45,9 @@ class BuyerBUS : public UserBUS {
     // Hàm logic phức tạp nhất, chuyển từ BuyerDTO::checkout
     static std::expected<void, std::string> checkout(BuyerDTO& BuyerDTO);
 
-    // ========== HISTORY LOGIC ==========
-    static void viewPurchaseHistory(const BuyerDTO& BuyerDTO);
+    // TODO: move this to ui
+    // // ========== HISTORY LOGIC ==========
+    // static void viewPurchaseHistory(const BuyerDTO& BuyerDTO);
 };
 
 #endif

@@ -15,22 +15,6 @@ class SellerDTO;
  */
 enum class BusError { ValidationFailed, NotFound, Conflict, MarketError, InternalError };
 
-std::string getErrorString(BusError e) {
-    switch (e) {
-        case BusError::ValidationFailed:
-            return "ValidationFailed";
-        case BusError::NotFound:
-            return "NotFound";
-        case BusError::Conflict:
-            return "Conflict";
-        case BusError::MarketError:
-            return "MarketError";
-        case BusError::InternalError:
-        default:
-            return "InternalError";
-    }
-}
-
 class SellerBUS {
    private:
     std::shared_ptr<SellerDTO> _seller;

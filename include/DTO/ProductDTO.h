@@ -9,11 +9,11 @@ class SellerDTO;
 class ProductDTO {
    private:
     std::weak_ptr<SellerDTO> _owner;
+    std::string _sellerId;
     std::string _id;
     std::string _name;
     double _price;
     int _stock;
-    std::string _sellerId;
 
    public:
     ProductDTO(const std::string& id, const std::string& name, double price, int stock,

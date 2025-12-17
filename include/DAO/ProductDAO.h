@@ -24,6 +24,7 @@ class ProductDAO {
     // Lưu sản phẩm mới vào DB
     static bool insert(const ProductDTO& product);
 
+    static bool insert(const std::shared_ptr<ProductDTO>& product);
     // Cập nhật thông tin sản phẩm (ví dụ sau khi giảm stock)
     static bool update(const ProductDTO& product);
 
