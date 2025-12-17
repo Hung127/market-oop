@@ -86,8 +86,8 @@ int main() {
     if (prodAfterPack.has_value()) {
         cout << "Product stock after checkout: " << prodAfterPack.value()->getStock() << endl;
     }
-    cout << "Purchase history:" << endl;
-    buyer->getPurchasesHistory().printHistory();
+    // cout << "Purchase history:" << endl;
+    // buyer->getPurchasesHistory().printHistory();
 
     cout << "=== SMOKE TEST END ===" << endl;
     return 0;

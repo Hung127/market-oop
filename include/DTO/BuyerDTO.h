@@ -11,7 +11,7 @@ class BuyerDTO : public UserDTO {
    private:
     double _balance;
     CartDTO _cart;
-    PurchaseHistory _purchasesHistory;
+    PurchaseHistoryDTO _purchasesHistory;
 
    public:
     BuyerDTO(const std::string& id, const std::string& name, const std::string& email,
@@ -24,8 +24,8 @@ class BuyerDTO : public UserDTO {
     CartDTO& getCart();
     const CartDTO& getCart() const;
 
-    PurchaseHistory& getPurchasesHistory();
-    const PurchaseHistory& getPurchasesHistory() const;
+    const PurchaseHistoryDTO& getPurchasesHistory() const;
+    PurchaseHistoryDTO& getPurchasesHistory();
     std::string getRole() const override;
 };
 

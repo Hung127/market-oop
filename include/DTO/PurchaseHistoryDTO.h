@@ -1,16 +1,16 @@
-#ifndef PURCHASEHISTORY_H
-#define PURCHASEHISTORY_H
+#ifndef PURCHASEHISTORY_DTO_H
+#define PURCHASEHISTORY_DTO_H
 
 #include <vector>
 
 #include "OrderDTO.h"
 
-class PurchaseHistory {
+class PurchaseHistoryDTO {
    private:
     std::vector<OrderDTO> _orders;
 
    public:
-    PurchaseHistory() = default;
+    PurchaseHistoryDTO() = default;
 
     // Add an order to history
     void addOrder(const OrderDTO& order);
@@ -19,6 +19,7 @@ class PurchaseHistory {
     const std::vector<OrderDTO>& orders() const;
 
     // Print a human-readable purchase history to stdout
+    // TODO: move it to ui
     void printHistory() const;
 };
 

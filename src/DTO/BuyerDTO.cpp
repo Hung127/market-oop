@@ -31,11 +31,11 @@ const CartDTO& BuyerDTO::getCart() const {
     return this->_cart;
 }
 // ===== PURCHASE HISTORY =====
-PurchaseHistory& BuyerDTO::getPurchasesHistory() {
+const PurchaseHistoryDTO& BuyerDTO::getPurchasesHistory() const {
     return this->_purchasesHistory;
 }
 
-const PurchaseHistory& BuyerDTO::getPurchasesHistory() const {
+PurchaseHistoryDTO& BuyerDTO::getPurchasesHistory() {
     return this->_purchasesHistory;
 }
 

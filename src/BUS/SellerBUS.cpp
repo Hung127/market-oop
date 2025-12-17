@@ -8,7 +8,7 @@
 
 #include "../../include/DTO/ProductDTO.h"
 #include "../../include/DTO/SellerDTO.h"
-#include "../../include/SearchHelper.h"
+#include "../../include/Utils/Utils.h"
 
 // Helper
 std::shared_ptr<ProductDTO> SellerBUS::findProductInInventory(const std::string& id) const {
@@ -172,7 +172,7 @@ SellerBUS::searchMyProductsByName(const std::string& keyword) const {
         if (!p) {
             continue;
         }
-        if (SearchHelper::containsIgnoreCase(p->getName(), keyword)) {
+        if (Utils::SearchHelper::containsIgnoreCase(p->getName(), keyword)) {
             out.push_back(p);
         }
     }
@@ -181,7 +181,7 @@ SellerBUS::searchMyProductsByName(const std::string& keyword) const {
     std::vector<std::pair<std::shared_ptr<ProductDTO>, double>> scored;
     scored.reserve(out.size());
     for (const auto& p : out) {
-        scored.emplace_back(p, SearchHelper::similarityScore(p->getName(), keyword));
+        scored.emplace_back(p, Utils::SearchHelper::similarityScore(p->getName(), keyword));
     }
 
     std::sort(scored.begin(), scored.end(), [](const auto& a, const auto& b) {
@@ -213,7 +213,7 @@ std::shared_ptr<ProductDTO> SellerBUS::searchMyClosestProduct(const std::string&
         if (!p) {
             continue;
         }
-        double score = SearchHelper::similarityScore(p->getName(), keyword);
+        double score = Utils::SearchHelper::similarityScore(p->getName(), keyword);
         if (score > bestScore) {
             bestScore = score;
             best = p;
