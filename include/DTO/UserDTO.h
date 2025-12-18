@@ -9,7 +9,7 @@ class UserDTO {
     std::string _id;
     std::string _name;
     std::string _email;
-    std::string _password;
+    std::string _hashedPassword;
     inline static std::vector<std::string> ids;
 
    public:
@@ -17,7 +17,7 @@ class UserDTO {
 
    public:
     UserDTO(const std::string& id, const std::string& name, const std::string& email,
-            const std::string& password);
+            const std::string& hashedPassword);
 
     const static std::vector<std::string>& getIDS();
 

@@ -1,8 +1,8 @@
 #include "../../include/DTO/UserDTO.h"
 
 UserDTO::UserDTO(const std::string& id, const std::string& name, const std::string& email,
-                 const std::string& password)
-    : _id(id), _name(name), _email(email), _password(password) {
+                 const std::string& hashedPassword)
+    : _id(id), _name(name), _email(email), _hashedPassword(hashedPassword) {
     UserDTO::ids.push_back(id);
 }
 
@@ -23,10 +23,9 @@ std::string UserDTO::getEmail() const {
 }
 
 std::string UserDTO::getPassword() const {
-    return _password;
+    return _hashedPassword;
 }
 
-// TODO: Change to use hashing
-bool UserDTO::authenticate(const std::string& inputPass) const {
-    return _password == inputPass;
+bool UserDTO::authenticate(const std::string& hashedInput) const {
+    return _hashedPassword == hashedInput;
 }
