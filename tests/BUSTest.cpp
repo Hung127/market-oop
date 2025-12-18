@@ -1,3 +1,5 @@
+#include <unordered_set>
+
 #include <gtest/gtest.h>
 
 #include "../include/BUS/BuyerBUS.h"
@@ -8,6 +10,7 @@
 #include "../include/DTO/ProductDTO.h"
 #include "../include/DTO/PurchaseHistoryDTO.h"
 #include "../include/DTO/SellerDTO.h"
+#include "../include/Utils/Utils.h"
 
 // Helper to create a seller
 static std::shared_ptr<SellerDTO> makeSeller(const std::string& id = "s_test",
@@ -119,4 +122,96 @@ TEST(BuyerBUSTest, CheckoutInsufficientBalance) {
 
     // cleanup
     EXPECT_TRUE(ProductDAO::remove("p_buy2"));
+}
+
+// Test password hashing & verification using PasswordUtils
+TEST(Security_PasswordUtils, HashAndVerify) {
+    using Utils::PasswordUtils;
+
+    const std::string plain = "super-secret-password-123!";
+
+    auto hashedPack = PasswordUtils::hash(plain);
+    ASSERT_TRUE(hashedPack.has_value()) << "Hash failed: " << hashedPack.error();
+    std::string stored = hashedPack.value();
+
+    // verify correct password
+    EXPECT_TRUE(PasswordUtils::verify(plain, stored));
+
+    // incorrect password fails
+    EXPECT_FALSE(PasswordUtils::verify("wrong-password", stored));
+
+    // hashing same password twice should produce different encodings (due to random salt)
+    auto hashedPack2 = PasswordUtils::hash(plain);
+    ASSERT_TRUE(hashedPack2.has_value());
+    std::string stored2 = hashedPack2.value();
+    EXPECT_NE(stored, stored2);
+    // but both verify successfully
+    EXPECT_TRUE(PasswordUtils::verify(plain, stored2));
+}
+
+// Test generateId uniqueness (basic)
+TEST(Utils_IdGenerator, GenerateUniqueIds) {
+    const int N = 1000;
+    std::unordered_set<std::string> seen;
+    seen.reserve(N * 2);
+
+    for (int i = 0; i < N; ++i) {
+        std::string id = Utils::generateId();
+        // Ensure non-empty and unique
+        ASSERT_FALSE(id.empty());
+        auto [it, inserted] = seen.emplace(std::move(id));
+        EXPECT_TRUE(inserted) << "Duplicate id generated at iteration " << i;
+    }
+
+    EXPECT_EQ(static_cast<int>(seen.size()), N);
+}
+
+// Test UserFactory creating both roles and fields correctness
+TEST(UserFactory_CreateUser, SellerAndBuyer) {
+    using namespace std::string_literals;
+
+    auto sellerPack = UserFactory::createUser(UserRole::SELLER, "s_test_id", "SellerName",
+                                              "s@example.com", "hashed_pw", 0.0);
+    ASSERT_TRUE(sellerPack.has_value());
+    std::shared_ptr<UserDTO> seller = sellerPack.value();
+    ASSERT_NE(seller, nullptr);
+    EXPECT_EQ(seller->getHashedPassword(), "hashed_pw");
+    EXPECT_EQ(seller->getRole(), "SELLER");
+
+    auto buyerPack = UserFactory::createUser(UserRole::BUYER, "b_test_id", "BuyerName",
+                                             "b@example.com", "hashed_pw", 50.0);
+    ASSERT_TRUE(buyerPack.has_value());
+    std::shared_ptr<UserDTO> buyer = buyerPack.value();
+    ASSERT_NE(buyer, nullptr);
+    EXPECT_EQ(buyer->getHashedPassword(), "hashed_pw");
+    EXPECT_EQ(buyer->getRole(), "BUYER");
+}
+
+// Integration test: register a user via UserBUS and login succeeds
+TEST(UserBUS_RegisterAndLogin, RegisterThenLogin) {
+    // Use unique values to avoid collision with other tests
+    std::string unique = Utils::generateId();
+    std::string email = "test+" + unique + "@example.com";
+    std::string name = "TUser_" + unique;
+    std::string password = "password-For-Test-!";
+
+    // Register user
+    auto regPack = UserBUS::registerUser(UserRole::BUYER, name, email, password, 20.0);
+    ASSERT_TRUE(regPack.has_value()) << "Register failed: " << regPack.error();
+    std::shared_ptr<UserDTO> created = regPack.value();
+    ASSERT_NE(created, nullptr);
+
+    // The returned user's stored hashed password should not equal plaintext
+    EXPECT_NE(created->getHashedPassword(), password);
+
+    // Try login with correct credentials
+    auto loginPack = UserBUS::login(email, password);
+    ASSERT_TRUE(loginPack.has_value()) << "Login failed: " << loginPack.error();
+    std::shared_ptr<UserDTO> logged = loginPack.value();
+    ASSERT_NE(logged, nullptr);
+    EXPECT_EQ(logged->getEmail(), email);
+
+    // Try login with wrong password
+    auto loginBad = UserBUS::login(email, "wrong-" + password);
+    EXPECT_FALSE(loginBad.has_value());
 }

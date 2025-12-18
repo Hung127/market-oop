@@ -1,9 +1,13 @@
 #include <algorithm>
+#include <atomic>
 #include <cctype>
 #include <chrono>
 #include <ctime>
 #include <expected>
 #include <functional>
+#include <iomanip>
+#include <random>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -107,6 +111,31 @@ bool PasswordUtils::verify(const std::string& plain, const std::string& encoded)
     }
     // crypto_pwhash_str_verify returns 0 on success
     return (crypto_pwhash_str_verify(encoded.c_str(), plain.c_str(), plain.size()) == 0);
+}
+
+static std::atomic<uint64_t> g_id_counter{0};
+
+std::string generateId() {
+    // 1) time in milliseconds since epoch
+    auto now_tp = std::chrono::system_clock::now().time_since_epoch();
+    uint64_t ms = static_cast<uint64_t>(
+        std::chrono::duration_cast<std::chrono::milliseconds>(now_tp).count());
+
+    // 2) a sequence counter (process-local, thread-safe)
+    uint64_t seq = ++g_id_counter;
+
+    // 3) a thread-local RNG for extra entropy between runs/processes
+    thread_local std::mt19937_64 rng(std::random_device{}());
+    uint64_t rnd = rng();
+
+    // Format as fixed-width hex segments for readability
+    std::ostringstream oss;
+    oss << std::hex << std::nouppercase << std::setw(12) << std::setfill('0')
+        << (ms & 0xFFFFFFFFFFFFULL) << '-'                                   // 12 hex digits
+        << std::setw(6) << std::setfill('0') << (seq & 0xFFFFFFULL) << '-'   // 6 hex digits
+        << std::setw(12) << std::setfill('0') << (rnd & 0xFFFFFFFFFFFFULL);  // 12 hex digits
+
+    return oss.str();
 }
 
 }  // namespace Utils

@@ -10,11 +10,6 @@ namespace Utils {
 // Return current date/time as "YYYY-MM-DD hh:mm:ss"
 std::string getCurrentDate();
 
-// NOTE: This is a placeholder implementation (uses std::hash).
-// It is NOT suitable for password storage in production — replace with a proper
-// password hashing function (e.g. libsodium / Argon2 / bcrypt / PBKDF2).
-std::string hashPassword(const std::string& password);
-
 /**
  * @brief Utility class chứa các thuật toán hỗ trợ tìm kiếm
  *
@@ -52,6 +47,9 @@ class PasswordUtils {
     inline static const unsigned long long OPS_LIMIT = crypto_pwhash_OPSLIMIT_MODERATE;
     inline static const size_t MEM_LIMIT = crypto_pwhash_MEMLIMIT_MODERATE;
 };
+
+// TODO: rewrite this function
+std::string generateId();
 
 }  // namespace Utils
 

@@ -11,6 +11,9 @@ if(NOT EXISTS "${PROJECT_INCLUDE_DIR}")
   message(FATAL_ERROR "Include dir does not exist: ${PROJECT_INCLUDE_DIR}")
 endif()
 
+# Option: control whether to require/use libsodium
+option(USE_SODIUM "Enable libsodium support (password hashing with crypto_pwhash)" ON)
+
 # Collect sources (exclude main.cpp from core)
 file(GLOB_RECURSE CORE_SRC
     "${CMAKE_SOURCE_DIR}/src/*.cpp"
@@ -18,7 +21,8 @@ file(GLOB_RECURSE CORE_SRC
     "${CMAKE_SOURCE_DIR}/src/DAO/*.cpp"
     "${CMAKE_SOURCE_DIR}/src/BUS/*.cpp"
     "${CMAKE_SOURCE_DIR}/src/UI/*.cpp"
-    "${CMAKE_SOURCE_DIR}/src/lib/*.cpp"
+    "${CMAKE_SOURCE_DIR}/src/Utils/*.cpp"
+    "${CMAKE_SOURCE_DIR}/src/Utils/BUS/*.cpp"
 )
 
 # If your main is at project root (CMakeLists location) use this path:
@@ -37,14 +41,47 @@ message(STATUS "Main source: ${MAIN_SRC}")
 # Core library
 add_library(core STATIC ${CORE_SRC})
 target_include_directories(core PUBLIC "${PROJECT_INCLUDE_DIR}")
+
+# Recommended: enable warnings for core (you can adjust per-compiler)
 target_compile_options(core PRIVATE -Wall -Wextra -Wpedantic)
+
+# Find and link libsodium if requested
+if(USE_SODIUM)
+  # Try pkg-config first (if available), then fallback to find_library
+  find_package(PkgConfig QUIET)
+  if(PKG_CONFIG_FOUND)
+    pkg_check_modules(SODIUM_PKG libsodium)
+  endif()
+
+  if(DEFINED SODIUM_PKG_LIBRARIES AND NOT "${SODIUM_PKG_LIBRARIES}" STREQUAL "")
+    message(STATUS "libsodium found via pkg-config")
+    target_include_directories(core PRIVATE ${SODIUM_PKG_INCLUDE_DIRS})
+    # Use PUBLIC so consumers of core (app/tests) inherit the link dependency
+    target_link_libraries(core PUBLIC ${SODIUM_PKG_LIBRARIES})
+    # Add any extra flags provided by pkg-config (if any)
+    if(DEFINED SODIUM_PKG_CFLAGS_OTHER)
+      target_compile_options(core PRIVATE ${SODIUM_PKG_CFLAGS_OTHER})
+    endif()
+  else()
+    find_library(SODIUM_LIB sodium)
+    if(SODIUM_LIB)
+      message(STATUS "libsodium found: ${SODIUM_LIB}")
+      # Link as PUBLIC so executables/tests linking core will also link sodium
+      target_link_libraries(core PUBLIC ${SODIUM_LIB})
+    else()
+      message(FATAL_ERROR "libsodium not found. Install libsodium-dev (Linux) / libsodium (Homebrew) or set -DUSE_SODIUM=OFF")
+    endif()
+  endif()
+else()
+  message(STATUS "USE_SODIUM=OFF -- libsodium support disabled")
+endif()
 
 # Executable: use main.cpp and link core
 add_executable(app ${MAIN_SRC})
 target_link_libraries(app PRIVATE core)
 target_include_directories(app PRIVATE "${PROJECT_INCLUDE_DIR}")
 
-# GoogleTest
+# GoogleTest (FetchContent)
 include(FetchContent)
 FetchContent_Declare(
   googletest
