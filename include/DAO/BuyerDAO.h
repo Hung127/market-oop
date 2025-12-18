@@ -14,7 +14,7 @@ class BuyerDAO {
     static bool save(const BuyerDTO& buyer);
 
     // Lấy dữ liệu (Cần thiết để nạp user lên)
-    static std::unique_ptr<BuyerDTO> getBuyerById(const std::string& id);
+    static std::shared_ptr<BuyerDTO> getBuyerById(const std::string& id);
 };
 
 #endif

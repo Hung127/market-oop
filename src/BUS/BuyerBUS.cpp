@@ -11,7 +11,7 @@
 #include "../../include/DTO/OrderItemDTO.h"
 #include "../../include/Utils/Utils.h"
 
-std::expected<std::unique_ptr<BuyerDTO>, std::string>
+std::expected<std::shared_ptr<BuyerDTO>, std::string>
 BuyerBUS::create(const std::string& id, const std::string& name, const std::string& email,
                  const std::string& password, double balance) {
     // check and add id
@@ -21,7 +21,7 @@ BuyerBUS::create(const std::string& id, const std::string& name, const std::stri
         }
     }
 
-    return std::make_unique<BuyerDTO>(BuyerDTO(id, name, email, password, balance));
+    return std::make_shared<BuyerDTO>(BuyerDTO(id, name, email, password, balance));
 }
 
 // ========== BALANCE LOGIC ==========

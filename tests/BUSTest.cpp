@@ -69,7 +69,7 @@ TEST(BuyerBUSTest, CheckoutSuccessAndHistory) {
     // create buyer with enough balance
     auto buyerPack = BuyerBUS::create("b_test1", "TestBuyer", "tb@example.com", "pw", 100.0);
     ASSERT_TRUE(buyerPack.has_value());
-    std::unique_ptr<BuyerDTO> buyer = std::move(buyerPack.value());
+    std::shared_ptr<BuyerDTO> buyer = buyerPack.value();
 
     // add to cart and checkout
     auto a1 = BuyerBUS::addToCart(*buyer, prod_ptr, 2);
@@ -103,7 +103,7 @@ TEST(BuyerBUSTest, CheckoutInsufficientBalance) {
 
     auto buyerPack = BuyerBUS::create("b_test2", "PoorBuyer", "poor@example.com", "pw", 10.0);
     ASSERT_TRUE(buyerPack.has_value());
-    std::unique_ptr<BuyerDTO> buyer = std::move(buyerPack.value());
+    std::shared_ptr<BuyerDTO> buyer = buyerPack.value();
 
     auto addRes = BuyerBUS::addToCart(*buyer, prod_ptr, 1);
     ASSERT_TRUE(addRes.has_value());

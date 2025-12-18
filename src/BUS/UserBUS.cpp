@@ -1,23 +1,50 @@
 #include "../../include/BUS/UserBUS.h"
 
+#include <format>
+#include <memory>
 #include <string>
 
 #include "../../include/DAO/UserDAO.h"
+#include "../../include/DTO/UserDTO.h"
 #include "../../include/UserFactory.h"
+#include "../../include/Utils/Utils.h"
 
-std::expected<std::unique_ptr<UserDTO>, std::string> UserBUS::login(const std::string& email,
+std::expected<std::shared_ptr<UserDTO>, std::string> UserBUS::login(const std::string& email,
                                                                     const std::string& password) {
-    // do nothing
-    return UserDAO::login(email, password);
+    using Utils::PasswordUtils;  // for short statements
+
+    auto userPack = UserDAO::getUserByEmail(email);
+    if (!userPack.has_value()) {
+        return std::unexpected("There is no user with that email");
+    }
+
+    std::shared_ptr<UserDTO> user = userPack.value();
+    if (!user) {
+        return std::unexpected("Invalid user with that email");
+    }
+
+    auto hashedPassword = user->getHashedPassword();
+    // success
+    if (PasswordUtils::verify(password, hashedPassword)) {
+        return user;
+    }
+
+    return std::unexpected("Invalid email or password");
 }
 
-std::expected<std::unique_ptr<UserDTO>, std::string>
+std::expected<std::shared_ptr<UserDTO>, std::string>
 UserBUS::registerUser(UserRole role, const std::string& name, const std::string& email,
                       const std::string& password, double initialBalance) {
-    if (password.length() < 6) {
-        return std::unexpected("Mat khau phai dai hon 6 ky tu!");
+    using Utils::PasswordUtils;
+
+    if (password.length() < PasswordUtils::MIN_PASSWORD_LENGTH) {
+        std::string error = std::format("The password need to have at least {} characters length",
+                                        PasswordUtils::MIN_PASSWORD_LENGTH);
+        return std::unexpected(error);
     }
 
     std::string newId = "0000";  // Utils::generateId(); TODO: Complete this function
-    return UserFactory::createUser(role, newId, name, email, password, initialBalance);
+
+    std::string hashedPassword = Utils::hashPassword(password);
+    return UserFactory::createUser(role, newId, name, email, hashedPassword, initialBalance);
 }

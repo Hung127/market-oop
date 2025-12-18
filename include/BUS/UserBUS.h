@@ -11,11 +11,11 @@ class UserDTO;
 
 class UserBUS {
    public:
-    // Trả về unique_ptr<UserDTO> hoặc error string
-    static std::expected<std::unique_ptr<UserDTO>, std::string> login(const std::string& email,
+    // Trả về shared_ptr<UserDTO> hoặc error string
+    static std::expected<std::shared_ptr<UserDTO>, std::string> login(const std::string& email,
                                                                       const std::string& password);
 
-    static std::expected<std::unique_ptr<UserDTO>, std::string>
+    static std::expected<std::shared_ptr<UserDTO>, std::string>
     registerUser(UserRole role, const std::string& name, const std::string& email,
                  const std::string& password, double initialBalance = 0);
 };

@@ -2,6 +2,7 @@
 #include <cctype>
 #include <chrono>
 #include <ctime>
+#include <expected>
 #include <functional>
 #include <string>
 #include <vector>
@@ -77,4 +78,35 @@ double SearchHelper::similarityScore(const std::string& a, const std::string& b)
     int maxLen = static_cast<int>(std::max(a.size(), b.size()));
     return 1.0 - (static_cast<double>(distance) / static_cast<double>(maxLen));
 }
+
+bool PasswordUtils::ensureInit() {
+    static bool initialized = (sodium_init() >= 0);
+    return initialized;
+}
+
+std::expected<std::string, std::string> PasswordUtils::hash(const std::string& plain) {
+    if (!ensureInit()) {
+        return std::unexpected("libsodium initialization failed");
+    }
+
+    char out[crypto_pwhash_STRBYTES];  // use char[] because the crypto_pwhash_str only accepts
+                                       // char[]
+    if (crypto_pwhash_str(out, plain.c_str(), plain.size(), OPS_LIMIT, MEM_LIMIT) != 0) {
+        return std::unexpected("crypto_pwhash_str failed (out of memory?)");
+    }
+
+    return std::string(out);
+}
+
+bool PasswordUtils::verify(const std::string& plain, const std::string& encoded) {
+    if (encoded.empty()) {
+        return false;
+    }
+    if (!ensureInit()) {
+        return false;
+    }
+    // crypto_pwhash_str_verify returns 0 on success
+    return (crypto_pwhash_str_verify(encoded.c_str(), plain.c_str(), plain.size()) == 0);
+}
+
 }  // namespace Utils

@@ -21,10 +21,10 @@ class UserDTO {
 
     const static std::vector<std::string>& getIDS();
 
-    std::string getId() const;
-    std::string getName() const;
-    std::string getEmail() const;
-    std::string getPassword() const;
+    const std::string& getId() const;
+    const std::string& getName() const;
+    const std::string& getEmail() const;
+    const std::string& getHashedPassword() const;
 
     virtual std::string getRole() const = 0;
 

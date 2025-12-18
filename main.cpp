@@ -48,7 +48,7 @@ int main() {
         cout << "[ERROR] BuyerBUS::create failed: " << buyerPack.error() << endl;
         return 1;
     }
-    std::unique_ptr<BuyerDTO> buyer = std::move(buyerPack.value());
+    std::shared_ptr<BuyerDTO> buyer = buyerPack.value();
     cout << "[INFO] Buyer created: " << buyer->getName() << " Balance=" << buyer->getBalance()
          << endl;
     //

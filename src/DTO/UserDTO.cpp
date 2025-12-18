@@ -6,11 +6,11 @@ UserDTO::UserDTO(const std::string& id, const std::string& name, const std::stri
     UserDTO::ids.push_back(id);
 }
 
-std::string UserDTO::getId() const {
+const std::string& UserDTO::getId() const {
     return _id;
 }
 
-std::string UserDTO::getName() const {
+const std::string& UserDTO::getName() const {
     return _name;
 }
 
@@ -18,14 +18,10 @@ const std::vector<std::string>& UserDTO::getIDS() {
     return UserDTO::ids;
 }
 
-std::string UserDTO::getEmail() const {
+const std::string& UserDTO::getEmail() const {
     return _email;
 }
 
-std::string UserDTO::getPassword() const {
+const std::string& UserDTO::getHashedPassword() const {
     return _hashedPassword;
-}
-
-bool UserDTO::authenticate(const std::string& hashedInput) const {
-    return _hashedPassword == hashedInput;
 }

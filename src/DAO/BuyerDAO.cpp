@@ -28,13 +28,11 @@ bool BuyerDAO::save(const BuyerDTO& buyer) {
     return true;  // Luôn thành công vì lưu trên RAM không bao giờ lỗi
 }
 
-std::unique_ptr<BuyerDTO> BuyerDAO::getBuyerById(const std::string& id) {
+std::shared_ptr<BuyerDTO> BuyerDAO::getBuyerById(const std::string& id) {
     // 1. Duyệt qua kho dữ liệu giả lập
     for (const auto& buyer : mockDatabase) {
         if (buyer.getId() == id) {
-            // 2. Nếu tìm thấy -> Tạo bản sao và trả về
-            // Chúng ta dùng make_unique để tạo ra pointer mới tách biệt
-            return std::make_unique<BuyerDTO>(buyer);
+            return std::make_shared<BuyerDTO>(buyer);
         }
     }
 
