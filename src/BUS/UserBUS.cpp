@@ -67,3 +67,10 @@ UserBUS::registerUser(UserRole role, const std::string& name, const std::string&
 
     return newUser;
 }
+
+void UserBUS::logout(std::shared_ptr<UserDTO>& user) {
+    if (!user) {
+        return;
+    }
+    user.reset();
+}

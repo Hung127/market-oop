@@ -1,31 +1,55 @@
-name: Build & Compile Check (CMake)
+name: Build & Test (CMake)
 
 on:
   push:
-    branches: [main, master]
+    branches: [ main, master ]
   pull_request:
-    branches: [main, master]
+    branches: [ main, master ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      BUILD_DIR: build
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Install GCC (g++-14)
-      run: |
-        sudo apt update
-        sudo apt install -y g++-14
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y
+          # Install build tools, cmake and libsodium
+          sudo apt-get install -y build-essential cmake pkg-config libsodium-dev
+          # Install a modern g++ if you explicitly want g++-14 (may already exist on runner)
+          # If g++-14 isn't available on the runner, this will fail — remove or change if needed.
+          sudo apt-get install -y g++-14 gcc-14 || true
+          # Confirm versions
+          echo "g++ version: $(g++ --version | head -n1)"
+          echo "cmake version: $(cmake --version | head -n1)"
+          echo "libsodium: $(pkg-config --modversion libsodium 2>/dev/null || echo 'not found')"
 
-    - name: Configure CMake
-      run: |
-        mkdir build
-        cd build
-        cmake .. -DCMAKE_CXX_COMPILER=g++-14
+      - name: Configure (CMake)
+        run: |
+          mkdir -p "${BUILD_DIR}"
+          cd "${BUILD_DIR}"
+          # If you installed g++-14 and want to use it, set CMAKE_C/CXX_COMPILER.
+          # If g++-14 isn't present on the runner, remove the -DCMAKE_C[XX]_COMPILER flags.
+          cmake -S .. -B . \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DBUILD_TESTS=ON \
+            -DUSE_SODIUM=ON \
+            -DCMAKE_C_COMPILER=gcc-14 \
+            -DCMAKE_CXX_COMPILER=g++-14
 
-    - name: Build project
-      run: |
-        cd build
-        cmake --build .
+      - name: Build
+        run: |
+          cd "${BUILD_DIR}"
+          cmake --build . -- -j$(nproc)
+
+      - name: Run unit tests
+        run: |
+          cd "${BUILD_DIR}"
+          # Run tests and show output on failure. ctest returns non-zero if any test fails,
+          # which will make the job fail as desired.
+          ctest --output-on-failure

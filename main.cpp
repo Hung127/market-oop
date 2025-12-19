@@ -16,7 +16,6 @@ int main() {
     using std::endl;
 
     cout << "=== MARKET APP SMOKE TEST ===" << endl;
-
     // 1) Tạo seller và SellerBUS
     auto seller = std::make_shared<SellerDTO>("s1", "Alice", "alice@example.com", "alicepwd");
     auto sellerBusPack = SellerBUS::create(seller);

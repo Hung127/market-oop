@@ -16,8 +16,11 @@ class UserBUS {
                                                                       const std::string& password);
 
     static std::expected<std::shared_ptr<UserDTO>, std::string>
+
     registerUser(UserRole role, const std::string& name, const std::string& email,
                  const std::string& password, double initialBalance = 0);
+
+    static void logout(std::shared_ptr<UserDTO>& user);
 };
 
 #endif  // USERBUS_H
