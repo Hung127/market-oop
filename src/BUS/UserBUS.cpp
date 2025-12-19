@@ -43,7 +43,6 @@ UserBUS::registerUser(UserRole role, const std::string& name, const std::string&
         return std::unexpected(error);
     }
 
-    //  TODO: Complete this function using Utils::generateID()
     std::string newId = Utils::generateId();
 
     auto hashedPasswordPack = PasswordUtils::hash(password);
@@ -51,15 +50,20 @@ UserBUS::registerUser(UserRole role, const std::string& name, const std::string&
         return std::unexpected(hashedPasswordPack.error());
     }
     std::string hashedPassword = hashedPasswordPack.value();
+
+    // create new user
     auto newUserPack =
         UserFactory::createUser(role, newId, name, email, hashedPassword, initialBalance);
     if (!newUserPack.has_value()) {
         return std::unexpected(newUserPack.error());
     }
     auto newUser = newUserPack.value();
+
+    // add user to database
     auto addPack = UserDAO::addUser(newUser);
     if (!addPack.has_value()) {
         return std::unexpected(addPack.error());
     }
+
     return newUser;
 }

@@ -12,12 +12,6 @@
 
 class BuyerBUS : public UserBUS {
    public:
-    // Logic tạo Buyer (Validation -> gọi DAO save -> trả về Buyer)
-    // Thay thế cho Buyer::create cũ
-    static std::expected<std::shared_ptr<BuyerDTO>, std::string>
-    create(const std::string& id, const std::string& name, const std::string& email,
-           const std::string& password, double balance = 0.0);
-
     // ========== BALANCE LOGIC ==========
     // Thay thế cho Buyer::addBalance
     static void addBalance(BuyerDTO& buyer, double amount);

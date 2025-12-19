@@ -36,3 +36,21 @@ std::expected<void, std::string> UserDAO::addUser(const std::shared_ptr<UserDTO>
 
     return {};
 }
+
+bool UserDAO::existById(const std::string& id) {
+    for (const std::shared_ptr<UserDTO>& user : UserDAO::_users) {
+        if (user->getId() == id) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool UserDAO::existByEmail(const std::string& email) {
+    for (const std::shared_ptr<UserDTO>& user : UserDAO::_users) {
+        if (user->getEmail() == email) {
+            return true;
+        }
+    }
+    return false;
+}

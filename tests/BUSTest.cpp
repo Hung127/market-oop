@@ -1,3 +1,4 @@
+#include <memory>
 #include <unordered_set>
 
 #include <gtest/gtest.h>
@@ -70,9 +71,10 @@ TEST(BuyerBUSTest, CheckoutSuccessAndHistory) {
     ASSERT_TRUE(ProductDAO::insert(prod_ptr));
 
     // create buyer with enough balance
-    auto buyerPack = BuyerBUS::create("b_test1", "TestBuyer", "tb@example.com", "pw", 100.0);
+    auto buyerPack = UserBUS::registerUser(UserRole::BUYER, "TestBuyer", "tb@example.com",
+                                           "pwdjsfaklpjf", 100.0);
+    std::shared_ptr<BuyerDTO> buyer = std::dynamic_pointer_cast<BuyerDTO>(buyerPack.value());
     ASSERT_TRUE(buyerPack.has_value());
-    std::shared_ptr<BuyerDTO> buyer = buyerPack.value();
 
     // add to cart and checkout
     auto a1 = BuyerBUS::addToCart(*buyer, prod_ptr, 2);
@@ -104,9 +106,10 @@ TEST(BuyerBUSTest, CheckoutInsufficientBalance) {
     auto prod_ptr = std::make_shared<ProductDTO>("p_buy2", "Expensive", 50.0, 3, seller);
     ASSERT_TRUE(ProductDAO::insert(*prod_ptr));
 
-    auto buyerPack = BuyerBUS::create("b_test2", "PoorBuyer", "poor@example.com", "pw", 10.0);
+    auto buyerPack = UserBUS::registerUser(UserRole::BUYER, "PoorBuyer", "poor@example.com",
+                                           "pwsdajkflasdjklfjl", 10.0);
     ASSERT_TRUE(buyerPack.has_value());
-    std::shared_ptr<BuyerDTO> buyer = buyerPack.value();
+    std::shared_ptr<BuyerDTO> buyer = std::dynamic_pointer_cast<BuyerDTO>(buyerPack.value());
 
     auto addRes = BuyerBUS::addToCart(*buyer, prod_ptr, 1);
     ASSERT_TRUE(addRes.has_value());
