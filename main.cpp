@@ -3,6 +3,7 @@
 #include <string>
 
 #include "include/BUS/BuyerBUS.h"
+#include "include/BUS/ProductBUS.h"
 #include "include/BUS/SellerBUS.h"
 #include "include/DAO/ProductDAO.h"
 #include "include/DTO/BuyerDTO.h"
@@ -10,6 +11,9 @@
 #include "include/DTO/PurchaseHistoryDTO.h"
 #include "include/DTO/SellerDTO.h"
 #include "include/UserFactory.h"
+#include "include/Utils/Utils.h"
+
+namespace fs = std::filesystem;
 
 int main() {
     using std::cout;
@@ -91,5 +95,62 @@ int main() {
     buyer->getPurchasesHistory().printHistory();
 
     cout << "=== SMOKE TEST END ===" << endl;
+
+    cout << "===== TEST QUY TRINH ANH NHI PHAN =====" << endl;
+
+    // 1. Khai báo đường dẫn
+    std::string testImagePath = "cpu.jpg";           // Đặt file này ở thư mục gốc Project
+    std::string databasePath = "data/database.bin";  // File này sẽ nằm trong folder data
+
+    // --- KIỂM TRA FILE ẢNH GỐC ---
+    if (!fs::exists(testImagePath)) {
+        cout << "[LOI] Khong tim thay file " << testImagePath << " o thu muc goc!" << endl;
+        cout << "Hay copy 1 tam anh vao folder Project va doi ten thanh test_image.jpg" << endl;
+        return 1;
+    }
+
+    // 2. GIAI ĐOẠN LƯU: Đọc từ đường dẫn -> Chuyển sang ảnh luôn (Binary) -> Lưu .bin
+    cout << "\n[BUOC 1] Dang nap anh va dong goi vao file .bin..." << endl;
+    ProductBUS bus;
+    std::vector<std::string> paths = {testImagePath};
+
+    // Hàm này sẽ gọi ImageHelper để đọc byte và DAO để ghi file .bin
+    bus.processAndSaveProduct("Mo ta san pham mau", paths);
+    cout << "-> Da tao file: " << databasePath << endl;
+
+    // 3. GIAI ĐOẠN XÓA: Xóa ảnh gốc để chứng minh "đọc sang ảnh luôn"
+    cout << "\n[BUOC 2] Dang xoa anh goc de test tinh bao toan..." << endl;
+    try {
+        if (fs::remove(testImagePath)) {
+            cout << "-> DA XOA THANH CONG: " << testImagePath << endl;
+        }
+    } catch (const fs::filesystem_error& e) {
+        cout << "[LOI] Khong the xoa file: " << e.what() << endl;
+    }
+
+    // 4. GIAI ĐOẠN ĐỌC: Sài dữ liệu từ file .bin (Lúc nộp bài chỉ cần bước này)
+    cout << "\n[BUOC 3] Dang khoi phuc anh tu file .bin (Load database)..." << endl;
+    ProductDAO dao;
+    ProductExtraInfoDTO loadedDto;
+
+    // DAO sẽ giải mã file .bin nạp lại vào DTO
+    dao.loadFromFile(databasePath, loadedDto);
+
+    // 5. KIỂM TRA KẾT QUẢ
+    cout << "\n===== KET QUA KIEM TRA =====" << endl;
+    cout << "Mo ta san pham: " << loadedDto.getDescription() << endl;
+    cout << "So luong anh trong database: " << loadedDto.getImageCount() << endl;
+
+    if (loadedDto.getImageCount() > 0) {
+        size_t imageSize = loadedDto.getImageAt(0).size();
+        cout << "Kich thuoc anh thu nhat: " << imageSize << " bytes" << endl;
+        cout << "=> KET LUAN: Anh van ton tai trong file .bin du anh goc da bi xoa!" << endl;
+        cout << "=> Backend da san sang gui du lieu cho Qt hien thi." << endl;
+    } else {
+        cout << "=> THAT BAI: Khong tim thay du lieu anh trong file .bin." << endl;
+    }
+
+    cout << "========================================" << endl;
+
     return 0;
 }
