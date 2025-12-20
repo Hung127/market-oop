@@ -49,19 +49,7 @@ class ProductBUS {
      */
     static void display(const ProductDTO& p);
 
-    void processAndSaveProduct(const std::string& desc, const std::vector<std::string>& paths) {
-        ProductExtraInfoDTO dto(desc);
-
-        for (const auto& path : paths) {
-            if (Utils::ImageHelper::isValidImage(path)) {
-                auto bytes = Utils::ImageHelper::readImageToBytes(path);
-                dto.addImageData(bytes);
-            }
-        }
-
-        // Lưu xuống file nhị phân để nộp bài
-        _dao.saveToFile("database.bin", dto);
-    }
+    void processAndSaveProduct(const std::string& desc, const std::vector<std::string>& paths);
 };
 
 #endif  // BUS_PRODUCT_BUS_H
