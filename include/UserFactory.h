@@ -11,9 +11,9 @@ class UserDTO;
 
 class UserFactory {
    public:
-    static std::expected<std::unique_ptr<UserDTO>, std::string>
+    static std::expected<std::shared_ptr<UserDTO>, std::string>
     createUser(UserRole role, const std::string& id, const std::string& name,
-               const std::string& email, const std::string& password, double balance = 0.0);
+               const std::string& email, const std::string& hashedPassword, double balance = 0.0);
 };
 
 #endif  // USER_FACTORY_H

@@ -9,13 +9,13 @@
 #include "include/DTO/ProductDTO.h"
 #include "include/DTO/PurchaseHistoryDTO.h"
 #include "include/DTO/SellerDTO.h"
+#include "include/UserFactory.h"
 
 int main() {
     using std::cout;
     using std::endl;
 
     cout << "=== MARKET APP SMOKE TEST ===" << endl;
-
     // 1) Tạo seller và SellerBUS
     auto seller = std::make_shared<SellerDTO>("s1", "Alice", "alice@example.com", "alicepwd");
     auto sellerBusPack = SellerBUS::create(seller);
@@ -43,12 +43,13 @@ int main() {
     cout << "[INFO] Product inserted into ProductDAO mock DB" << endl;
     //
     // 4) Tạo buyer qua BuyerBUS
-    auto buyerPack = BuyerBUS::create("b1", "Bob", "bob@example.com", "bobpwd", 100.0);
+    auto buyerPack =
+        UserBUS::registerUser(UserRole::BUYER, "Bob", "bob@example.com", "bobpwd", 100.0);
     if (!buyerPack.has_value()) {
         cout << "[ERROR] BuyerBUS::create failed: " << buyerPack.error() << endl;
         return 1;
     }
-    std::unique_ptr<BuyerDTO> buyer = std::move(buyerPack.value());
+    std::shared_ptr<BuyerDTO> buyer = std::dynamic_pointer_cast<BuyerDTO>(buyerPack.value());
     cout << "[INFO] Buyer created: " << buyer->getName() << " Balance=" << buyer->getBalance()
          << endl;
     //
@@ -86,8 +87,8 @@ int main() {
     if (prodAfterPack.has_value()) {
         cout << "Product stock after checkout: " << prodAfterPack.value()->getStock() << endl;
     }
-    // cout << "Purchase history:" << endl;
-    // buyer->getPurchasesHistory().printHistory();
+    cout << "Purchase history:" << endl;
+    buyer->getPurchasesHistory().printHistory();
 
     cout << "=== SMOKE TEST END ===" << endl;
     return 0;

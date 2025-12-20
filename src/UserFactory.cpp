@@ -7,15 +7,16 @@
 #include "../include/DTO/OrderItemDTO.h"
 #include "../include/DTO/SellerDTO.h"
 
-std::expected<std::unique_ptr<UserDTO>, std::string>
+std::expected<std::shared_ptr<UserDTO>, std::string>
 UserFactory::createUser(UserRole role, const std::string& id, const std::string& name,
-                        const std::string& email, const std::string& password, double balance) {
+                        const std::string& email, const std::string& hashedPassword,
+                        double balance) {
     switch (role) {
         case UserRole::SELLER:
-            return std::make_unique<SellerDTO>(SellerDTO(id, name, email, password));
+            return std::make_shared<SellerDTO>(SellerDTO(id, name, email, hashedPassword));
 
         case UserRole::BUYER:
-            return std::make_unique<BuyerDTO>(BuyerDTO(id, name, email, password, balance));
+            return std::make_shared<BuyerDTO>(BuyerDTO(id, name, email, hashedPassword, balance));
 
         default:
             return std::unexpected("Unknown user role");

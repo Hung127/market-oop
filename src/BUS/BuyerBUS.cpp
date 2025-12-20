@@ -11,21 +11,7 @@
 #include "../../include/DTO/OrderItemDTO.h"
 #include "../../include/Utils/Utils.h"
 
-std::expected<std::unique_ptr<BuyerDTO>, std::string>
-BuyerBUS::create(const std::string& id, const std::string& name, const std::string& email,
-                 const std::string& password, double balance) {
-    // check and add id
-    for (const std::string& usedId : UserDTO::getIDS()) {
-        if (usedId == id) {
-            return std::unexpected("User id is already used");
-        }
-    }
-
-    return std::make_unique<BuyerDTO>(BuyerDTO(id, name, email, password, balance));
-}
-
 // ========== BALANCE LOGIC ==========
-// Thay thế cho Buyer::addBalance
 void BuyerBUS::addBalance(BuyerDTO& buyer, double amount) {
     if (amount > 0) {
         // DTO chỉ chứa dữ liệu, ta dùng getter/setter

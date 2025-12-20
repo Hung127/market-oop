@@ -9,26 +9,21 @@ class UserDTO {
     std::string _id;
     std::string _name;
     std::string _email;
-    std::string _password;
-    inline static std::vector<std::string> ids;
+    std::string _hashedPassword;
 
    public:
     virtual ~UserDTO() = default;
 
    public:
     UserDTO(const std::string& id, const std::string& name, const std::string& email,
-            const std::string& password);
+            const std::string& hashedPassword);
 
-    const static std::vector<std::string>& getIDS();
-
-    std::string getId() const;
-    std::string getName() const;
-    std::string getEmail() const;
-    std::string getPassword() const;
+    const std::string& getId() const;
+    const std::string& getName() const;
+    const std::string& getEmail() const;
+    const std::string& getHashedPassword() const;
 
     virtual std::string getRole() const = 0;
-
-    bool authenticate(const std::string& inputPass) const;
 };
 
 #endif  // USERDTO_H
