@@ -35,24 +35,30 @@ int main(int argc, char *argv[])
     allProductsModel.addProduct({"Quilted Satin Jacket", 660, 0, 0, 4.5, 55, "qrc:/images/jacket.png"});
 
     QQmlApplicationEngine engine;
-    
+
     // Set context properties before loading QML
     engine.rootContext()->setContextProperty("flashSaleModel", &flashSaleModel);
     engine.rootContext()->setContextProperty("bestSellingModel", &bestSellingModel);
     engine.rootContext()->setContextProperty("allProductsModel", &allProductsModel);
 
-    const QUrl url(u"qrc:/qml/Main.qml"_qs);
+    // Đường dẫn QML với RESOURCE_PREFIX /
+    const QUrl url(u"qrc:/ExclusiveEcommerce/Main.qml"_qs);
+
     QObject::connect(
         &engine, &QQmlApplicationEngine::objectCreated,
         &app, [url](QObject *obj, const QUrl &objUrl) {
-            if (!obj && url == objUrl)
+            if (!obj && url == objUrl) {
+                qDebug() << "Failed to load QML from:" << url;
                 QCoreApplication::exit(-1);
+            }
         }, Qt::QueuedConnection);
 
     engine.load(url);
-    
-    if (engine.rootObjects().isEmpty())
+
+    if (engine.rootObjects().isEmpty()) {
+        qDebug() << "No root objects loaded!";
         return -1;
-    
+    }
+
     return app.exec();
 }

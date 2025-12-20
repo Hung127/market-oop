@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import QtGraphicalEffects 1.15
 
 Rectangle {
     id: card
@@ -310,6 +311,3 @@ Rectangle {
         color: "#10000000"
     }
 }
-
-// Import for DropShadow effect
-import QtGraphicalEffects 1.15

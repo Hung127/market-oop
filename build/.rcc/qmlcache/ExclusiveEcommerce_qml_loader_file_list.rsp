@@ -2,8 +2,6 @@
 C:/Users/Admin/Documents/OOP_PROJ/build/.qt/rcc/qmake_ExclusiveEcommerce.qrc
 --resource
 C:/Users/Admin/Documents/OOP_PROJ/build/.qt/rcc/ExclusiveEcommerce_raw_qml_0.qrc
---resource
-C:/Users/Admin/Documents/OOP_PROJ/build/.qt/rcc/ExclusiveEcommerce_raw_res_0.qrc
 /ExclusiveEcommerce/qml/Main.qml
 /ExclusiveEcommerce/qml/HeaderBar.qml
 /ExclusiveEcommerce/qml/FooterBar.qml

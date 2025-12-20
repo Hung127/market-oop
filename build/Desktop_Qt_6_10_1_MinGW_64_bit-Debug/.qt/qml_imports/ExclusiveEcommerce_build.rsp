@@ -1,0 +1,14 @@
+-rootPath
+C:/Users/Admin/Documents/OOP_PROJ
+-cmake-output
+-output-file
+C:/Users/Admin/Documents/OOP_PROJ/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/.qt/qml_imports/ExclusiveEcommerce_build.cmake
+-importPath
+C:/Users/Admin/Documents/OOP_PROJ/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/ExclusiveEcommerce
+-importPath
+C:/Users/Admin/Documents/OOP_PROJ/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug
+-importPath
+C:/Qt/6.10.1/mingw_64/qml
+-qrcFiles
+C:/Users/Admin/Documents/OOP_PROJ/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/.qt/rcc/qmake_ExclusiveEcommerce.qrc
+C:/Users/Admin/Documents/OOP_PROJ/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/.qt/rcc/ExclusiveEcommerce_raw_qml_0.qrc

@@ -1,0 +1,204 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "ExclusiveEcommerce",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "ExclusiveEcommerce::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExclusiveEcommerce-Debug-f711411bcf427321c772.json",
+					"name" : "ExclusiveEcommerce",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExclusiveEcommerce_autogen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExclusiveEcommerce_autogen-Debug-c467998082e66430a0a6.json",
+					"name" : "ExclusiveEcommerce_autogen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExclusiveEcommerce_autogen_timestamp_deps::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExclusiveEcommerce_autogen_timestamp_deps-Debug-cbfb205572af3baf7c1b.json",
+					"name" : "ExclusiveEcommerce_autogen_timestamp_deps",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExclusiveEcommerce_copy_qml::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExclusiveEcommerce_copy_qml-Debug-1d12a19d2ef578320762.json",
+					"name" : "ExclusiveEcommerce_copy_qml",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExclusiveEcommerce_copy_res::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExclusiveEcommerce_copy_res-Debug-bc7dc162c204ec7aedf1.json",
+					"name" : "ExclusiveEcommerce_copy_res",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExclusiveEcommerce_qmlimportscan::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExclusiveEcommerce_qmlimportscan-Debug-c32cee06a110f69c4f1f.json",
+					"name" : "ExclusiveEcommerce_qmlimportscan",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExclusiveEcommerce_qmllint::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExclusiveEcommerce_qmllint-Debug-b52e84fbe3c94729c6e1.json",
+					"name" : "ExclusiveEcommerce_qmllint",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExclusiveEcommerce_qmllint_json::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExclusiveEcommerce_qmllint_json-Debug-45701c58ae48c3809936.json",
+					"name" : "ExclusiveEcommerce_qmllint_json",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExclusiveEcommerce_qmllint_module::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExclusiveEcommerce_qmllint_module-Debug-8bec4e952b0e3f47b82c.json",
+					"name" : "ExclusiveEcommerce_qmllint_module",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExclusiveEcommerce_qmltyperegistration::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExclusiveEcommerce_qmltyperegistration-Debug-39d5de9e734c97bed030.json",
+					"name" : "ExclusiveEcommerce_qmltyperegistration",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "all_aotstats::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-all_aotstats-Debug-8e13650c08e61c30d7ca.json",
+					"name" : "all_aotstats",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "all_qmllint::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-all_qmllint-Debug-14b003f39022679ea7db.json",
+					"name" : "all_qmllint",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "all_qmllint_json::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-all_qmllint_json-Debug-7e6d7d00904fd0f73808.json",
+					"name" : "all_qmllint_json",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "all_qmllint_module::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-all_qmllint_module-Debug-5ad49624c7f1b5abf697.json",
+					"name" : "all_qmllint_module",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "all_qmltyperegistrations::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-all_qmltyperegistrations-Debug-584f39c3c1045d50a0ed.json",
+					"name" : "all_qmltyperegistrations",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "generate_qmlls_build_ini_file::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-generate_qmlls_build_ini_file-Debug-ca29768f0684f0332258.json",
+					"name" : "generate_qmlls_build_ini_file",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "module_ExclusiveEcommerce_aotstats_target::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-module_ExclusiveEcommerce_aotstats_target-Debug-0c4b690f35c41ec7f5b5.json",
+					"name" : "module_ExclusiveEcommerce_aotstats_target",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/Admin/Documents/OOP_PROJ/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug",
+		"source" : "C:/Users/Admin/Documents/OOP_PROJ"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

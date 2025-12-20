@@ -4,8 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:/Qt/6.10.1/mingw_64/include/QtQuick",
-                "C:/Qt/6.10.1/mingw_64/include/QtQml"
+                "C:/Qt/6.10.1/mingw_64/include/**"
             ],
             "defines": [
                 "_DEBUG",
