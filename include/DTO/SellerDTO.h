@@ -1,11 +1,15 @@
 #ifndef SELLER_DTO_H_
 #define SELLER_DTO_H_
 
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
 
+#include "../../include/enums/OrderItemStatus.h"
+#include "OrderDTO.h"
 #include "UserDTO.h"
+
 class ProductDTO;
 
 /**
@@ -20,6 +24,7 @@ class SellerDTO : public UserDTO {
    private:
     // Seller owns products in inventory (choose shared_ptr or unique_ptr based on design)
     std::vector<std::shared_ptr<ProductDTO>> _myProducts;
+    std::vector<OrderDTO> _receivedOrders;
 
    public:
     /**
@@ -30,15 +35,6 @@ class SellerDTO : public UserDTO {
      */
     SellerDTO(const std::string& id, const std::string& name, const std::string& email,
               const std::string& password);
-
-    ~SellerDTO() override = default;
-
-    // SellerDTO(const SellerDTO&) = delete;
-    // SellerDTO& operator=(const SellerDTO&) = delete;
-
-    // // Allow move
-    // SellerDTO(SellerDTO&&) noexcept = default;
-    // SellerDTO& operator=(SellerDTO&&) noexcept = default;
 
     std::string getRole() const override;
 

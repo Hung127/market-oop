@@ -49,4 +49,4 @@ inline OrderItemStatus stringToOrderItemStatus(const std::string& str) {
     return OrderItemStatus::PENDING;
 }
 
-#endif  // ORDERITEMSTATUS_H
+#endif  // ORDERITEMSTATUSDTO_H
