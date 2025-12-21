@@ -15,6 +15,8 @@
 #include "../include/DTO/SellerDTO.h"
 #include "../include/UserFactory.h"
 #include "../include/Utils/Utils.h"
+#include "../include/BUS/RatingBUS.h"
+#include "../include/DAO/RatingDAO.h"
 
 // Helper to create a seller
 static std::shared_ptr<SellerDTO> makeSeller(const std::string& id = "s_test",
