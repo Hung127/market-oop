@@ -100,7 +100,7 @@ int main() {
 
     // 1. Khai báo đường dẫn
     std::string testImagePath = "cpu.jpg";           // Đặt file này ở thư mục gốc Project
-    std::string databasePath = "data/database.bin";  // File này sẽ nằm trong folder data
+    std::string databasePath = "../data/database.bin";  // File này sẽ nằm trong folder data
 
     // --- KIỂM TRA FILE ẢNH GỐC ---
     if (!fs::exists(testImagePath)) {
@@ -115,18 +115,23 @@ int main() {
     std::vector<std::string> paths = {testImagePath};
 
     // Hàm này sẽ gọi ImageHelper để đọc byte và DAO để ghi file .bin
-    bus.processAndSaveProduct("Mo ta san pham mau", paths);
-    cout << "-> Da tao file: " << databasePath << endl;
+    bus.processAndSaveProduct("San pham CPU", paths);
+   if (fs::exists(databasePath)) {
+    cout << "-> XAC NHAN: File da ton tai tai: " << fs::absolute(databasePath) << endl;
+    cout << "-> Kich thuoc: " << fs::file_size(databasePath) << " bytes" << endl;
+} else {
+    cout << "-> [LOI THAT SU] File van chua duoc tao ra!" << endl;
+}
 
     // 3. GIAI ĐOẠN XÓA: Xóa ảnh gốc để chứng minh "đọc sang ảnh luôn"
-    cout << "\n[BUOC 2] Dang xoa anh goc de test tinh bao toan..." << endl;
+    /*cout << "\n[BUOC 2] Dang xoa anh goc de test tinh bao toan..." << endl;
     try {
         if (fs::remove(testImagePath)) {
             cout << "-> DA XOA THANH CONG: " << testImagePath << endl;
         }
     } catch (const fs::filesystem_error& e) {
         cout << "[LOI] Khong the xoa file: " << e.what() << endl;
-    }
+    }*/
 
     // 4. GIAI ĐOẠN ĐỌC: Sài dữ liệu từ file .bin (Lúc nộp bài chỉ cần bước này)
     cout << "\n[BUOC 3] Dang khoi phuc anh tu file .bin (Load database)..." << endl;

@@ -97,9 +97,10 @@ bool ProductDAO::remove(const std::string& productId) {
 
 void ProductDAO::saveToFile(const std::string& fileName, const ProductExtraInfoDTO& dto) {
     std::ofstream f(fileName, std::ios::binary);
-    if (!f)
-        return;
+    if (!f.is_open()) return;
 
+    // Kiểm tra xem DTO có ảnh không trước khi ghi
+    std::cout << "[DAO DEBUG] Dang ghi " << dto.getImageCount() << " anh vao file." << std::endl;
     // 1. Ghi mô tả
     size_t descLen = dto.getDescription().size();
     f.write(reinterpret_cast<char*>(&descLen), sizeof(descLen));
