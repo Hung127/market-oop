@@ -1,6 +1,5 @@
 #include "../../include/DAO/OrderDAO.h"
 
-#include <algorithm>
 #include <memory>
 #include <vector>
 
@@ -8,17 +7,27 @@
 #include "../../include/DTO/OrderItemDTO.h"
 
 std::expected<void, std::string> OrderDAO::addOrder(const OrderDTO& order) {
-    _orders.push_back(order);
+    for (auto o : _orders) {
+        if (!o) {
+            continue;
+        }
+        if (o->orderId() == order.orderId()) {
+            return std::unexpected("There is alreay an order with this");
+        }
+    }
+
+    _orders.push_back(std::make_shared<OrderDTO>(order));
     return {};  // success
 }
 
 std::shared_ptr<OrderDTO> OrderDAO::getOrderById(const std::string& id) {
-    auto it = std::find_if(_orders.begin(), _orders.end(),
-                           [&](const OrderDTO& o) { return o.orderId() == id; });
-
-    if (it != _orders.end()) {
-        // return a shared_ptr copy of the stored order
-        return std::make_shared<OrderDTO>(*it);
+    for (std::shared_ptr<OrderDTO> order : _orders) {
+        if (!order) {
+            continue;
+        }
+        if (order->orderId() == id) {
+            return order;
+        }
     }
 
     return nullptr;
@@ -27,8 +36,11 @@ std::shared_ptr<OrderDTO> OrderDAO::getOrderById(const std::string& id) {
 std::vector<std::shared_ptr<OrderDTO>> OrderDAO::getOrdersByBuyerId(const std::string& id) {
     auto result = std::vector<std::shared_ptr<OrderDTO>>();
     for (const auto& o : _orders) {
-        if (o.buyerId() == id) {
-            result.push_back(std::make_shared<OrderDTO>(o));
+        if (!o) {
+            continue;
+        }
+        if (o->buyerId() == id) {
+            result.push_back(o);
         }
     }
     return result;
@@ -39,11 +51,38 @@ std::vector<std::shared_ptr<OrderDTO>> OrderDAO::getOrdersBySellerId(const std::
 
     for (const auto& o : _orders) {
         // if any item in the order belongs to this seller, include the order
-        for (const auto& item : o.items()) {
-            if (item.getSellerId() == id) {
-                result.push_back(std::make_shared<OrderDTO>(o));
+        for (const auto& item : o->items()) {
+            if (!item) {
+                continue;
+            }
+            if (item->getSellerId() == id) {
+                result.push_back(o);
                 break;
             }
+        }
+    }
+
+    return result;
+}
+
+std::vector<OrderItemDTO> OrderDAO::getSellerOrderItemByStatus(const std::string& sellerId,
+                                                               OrderItemStatus status) {
+    std::vector<OrderItemDTO> result;
+
+    auto orders = OrderDAO::getOrdersBySellerId(sellerId);
+
+    for (const auto& orderPtr : orders) {
+        for (const auto& item : orderPtr->items()) {
+            // clang-format off
+            if (!item) {
+                continue;
+            }
+            if ((item->getSellerId() == sellerId)
+                && (item->getStatus() == status)
+            ) {
+                result.push_back(*item);
+            }
+            // clang-format on
         }
     }
 

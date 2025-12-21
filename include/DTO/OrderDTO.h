@@ -9,25 +9,26 @@
 
 class OrderDTO {
    private:
-    std::string _id;
-    std::vector<OrderItemDTO> _items;
+    std::string _orderId;
+    std::string _buyerId;
+    std::vector<std::shared_ptr<OrderItemDTO>> _items;
     double _totalPrice;
     std::string _date;
 
    public:
     OrderDTO();
-    OrderDTO(const std::string& id, const std::string& buyerId,
+    OrderDTO(const std::string& orderId, const std::string& buyerId,
              const std::vector<OrderItemDTO>& items, double total, const std::string& date);
 
     // Accessors
-    const std::vector<OrderItemDTO>& items() const;
+    const std::vector<std::shared_ptr<OrderItemDTO>>& items() const;
     double totalPrice() const;
     const std::string& date() const;
     const std::string& orderId() const;
     const std::string& buyerId() const;
 
     // Mutators / helpers
-    void setItems(const std::vector<OrderItemDTO>& items);
+    void setItems(const std::vector<std::shared_ptr<OrderItemDTO>>& items);
     void setTotalPrice(double total);
     void setDate(const std::string& date);
 

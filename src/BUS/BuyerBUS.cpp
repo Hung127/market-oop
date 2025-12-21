@@ -6,9 +6,11 @@
 #include <vector>
 
 #include "../../include/BUS/CartBUS.h"
+#include "../../include/DAO/OrderDAO.h"
 #include "../../include/DTO/BuyerDTO.h"
 #include "../../include/DTO/OrderDTO.h"
 #include "../../include/DTO/OrderItemDTO.h"
+#include "../../include/DTO/SellerDTO.h"
 #include "../../include/Utils/Utils.h"
 
 // ========== BALANCE LOGIC ==========
@@ -108,15 +110,28 @@ std::expected<void, std::string> BuyerBUS::checkout(BuyerDTO& buyer) {
         // Lấy ProductDTO từ Cart ra
         if (auto p = weakProduct.lock()) {
             // Trích xuất dữ liệu từ ProductDTO nạp vào OrderItem
-            orderItems.emplace_back(p->getID(), p->getName(), p->getPrice(), quantity);
+            std::shared_ptr<SellerDTO> seller = p->getOwner();
+            if (!seller) {
+                return std::unexpected("Seller doesn't exist");
+            }
+            std::string sellerName = seller->getName();
+            OrderItemDTO(p->getID(), p->getName(), p->getSellerId(), sellerName, p->getPrice(),
+                         quantity);
         }
     }
 
-    OrderDTO order(orderItems, totalPrice, Utils::getCurrentDate());
-    buyer.getPurchasesHistory().addOrder(order);
+    OrderDTO newOrder(Utils::generateId(), buyer.getId(), orderItems, totalPrice,
+                      Utils::getCurrentDate());
+
+    buyer.getPurchasesHistory().addOrder(newOrder);
 
     // 7. Clear cart
     CartBUS::clear(cart);
+
+    auto orderPack = OrderDAO::addOrder(newOrder);
+    if (!orderPack.has_value()) {
+        return std::unexpected("Failed to add order");
+    }
 
     return {};
 }
