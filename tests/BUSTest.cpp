@@ -339,3 +339,89 @@ TEST(UserBUS_Login_NonexistentEmail, FailsGracefully) {
     auto res = UserBUS::login(fakeEmail, "whatever");
     EXPECT_FALSE(res.has_value());
 }
+TEST(RatingBUS_Product, RateAndAverageProduct) {
+    // setup seller + product
+    auto seller = makeSeller("s_rate_p");
+    auto prod = std::make_shared<ProductDTO>("p_rate", "RateItem", 10.0, 5, seller);
+    ASSERT_TRUE(ProductDAO::insert(*prod));
+
+    // create buyer
+    auto buyerPack =
+        UserBUS::registerUser(UserRole::BUYER, "RateBuyer", "ratebuyer@example.com",
+                              "rate-pass-123", 100.0);
+    ASSERT_TRUE(buyerPack.has_value());
+    auto buyer = std::dynamic_pointer_cast<BuyerDTO>(buyerPack.value());
+    ASSERT_NE(buyer, nullptr);
+
+    // buyer rates product
+    bool ok = RatingBUS::rate(buyer->getID(), prod->getID(), 5, "Very good", "PRODUCT");
+    EXPECT_TRUE(ok);
+
+    // average rating should be 5
+    double avg = RatingBUS::avgRating(prod->getID(), "PRODUCT");
+    EXPECT_DOUBLE_EQ(avg, 5.0);
+
+    // cleanup
+    EXPECT_TRUE(ProductDAO::remove("p_rate"));
+}
+
+TEST(RatingBUS_Seller, RateAndAverageSeller) {
+    auto seller = makeSeller("s_rate_s");
+
+    auto buyerPack =
+        UserBUS::registerUser(UserRole::BUYER, "RateBuyer2", "ratebuyer2@example.com",
+                              "rate-pass-456", 50.0);
+    ASSERT_TRUE(buyerPack.has_value());
+    auto buyer = std::dynamic_pointer_cast<BuyerDTO>(buyerPack.value());
+    ASSERT_NE(buyer, nullptr);
+
+    // rate seller
+    bool ok = RatingBUS::rate(buyer->getID(), seller->getID(), 4, "Uy tin", "SELLER");
+    EXPECT_TRUE(ok);
+
+    double avg = RatingBUS::avgRating(seller->getID(), "SELLER");
+    EXPECT_DOUBLE_EQ(avg, 4.0);
+}
+
+TEST(RatingBUS_InvalidCases, RejectInvalidScoreAndType) {
+    auto seller = makeSeller("s_rate_invalid");
+
+    auto buyerPack =
+        UserBUS::registerUser(UserRole::BUYER, "BadRate", "badrate@example.com",
+                              "bad-pass-123", 10.0);
+    ASSERT_TRUE(buyerPack.has_value());
+    auto buyer = std::dynamic_pointer_cast<BuyerDTO>(buyerPack.value());
+    ASSERT_NE(buyer, nullptr);
+
+    // invalid score (<1)
+    EXPECT_FALSE(RatingBUS::rate(buyer->getID(), seller->getID(), 0, "bad", "SELLER"));
+
+    // invalid score (>5)
+    EXPECT_FALSE(RatingBUS::rate(buyer->getID(), seller->getID(), 6, "bad", "SELLER"));
+
+    // invalid type
+    EXPECT_FALSE(RatingBUS::rate(buyer->getID(), seller->getID(), 5, "bad", "UNKNOWN"));
+}
+
+TEST(RatingBUS_MultipleRatings, AverageCalculatedCorrectly) {
+    auto seller = makeSeller("s_rate_multi");
+
+    auto b1 = UserBUS::registerUser(UserRole::BUYER, "B1", "b1@" + Utils::generateId(),
+                                    "pw123456", 10.0)
+                  .value();
+    auto b2 = UserBUS::registerUser(UserRole::BUYER, "B2", "b2@" + Utils::generateId(),
+                                    "pw123456", 10.0)
+                  .value();
+
+    auto buyer1 = std::dynamic_pointer_cast<BuyerDTO>(b1);
+    auto buyer2 = std::dynamic_pointer_cast<BuyerDTO>(b2);
+
+    ASSERT_NE(buyer1, nullptr);
+    ASSERT_NE(buyer2, nullptr);
+
+    EXPECT_TRUE(RatingBUS::rate(buyer1->getID(), seller->getID(), 3, "ok", "SELLER"));
+    EXPECT_TRUE(RatingBUS::rate(buyer2->getID(), seller->getID(), 5, "good", "SELLER"));
+
+    double avg = RatingBUS::avgRating(seller->getID(), "SELLER");
+    EXPECT_DOUBLE_EQ(avg, 4.0);
+}
