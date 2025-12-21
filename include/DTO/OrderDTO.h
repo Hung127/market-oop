@@ -18,7 +18,8 @@ class OrderDTO {
    public:
     OrderDTO();
     OrderDTO(const std::string& orderId, const std::string& buyerId,
-             const std::vector<OrderItemDTO>& items, double total, const std::string& date);
+             const std::vector<std::shared_ptr<OrderItemDTO>>& items, double total,
+             const std::string& date);
 
     // Accessors
     const std::vector<std::shared_ptr<OrderItemDTO>>& items() const;

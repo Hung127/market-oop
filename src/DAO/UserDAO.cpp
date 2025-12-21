@@ -19,6 +19,18 @@ UserDAO::getUserByEmail(const std::string& email) {
     return std::unexpected("There is no user with that email");
 }
 
+std::expected<std::shared_ptr<UserDTO>, std::string> UserDAO::getUserById(const std::string& id) {
+    for (auto user : UserDAO::_users) {
+        if (!user) {
+            continue;
+        }
+        if (id == user->getId()) {
+            return user;
+        }
+    }
+    return std::unexpected("There is no user with that id");
+}
+
 std::expected<void, std::string> UserDAO::addUser(const std::shared_ptr<UserDTO>& user) {
     for (auto userDb : UserDAO::_users) {
         if (!userDb) {

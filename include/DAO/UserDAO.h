@@ -15,6 +15,9 @@ class UserDAO {
    public:
     static std::expected<std::shared_ptr<UserDTO>, std::string>
     getUserByEmail(const std::string& email);
+
+    static std::expected<std::shared_ptr<UserDTO>, std::string> getUserById(const std::string& id);
+
     static std::expected<void, std::string> addUser(const std::shared_ptr<UserDTO>& user);
     static bool existById(const std::string& id);
     static bool existByEmail(const std::string& email);

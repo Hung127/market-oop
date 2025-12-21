@@ -1,6 +1,7 @@
 #include "../../include/BUS/BuyerBUS.h"
 
 #include <expected>
+#include <iterator>
 #include <memory>
 #include <string>
 #include <vector>
@@ -57,7 +58,7 @@ void BuyerBUS::viewCart(const BuyerDTO& buyerDTO) {
 std::expected<void, std::string> BuyerBUS::checkout(BuyerDTO& buyer) {
     CartDTO& cart = buyer.getCart();
 
-    // 1. Kiểm tra giỏ hàng rỗng (Nghiệp vụ)
+    // 1. Kiểm tra giỏ hàng rỗng
     if (cart.getItems().empty()) {
         return std::unexpected("Your cart is EMPTY, cannot checkout !");
     }
@@ -65,15 +66,12 @@ std::expected<void, std::string> BuyerBUS::checkout(BuyerDTO& buyer) {
     // 2. Get items before clearing cart
     const auto& items = cart.getItems();
 
-    // 3. Reduce stock
+    // 3. Validate stock availability (don't reduce yet!)
     for (const auto& item : items) {
         const auto& [weakProduct, quantity] = item;
-
-        // Phải lock() để lấy ra shared_ptr sử dụng được
         auto product = weakProduct.lock();
 
         if (!product) {
-            // Nếu product == null nghĩa là sản phẩm đã bị xóa khỏi hệ thống
             return std::unexpected("There is an item in your cart that no longer exists!");
         }
 
@@ -83,9 +81,6 @@ std::expected<void, std::string> BuyerBUS::checkout(BuyerDTO& buyer) {
                 std::format("Product '{}' is out of stock (Remaining: {}, Buy: {})",
                             product->getName(), currentStock, quantity));
         }
-
-        // Trừ tồn kho
-        product->setStock(currentStock - quantity);
     }
 
     // 4. Tính tổng tiền
@@ -95,28 +90,37 @@ std::expected<void, std::string> BuyerBUS::checkout(BuyerDTO& buyer) {
     }
     double totalPrice = totalPricePack.value();
 
-    // 5. Check balance
+    // 5. Check balance BEFORE making any changes
     if (!hasEnoughBalance(buyer, totalPrice)) {
-        return std::unexpected(std::format("Insufficient balance. Need: ${:.2f}, Have: ${:.2f}",
+        return std::unexpected(std::format("Insufficient balance.  Need: ${:.2f}, Have: ${:.2f}",
                                            totalPrice, buyer.getBalance()));
     }
 
-    // 5. Deduct balance
+    // 6. NOW reduce stock (after all validations passed)
+    for (const auto& item : items) {
+        const auto& [weakProduct, quantity] = item;
+        auto product = weakProduct.lock();
+        if (product) {  // Should always be valid since we checked above
+            product->setStock(product->getStock() - quantity);
+        }
+    }
+
+    // 7. Deduct balance
     buyer.setBalance(buyer.getBalance() - totalPrice);
 
-    // 6. CREATE ORDER AND SAVE TO HISTORY
-    std::vector<OrderItemDTO> orderItems;
+    // 8. CREATE ORDER AND SAVE TO HISTORY
+    std::vector<std::shared_ptr<OrderItemDTO>> orderItems;
     for (const auto& [weakProduct, quantity] : items) {
-        // Lấy ProductDTO từ Cart ra
         if (auto p = weakProduct.lock()) {
-            // Trích xuất dữ liệu từ ProductDTO nạp vào OrderItem
             std::shared_ptr<SellerDTO> seller = p->getOwner();
             if (!seller) {
                 return std::unexpected("Seller doesn't exist");
             }
             std::string sellerName = seller->getName();
-            OrderItemDTO(p->getID(), p->getName(), p->getSellerId(), sellerName, p->getPrice(),
-                         quantity);
+
+            auto newItem = std::make_shared<OrderItemDTO>(OrderItemDTO(
+                p->getID(), p->getName(), p->getSellerId(), sellerName, p->getPrice(), quantity));
+            orderItems.push_back(newItem);
         }
     }
 
@@ -125,7 +129,7 @@ std::expected<void, std::string> BuyerBUS::checkout(BuyerDTO& buyer) {
 
     buyer.getPurchasesHistory().addOrder(newOrder);
 
-    // 7. Clear cart
+    // 9. Clear cart
     CartBUS::clear(cart);
 
     auto orderPack = OrderDAO::addOrder(newOrder);

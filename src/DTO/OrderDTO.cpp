@@ -9,11 +9,10 @@ OrderDTO::OrderDTO() : _totalPrice(0.0) {
 }
 
 OrderDTO::OrderDTO(const std::string& orderId, const std::string& buyerId,
-                   const std::vector<OrderItemDTO>& items, double total, const std::string& date)
-    : _orderId(orderId), _buyerId(buyerId), _totalPrice(total), _date(date) {
-    for (const auto& it : items) {
-        _items.push_back(std::make_shared<OrderItemDTO>(it));
-    }
+                   const std::vector<std::shared_ptr<OrderItemDTO>>& items, double total,
+                   const std::string& date)
+    : _orderId(orderId), _buyerId(buyerId), _items(items), _totalPrice(total), _date(date) {
+    // Do nothing
 }
 
 // Accessors

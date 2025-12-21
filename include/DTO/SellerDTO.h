@@ -24,7 +24,6 @@ class SellerDTO : public UserDTO {
    private:
     // Seller owns products in inventory (choose shared_ptr or unique_ptr based on design)
     std::vector<std::shared_ptr<ProductDTO>> _myProducts;
-    std::vector<OrderDTO> _receivedOrders;
 
    public:
     /**
