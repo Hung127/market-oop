@@ -98,6 +98,7 @@ add_executable(app ${MAIN_SRC})
 target_link_libraries(app PRIVATE core)
 target_include_directories(app PRIVATE "${PROJECT_INCLUDE_DIR}")
 
+file(COPY "${CMAKE_SOURCE_DIR}/assets" DESTINATION "${CMAKE_BINARY_DIR}")
 # -----------------------
 # Tests (GoogleTest) via FetchContent
 # -----------------------
@@ -118,7 +119,7 @@ if(BUILD_TESTS)
     add_executable(tests ${TEST_SOURCES})
     target_include_directories(tests PRIVATE "${PROJECT_INCLUDE_DIR}")
     target_link_libraries(tests PRIVATE core gtest_main)
-
+    
     # Discover and register individual GoogleTest cases with CTest
     include(GoogleTest)
     gtest_discover_tests(tests

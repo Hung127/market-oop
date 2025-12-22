@@ -70,5 +70,5 @@ void ProductBUS::processAndSaveProduct(const std::string& desc,
             dto.addImageData(bytes);
         }
     }
-    _dao.saveToFile("../data/database.bin", dto);
+    _dao.saveToFile("data/database.bin", dto);
 }

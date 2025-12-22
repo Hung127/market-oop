@@ -99,8 +99,8 @@ int main() {
     cout << "===== TEST QUY TRINH ANH NHI PHAN =====" << endl;
 
     // 1. Khai báo đường dẫn
-    std::string testImagePath = "cpu.jpg";           // Đặt file này ở thư mục gốc Project
-    std::string databasePath = "../data/database.bin";  // File này sẽ nằm trong folder data
+    std::string testImagePath = "assets/cpu.jpg";           // Đặt file này ở thư mục gốc Project
+    std::string databasePath = "data/database.bin";  // File này sẽ nằm trong folder data
 
     // --- KIỂM TRA FILE ẢNH GỐC ---
     if (!fs::exists(testImagePath)) {
