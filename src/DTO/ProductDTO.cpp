@@ -1,7 +1,9 @@
 #include "../../include/DTO/ProductDTO.h"
-#include "../../include/DTO/SellerDTO.h"
+
 #include <memory>
 #include <stdexcept>
+
+#include "../../include/DTO/SellerDTO.h"
 
 //================== PRODUCT_DTO ==================
 
@@ -15,11 +17,21 @@ ProductDTO::ProductDTO(const std::string& id, const std::string& name, double pr
       _stock(stock) {}
 
 // ========== GETTERS (Non-const) ==========
-std::string ProductDTO::getName() { return _name; }
-std::string ProductDTO::getID() { return _id; }
-double ProductDTO::getPrice() { return _price; }
-int ProductDTO::getStock() { return _stock; }
-std::shared_ptr<SellerDTO> ProductDTO::getOwner() { return _owner.lock(); }
+std::string ProductDTO::getName() {
+    return _name;
+}
+std::string ProductDTO::getID() {
+    return _id;
+}
+double ProductDTO::getPrice() {
+    return _price;
+}
+int ProductDTO::getStock() {
+    return _stock;
+}
+std::shared_ptr<SellerDTO> ProductDTO::getOwner() {
+    return _owner.lock();
+}
 
 std::shared_ptr<ProductExtraInfoDTO> ProductDTO::getExtraInfo() {
     return _extraInfo;
@@ -27,22 +39,22 @@ std::shared_ptr<ProductExtraInfoDTO> ProductDTO::getExtraInfo() {
 
 // ========== GETTERS (Const) ==========
 std::string ProductDTO::getName() const {
-     return _name; 
-    }
-std::string ProductDTO::getID() const { 
-    return _id; 
+    return _name;
 }
-double ProductDTO::getPrice() const { 
-    return _price; 
+std::string ProductDTO::getID() const {
+    return _id;
 }
-int ProductDTO::getStock() const { 
-    return _stock; 
+double ProductDTO::getPrice() const {
+    return _price;
 }
-std::shared_ptr<SellerDTO> ProductDTO::getOwner() const { 
-    return _owner.lock(); 
+int ProductDTO::getStock() const {
+    return _stock;
 }
-std::string ProductDTO::getSellerId() const { 
-    return _sellerId; 
+std::shared_ptr<SellerDTO> ProductDTO::getOwner() const {
+    return _owner.lock();
+}
+std::string ProductDTO::getSellerId() const {
+    return _sellerId;
 }
 
 // Lưu ý: Dùng shared_ptr<const ...> để đảm bảo tính đúng đắn của hằng số
@@ -52,13 +64,15 @@ std::shared_ptr<const ProductExtraInfoDTO> ProductDTO::getExtraInfo() const {
 
 // ========== SETTERS ==========
 void ProductDTO::setName(const std::string& name) {
-     _name = name; 
-    }
+    _name = name;
+}
 void ProductDTO::setPrice(double price) {
-     if (price >= 0) _price = price; 
-    }
-void ProductDTO::setStock(int stock) { 
-    if (stock >= 0) _stock = stock; 
+    if (price >= 0)
+        _price = price;
+}
+void ProductDTO::setStock(int stock) {
+    if (stock >= 0)
+        _stock = stock;
 }
 void ProductDTO::setOwner(const std::shared_ptr<SellerDTO>& owner) {
     _owner = owner;
