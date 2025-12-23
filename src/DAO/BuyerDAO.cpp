@@ -1,41 +1,35 @@
-
 #include "../../include/DAO/BuyerDAO.h"
 
-#include <algorithm>
 #include <memory>
 #include <string>
 
-#include "../../include/DTO/OrderDTO.h"
-#include "../../include/DTO/OrderItemDTO.h"
-
-static std::vector<BuyerDTO> mockDatabase;
+#include "../../include/DAO/UserDAO.h"
+#include "../../include/DTO/BuyerDTO.h"
 
 bool BuyerDAO::save(const BuyerDTO& buyer) {
-    // 1. Kiểm tra xem người dùng đã có trong "Database" chưa
-    auto it = std::find_if(mockDatabase.begin(), mockDatabase.end(),
-                           [&](const BuyerDTO& b) { return b.getId() == buyer.getId(); });
+    auto userPack = UserDAO::getUserById(buyer.getId());
 
-    if (it != mockDatabase.end()) {
-        // 2a. Nếu có rồi -> Cập nhật thông tin (Update)
-        *it = buyer;  // Ghi đè dữ liệu mới vào
-        // std::cout << "[DEBUG] Da cap nhat thong tin Buyer: " << buyer.getName() << "\n";
-    } else {
-        // 2b. Nếu chưa có -> Thêm mới (Create)
-        mockDatabase.push_back(buyer);
-        // std::cout << "[DEBUG] Da them Buyer moi: " << buyer.getName() << "\n";
-    }
-
-    return true;  // Luôn thành công vì lưu trên RAM không bao giờ lỗi
-}
-
-std::shared_ptr<BuyerDTO> BuyerDAO::getBuyerById(const std::string& id) {
-    // 1. Duyệt qua kho dữ liệu giả lập
-    for (const auto& buyer : mockDatabase) {
-        if (buyer.getId() == id) {
-            return std::make_shared<BuyerDTO>(buyer);
+    if (userPack.has_value()) {
+        auto user = userPack.value();
+        if (auto buyerPtr = std::dynamic_pointer_cast<BuyerDTO>(user)) {
+            // Update the existing buyer (copy data into shared instance)
+            *buyerPtr = buyer;
+            return true;
         }
     }
 
-    // 3. Không tìm thấy
+    // If not found, add as new user to UserDAO
+    auto newBuyer = std::make_shared<BuyerDTO>(buyer);
+    auto addResult = UserDAO::addUser(newBuyer);
+    return addResult.has_value();
+}
+
+std::shared_ptr<BuyerDTO> BuyerDAO::getBuyerById(const std::string& id) {
+    auto userPack = UserDAO::getUserById(id);
+
+    if (userPack.has_value()) {
+        return std::dynamic_pointer_cast<BuyerDTO>(userPack.value());
+    }
+
     return nullptr;
 }

@@ -2,6 +2,7 @@
 
 #include <iomanip>
 #include <iostream>
+#include <memory>
 
 #include "../../include/DTO/OrderDTO.h"
 #include "../../include/DTO/OrderItemDTO.h"
@@ -34,13 +35,16 @@ void PurchaseHistoryDTO::printHistory() const {
         std::cout << std::string(62, '-') << '\n';
 
         double running = 0.0;
-        for (const OrderItemDTO& item : order.items()) {
-            double price = item.getPrice();
-            int qty = item.getQuantity();
+        for (const std::shared_ptr<OrderItemDTO>& item : order.items()) {
+            if (!item) {
+                continue;
+            }
+            double price = item->getPrice();
+            int qty = item->getQuantity();
             double subtotal = price * qty;
             running += subtotal;
 
-            std::cout << std::left << std::setw(30) << item.getProductName() << std::right
+            std::cout << std::left << std::setw(30) << item->getProductName() << std::right
                       << std::setw(8) << qty << std::right << std::setw(12) << std::fixed
                       << std::setprecision(2) << price << std::right << std::setw(12) << std::fixed
                       << std::setprecision(2) << subtotal << '\n';
