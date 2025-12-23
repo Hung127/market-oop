@@ -4,7 +4,7 @@
 
 // Test ProductDTO with extra info and images
 TEST(ProductDTO_ExtraInfo, SetAndGetExtraInfoWithImages) {
-    auto seller = makeSeller("s_extra");
+    auto seller = makeSeller(Utils::generateId(), "s_extra");
     ProductDTO product("p_extra", "Extra Product", 50.0, 10, seller);
 
     // Create extra info
