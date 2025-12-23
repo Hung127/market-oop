@@ -14,10 +14,9 @@ OrderDTO::OrderDTO() : _items(), _totalPrice(0.0), _date() {
     // khởi tạo đã thực hiện trong initializer list
 }
 
-OrderDTO::OrderDTO(const std::vector<OrderItemDTO>& items, double total, const std::string& date)
-    : _items(items), _totalPrice(total), _date(date) {
-    // khởi tạo đã thực hiện trong initializer list
-}
+OrderDTO::OrderDTO(const std::vector<OrderItemDTO>& items, double rawTotal, const std::string& date)
+        : _items(items), _rawTotal(rawTotal), _date(date), 
+          _voucherDiscount(0), _coinDiscount(0), _totalPrice(rawTotal) {}
 
 // Accessors
 const std::vector<OrderItemDTO>& OrderDTO::items() const {
@@ -59,3 +58,24 @@ void OrderDTO::recalculateTotal() {
         this->_totalPrice += it.getPrice() * static_cast<double>(it.getQuantity());
     }
 }
+
+
+void OrderDTO::setDiscounts(double vDiscount, double cDiscount) {
+        _voucherDiscount = vDiscount;
+        _coinDiscount = cDiscount;
+    }
+    double OrderDTO::getRawTotal() const { 
+        return _rawTotal; 
+    }
+    double OrderDTO::getVoucherDiscount() const { 
+        return _voucherDiscount; 
+    }
+    double OrderDTO::getCoinDiscount() const { 
+        return _coinDiscount; 
+    }
+    double OrderDTO::totalPrice() const { 
+        return _totalPrice; 
+    }
+    void OrderDTO::setTotalPrice(double price) { 
+        _totalPrice = price; 
+    }
