@@ -10,12 +10,13 @@
 class BuyerDTO : public UserDTO {
    private:
     double _balance;
+    double _coins;
     CartDTO _cart;
     PurchaseHistoryDTO _purchasesHistory;
 
    public:
     BuyerDTO(const std::string& id, const std::string& name, const std::string& email,
-             const std::string& password, double balance = 0.0);
+             const std::string& password, double balance = 0.0, double coins = 0.0);
     ~BuyerDTO() override = default;
 
     double getBalance() const;
@@ -23,6 +24,9 @@ class BuyerDTO : public UserDTO {
 
     CartDTO& getCart();
     const CartDTO& getCart() const;
+
+    double getCoins() const;
+    void setCoins(double amount);
 
     const PurchaseHistoryDTO& getPurchasesHistory() const;
     PurchaseHistoryDTO& getPurchasesHistory();

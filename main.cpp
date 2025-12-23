@@ -1,15 +1,19 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <vector>
+#include <filesystem>
 
 #include "include/BUS/BuyerBUS.h"
 #include "include/BUS/ProductBUS.h"
 #include "include/BUS/SellerBUS.h"
+#include "include/BUS/UserBUS.h"
 #include "include/DAO/ProductDAO.h"
 #include "include/DTO/BuyerDTO.h"
 #include "include/DTO/ProductDTO.h"
 #include "include/DTO/PurchaseHistoryDTO.h"
 #include "include/DTO/SellerDTO.h"
+#include "include/DTO/VoucherDTO.h"
 #include "include/UserFactory.h"
 #include "include/Utils/Utils.h"
 
@@ -20,142 +24,110 @@ int main() {
     using std::endl;
 
     cout << "=== MARKET APP SMOKE TEST ===" << endl;
-    // 1) Tạo seller và SellerBUS
+
+    // 1) Thiết lập Seller và Sản phẩm mẫu
     auto seller = std::make_shared<SellerDTO>("s1", "Alice", "alice@example.com", "alicepwd");
     auto sellerBusPack = SellerBUS::create(seller);
-    if (!sellerBusPack.has_value()) {
-        cout << "[ERROR] Cannot create SellerBUS" << endl;
-        return 1;
-    }
     SellerBUS sellerBus = sellerBusPack.value();
 
-    // 2) Seller tạo 1 product
-    auto productPack = sellerBus.createProduct("p1", "Widget", 10.0, 5);
-    if (!productPack.has_value()) {
-        cout << "[ERROR] createProduct failed" << endl;
-        return 1;
-    }
+    auto productPack = sellerBus.createProduct("p1", "Widget", 100.0, 100);
     std::shared_ptr<ProductDTO> prod = productPack.value();
-    cout << "[INFO] Product created: " << prod->getName() << " (ID=" << prod->getID()
-         << ") price=" << prod->getPrice() << " stock=" << prod->getStock() << endl;
+    ProductDAO::insert(prod);
 
-    // 3) Lưu product vào DAO (mock)
-    if (!ProductDAO::insert(*prod)) {
-        cout << "[ERROR] ProductDAO::insert failed (maybe duplicate id)" << endl;
-        return 1;
+    // Tạo thêm sản phẩm thứ 2 để test việc "thanh toán một phần giỏ hàng"
+    auto product2Pack = sellerBus.createProduct("p2", "Gadget", 50.0, 100);
+    std::shared_ptr<ProductDTO> prod2 = product2Pack.value();
+    ProductDAO::insert(prod2);
+
+    // 2) Thiết lập Voucher Shop của Alice: Giảm 10%, Min đơn 150.0
+    SellerVoucherDTO aliceVoucher("v1", "ALICE_SALE", "s1", 10.0, 150.0);
+
+    // ---------------------------------------------------------
+    // SCENARIO 1: BOB (Thanh toán bình thường - Không Voucher/Xu)
+    // ---------------------------------------------------------
+    cout << "\n--- Scenario 1: Bob (Standard Checkout) ---" << endl;
+    auto bobPack = UserBUS::registerUser(UserRole::BUYER, "Bob", "bob@example.com", "bobpwd", 500.0);
+    auto bob = std::dynamic_pointer_cast<BuyerDTO>(bobPack.value());
+
+    BuyerBUS::addToCart(*bob, prod, 1); // 100.0
+    
+    cout << "[CHECK] Giỏ hàng của Bob trước khi mua:" << endl;
+    BuyerBUS::viewCart(*bob);
+
+    // Thanh toán: Không voucher, không xu
+    auto res1 = BuyerBUS::checkout(*bob, {"p1"}, {}, false); 
+    if (res1.has_value()) {
+        cout << "[SUCCESS] Bob thanh toán thành công!" << endl;
+        cout << "-> Số dư cũ: 500.0 | Thực trả: 100.0 | Số dư mới: " << bob->getBalance() << endl;
+        cout << "[CHECK] Giỏ hàng của Bob sau khi mua (phải trống):" << endl;
+        BuyerBUS::viewCart(*bob);
     }
-    cout << "[INFO] Product inserted into ProductDAO mock DB" << endl;
-    //
-    // 4) Tạo buyer qua BuyerBUS
-    auto buyerPack =
-        UserBUS::registerUser(UserRole::BUYER, "Bob", "bob@example.com", "bobpwd", 100.0);
-    if (!buyerPack.has_value()) {
-        cout << "[ERROR] BuyerBUS::create failed: " << buyerPack.error() << endl;
-        return 1;
+
+    // ---------------------------------------------------------
+    // SCENARIO 2: DAVID (Thanh toán một phần + Voucher + Xu)
+    // ---------------------------------------------------------
+    cout << "\n--- Scenario 2: David (Voucher + Coins + Partial Checkout) ---" << endl;
+    auto davidPack = UserBUS::registerUser(UserRole::BUYER, "David", "david@example.com", "dpwdfgh", 1000.0);
+    auto david = std::dynamic_pointer_cast<BuyerDTO>(davidPack.value());
+
+    // Giả lập David có sẵn 50 xu và bỏ 2 loại hàng vào giỏ
+    david->setCoins(50.0);
+    BuyerBUS::addToCart(*david, prod, 3);  // 3 x 100 = 300.0 (Widget)
+    BuyerBUS::addToCart(*david, prod2, 1); // 1 x 50 = 50.0   (Gadget)
+
+    cout << "[CHECK] Giỏ hàng của David (có 2 loại sản phẩm):" << endl;
+    BuyerBUS::viewCart(*david);
+
+    // David chỉ muốn thanh toán Widget (p1), chừa Gadget (p2) lại giỏ
+    cout << "[INFO] David chọn thanh toán Widget, dùng Voucher và 50 Xu..." << endl;
+    std::vector<VoucherDTO*> vouchersForDavid = { &aliceVoucher };
+    
+    auto res2 = BuyerBUS::checkout(*david, {"p1"}, vouchersForDavid, true);
+
+    if (res2.has_value()) {
+        cout << "[SUCCESS] David thanh toán thành công!" << endl;
+        // Tính toán kiểm tra: 
+        // 300 (Widget) - 10% Voucher (30) = 270.
+        // 270 - 50 Xu = 220 thực trả. 
+        // Balance mới: 1000 - 220 = 780.
+        cout << "-> Số dư mới: " << david->getBalance() << " (Kỳ vọng: 780.0)" << endl;
+        cout << "-> Xu mới tích lũy: " << david->getCoins() << " (Kỳ vọng: 0.22 xu)" << endl;
+        
+        cout << "[CHECK] Giỏ hàng của David sau khi mua (phải còn Gadget p2):" << endl;
+        BuyerBUS::viewCart(*david);
     }
-    std::shared_ptr<BuyerDTO> buyer = std::dynamic_pointer_cast<BuyerDTO>(buyerPack.value());
-    cout << "[INFO] Buyer created: " << buyer->getName() << " Balance=" << buyer->getBalance()
-         << endl;
-    //
-    // 5) Lấy product từ DAO (đảm bảo lấy đúng shared_ptr)
-    auto prodPack = ProductDAO::getProductById("p1");
-    if (!prodPack.has_value()) {
-        cout << "[ERROR] ProductDAO::getProductById failed: " << prodPack.error() << endl;
-        return 1;
-    }
-    std::shared_ptr<ProductDTO> prodFromDao = prodPack.value();
 
-    // 6) Buyer addToCart 2 cái product
-    auto addRes = BuyerBUS::addToCart(*buyer, prodFromDao, 2);
-    if (!addRes.has_value()) {
-        cout << "[ERROR] addToCart failed: " << addRes.error() << endl;
-        return 1;
-    }
-    cout << "[INFO] Added 2 items to cart" << endl;
+    // ---------------------------------------------------------
+    // PHẦN 2: TEST QUY TRÌNH ẢNH NHỊ PHÂN (GIỮ NGUYÊN)
+    // ---------------------------------------------------------
+    
+    cout << "\n===== TEST QUY TRINH ANH NHI PHAN =====" << endl;
 
-    // 7) View cart (prints)
-    cout << "---- Cart before checkout ----" << endl;
-    BuyerBUS::viewCart(*buyer);
+ std::string testImagePath = std::string(PROJECT_ROOT_DIR) + "/assets/cpu.jpg";
+    
+    // SỬA DÒNG NÀY: Để file database luôn nằm trong folder data ở gốc dự án
+    std::string databasePath = std::string(PROJECT_ROOT_DIR) + "/data/database.bin";
 
-    // 8) Checkout
-    auto ck = BuyerBUS::checkout(*buyer);
-    if (!ck.has_value()) {
-        cout << "[ERROR] Checkout failed: " << ck.error() << endl;
-        return 1;
-    }
-    cout << "[INFO] Checkout SUCCESS" << endl;
-
-    // 9) Post-checkout info: buyer balance, product stock, purchase history
-    cout << "Buyer balance after checkout: " << buyer->getBalance() << endl;
-    auto prodAfterPack = ProductDAO::getProductById("p1");
-    if (prodAfterPack.has_value()) {
-        cout << "Product stock after checkout: " << prodAfterPack.value()->getStock() << endl;
-    }
-    cout << "Purchase history:" << endl;
-    buyer->getPurchasesHistory().printHistory();
-
-    cout << "=== SMOKE TEST END ===" << endl;
-
-    cout << "===== TEST QUY TRINH ANH NHI PHAN =====" << endl;
-
-    // 1. Khai báo đường dẫn
-    std::string testImagePath = "cpu.jpg";           // Đặt file này ở thư mục gốc Project
-    std::string databasePath = "../data/database.bin";  // File này sẽ nằm trong folder data
-
-    // --- KIỂM TRA FILE ẢNH GỐC ---
     if (!fs::exists(testImagePath)) {
         cout << "[LOI] Khong tim thay file " << testImagePath << " o thu muc goc!" << endl;
-        cout << "Hay copy 1 tam anh vao folder Project va doi ten thanh test_image.jpg" << endl;
-        return 1;
-    }
-
-    // 2. GIAI ĐOẠN LƯU: Đọc từ đường dẫn -> Chuyển sang ảnh luôn (Binary) -> Lưu .bin
-    cout << "\n[BUOC 1] Dang nap anh va dong goi vao file .bin..." << endl;
-    ProductBUS bus;
-    std::vector<std::string> paths = {testImagePath};
-
-    // Hàm này sẽ gọi ImageHelper để đọc byte và DAO để ghi file .bin
-    bus.processAndSaveProduct("San pham CPU", paths);
-   if (fs::exists(databasePath)) {
-    cout << "-> XAC NHAN: File da ton tai tai: " << fs::absolute(databasePath) << endl;
-    cout << "-> Kich thuoc: " << fs::file_size(databasePath) << " bytes" << endl;
-} else {
-    cout << "-> [LOI THAT SU] File van chua duoc tao ra!" << endl;
-}
-
-    // 3. GIAI ĐOẠN XÓA: Xóa ảnh gốc để chứng minh "đọc sang ảnh luôn"
-    /*cout << "\n[BUOC 2] Dang xoa anh goc de test tinh bao toan..." << endl;
-    try {
-        if (fs::remove(testImagePath)) {
-            cout << "-> DA XOA THANH CONG: " << testImagePath << endl;
-        }
-    } catch (const fs::filesystem_error& e) {
-        cout << "[LOI] Khong the xoa file: " << e.what() << endl;
-    }*/
-
-    // 4. GIAI ĐOẠN ĐỌC: Sài dữ liệu từ file .bin (Lúc nộp bài chỉ cần bước này)
-    cout << "\n[BUOC 3] Dang khoi phuc anh tu file .bin (Load database)..." << endl;
-    ProductDAO dao;
-    ProductExtraInfoDTO loadedDto;
-
-    // DAO sẽ giải mã file .bin nạp lại vào DTO
-    dao.loadFromFile(databasePath, loadedDto);
-
-    // 5. KIỂM TRA KẾT QUẢ
-    cout << "\n===== KET QUA KIEM TRA =====" << endl;
-    cout << "Mo ta san pham: " << loadedDto.getDescription() << endl;
-    cout << "So luong anh trong database: " << loadedDto.getImageCount() << endl;
-
-    if (loadedDto.getImageCount() > 0) {
-        size_t imageSize = loadedDto.getImageAt(0).size();
-        cout << "Kich thuoc anh thu nhat: " << imageSize << " bytes" << endl;
-        cout << "=> KET LUAN: Anh van ton tai trong file .bin du anh goc da bi xoa!" << endl;
-        cout << "=> Backend da san sang gui du lieu cho Qt hien thi." << endl;
     } else {
-        cout << "=> THAT BAI: Khong tim thay du lieu anh trong file .bin." << endl;
+        ProductBUS pBus;
+        pBus.processAndSaveProduct("San pham CPU Chinh Hang", {testImagePath});
+
+        if (fs::exists(databasePath)) {
+            cout << "-> XAC NHAN: Da luu database nhi phan, kich thuoc: " << fs::file_size(databasePath) << " bytes" << endl;
+        }
+
+        ProductDAO dao;
+        ProductExtraInfoDTO loadedDto;
+        dao.loadFromFile(databasePath, loadedDto);
+
+        cout << "Mo ta san pham load tu file: " << loadedDto.getDescription() << endl;
+        if (loadedDto.getImageCount() > 0) {
+            cout << "=> KET LUAN: Anh da duoc bao toan trong file .bin!" << endl;
+        }
     }
 
     cout << "========================================" << endl;
-
     return 0;
 }

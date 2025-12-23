@@ -29,7 +29,7 @@ public:
     virtual bool canApply(const OrderDTO& order) const = 0;
 
     // Hàm thuần ảo: Tính toán số tiền được giảm
-    virtual double calculateDiscount(const CartDTO& cart) const = 0;
+    virtual double calculateDiscount(const OrderDTO& order) const = 0;
 };
 
 class SellerVoucherDTO: public VoucherDTO{
@@ -37,29 +37,33 @@ private:
     double _discountPercent;
     double _minOrderValue;
 public:
-    SellerVoucherDTO(std::string id, std::string code, std::string sellerId, double percent)
-        : VoucherDTO(id, code, sellerId), _discountPercent(percent) {}
+    SellerVoucherDTO(std::string id, std::string code, std::string sellerId, double percent, double minVal)
+        : VoucherDTO(id, code, sellerId), _discountPercent(percent), _minOrderValue(minVal) {}
     
     bool canApply(const OrderDTO& order) const override {
-        for (const auto& item : cart.getItems()) {
-            if (auto p = std::get<0>(item).lock()) {
-                if (p->getSellerId() == _ownerId) return true; // Có SP của shop này
+        double totalShopValue = 0.0;
+
+        for (const auto& item : order.items()) {
+            if (item.getSellerId() == _ownerId) {
+                totalShopValue += item.getSubtotal(); // Cộng dồn giá trị từng món
             }
         }
-        return false;
+
+        // Voucher chỉ có hiệu lực nếu tổng tiền của shop đạt mức tối thiểu
+        return totalShopValue >= _minOrderValue;
     }
 
     //
-    double calculateDiscount(const CartDTO& cart) const override {
+    double calculateDiscount(const OrderDTO& order) const override {
         double shopTotal = 0;
-        for (const auto& item : cart.getItems()) {
-            if (auto p = std::get<0>(item).lock()) {
-                if (p->getSellerId() == _ownerId) 
-                    shopTotal += p->getPrice() * std::get<1>(item);
-            }
+        for (const auto& item : order.items()) {
+            if (item.getSellerId() == _ownerId) 
+                shopTotal += item.getPrice() * item.getQuantity(); // Dùng snapshot giá trong Order
         }
         return shopTotal * (_discountPercent / 100.0);
     }
 
 };
+
+
 #endif

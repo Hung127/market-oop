@@ -86,7 +86,13 @@ TEST(BuyerBUSTest, CheckoutSuccessAndHistory) {
     auto a1 = BuyerBUS::addToCart(*buyer, prod_ptr, 2);
     ASSERT_TRUE(a1.has_value());
 
-    auto ck = BuyerBUS::checkout(*buyer);
+ // THÊM CÁC BIẾN NÀY ĐỂ TRUYỀN VÀO HÀM CHECKOUT
+    std::vector<std::string> selectedIds = {prod_ptr->getID()}; 
+    std::vector<VoucherDTO*> emptyVouchers; // Danh sách voucher rỗng
+    bool useCoins = false; // Không dùng xu
+
+    // Cập nhật lời gọi hàm với 4 tham số
+    auto ck = BuyerBUS::checkout(*buyer, selectedIds, emptyVouchers, useCoins);
     EXPECT_TRUE(ck.has_value());
 
     // balance decreased
@@ -120,7 +126,13 @@ TEST(BuyerBUSTest, CheckoutInsufficientBalance) {
     auto addRes = BuyerBUS::addToCart(*buyer, prod_ptr, 1);
     ASSERT_TRUE(addRes.has_value());
 
-    auto ck = BuyerBUS::checkout(*buyer);
+// THÊM CÁC BIẾN NÀY ĐỂ TRUYỀN VÀO HÀM CHECKOUT
+    std::vector<std::string> selectedIds = {prod_ptr->getID()};
+    std::vector<VoucherDTO*> emptyVouchers;
+    bool useCoins = false;
+
+    // Cập nhật lời gọi hàm với 4 tham số
+    auto ck = BuyerBUS::checkout(*buyer, selectedIds, emptyVouchers, useCoins);
     EXPECT_FALSE(ck.has_value());  // should fail
 
     // ensure nothing changed: balance unchanged, stock unchanged
@@ -338,4 +350,163 @@ TEST(UserBUS_Login_NonexistentEmail, FailsGracefully) {
     std::string fakeEmail = "no-user-" + Utils::generateId() + "@example.com";
     auto res = UserBUS::login(fakeEmail, "whatever");
     EXPECT_FALSE(res.has_value());
+}
+
+// Test ProductDTO with extra info and images
+TEST(ProductDTO_ExtraInfo, SetAndGetExtraInfoWithImages) {
+    auto seller = makeSeller("s_extra");
+    ProductDTO product("p_extra", "Extra Product", 50.0, 10, seller);
+
+    // Create extra info
+    auto extra = std::make_shared<ProductExtraInfoDTO>("Detailed description");
+    
+    // Add some dummy image data
+    std::vector<uint8_t> img1 = {0xFF, 0xD8, 0xFF, 0xE0}; // JPEG header
+    std::vector<uint8_t> img2 = {0x89, 0x50, 0x4E, 0x47}; // PNG header
+    extra->addImageData(img1);
+    extra->addImageData(img2);
+
+    // Set extra info to product
+    product.setExtraInfo(extra);
+
+    // Verify
+    auto retrievedExtra = product.getExtraInfo();
+    ASSERT_TRUE(retrievedExtra != nullptr);
+    EXPECT_EQ(retrievedExtra->getDescription(), "Detailed description");
+    EXPECT_EQ(retrievedExtra->getImageCount(), 2);
+    EXPECT_EQ(retrievedExtra->getImageAt(0), img1);
+    EXPECT_EQ(retrievedExtra->getImageAt(1), img2);
+
+    // Test const version
+    auto constExtra = product.getExtraInfo();
+    EXPECT_EQ(constExtra->getDescription(), "Detailed description");
+}
+
+// Test ImageHelper reading image bytes
+TEST(ImageHelper_ReadImage, ValidAndInvalidFiles) {
+    // Test invalid file (non-existent)
+    auto invalid = Utils::ImageHelper::readImageToBytes("nonexistent.jpg");
+    EXPECT_TRUE(invalid.empty());
+
+    // Test valid image file (assets/ copied to build/ by CMake)
+    auto valid = Utils::ImageHelper::readImageToBytes("assets/cpu.jpg");
+    EXPECT_FALSE(valid.empty());
+    EXPECT_GT(valid.size(), 0);
+
+    // Test isValidImage
+    EXPECT_TRUE(Utils::ImageHelper::isValidImage("assets/cpu.jpg"));
+    EXPECT_FALSE(Utils::ImageHelper::isValidImage("invalid.txt"));
+}
+
+// ----------------------------- Voucher and Coin tests -----------------------------
+
+// Test 1: Thanh toán có áp dụng Seller Voucher thành công
+TEST(BuyerBUSTest, CheckoutWithVoucherSuccess) {
+    auto seller = makeSeller("s_vouch");
+    // Sản phẩm giá 100.0
+    auto prod = std::make_shared<ProductDTO>("p_vouch", "VoucherItem", 100.0, 10, seller);
+    ASSERT_TRUE(ProductDAO::insert(prod));
+
+    auto buyerPack = UserBUS::registerUser(UserRole::BUYER, "VoucherUser", "vu@test.com", "pw123456", 200.0);
+    auto buyer = std::dynamic_pointer_cast<BuyerDTO>(buyerPack.value());
+
+    BuyerBUS::addToCart(*buyer, prod, 1);
+
+    // Tạo Voucher: Giảm 10%, yêu cầu đơn tối thiểu 50.0
+    SellerVoucherDTO voucher("v_test", "SALE10", "s_vouch", 10.0, 50.0);
+    std::vector<VoucherDTO*> vouchers = { &voucher };
+    std::vector<std::string> selectedIds = {"p_vouch"};
+
+    auto ck = BuyerBUS::checkout(*buyer, selectedIds, vouchers, false);
+    ASSERT_TRUE(ck.has_value()) << (ck.has_value() ? "" : ck.error());
+
+    // Kiểm tra số dư: 200 - (100 - 10%*100) = 200 - 90 = 110
+    EXPECT_DOUBLE_EQ(buyer->getBalance(), 110.0);
+
+    EXPECT_TRUE(ProductDAO::remove("p_vouch"));
+}
+
+// Test 2: Voucher không được áp dụng do không đủ giá trị đơn hàng tối thiểu
+TEST(BuyerBUSTest, CheckoutWithVoucherFailsMinOrder) {
+    auto seller = makeSeller("s_vouch_fail");
+    // Sản phẩm giá 30.0
+    auto prod = std::make_shared<ProductDTO>("p_vouch_fail", "CheapItem", 30.0, 10, seller);
+    ASSERT_TRUE(ProductDAO::insert(prod));
+
+    auto buyerPack = UserBUS::registerUser(UserRole::BUYER, "VoucherUser2", "vu2@test.com", "pw123456", 100.0);
+    auto buyer = std::dynamic_pointer_cast<BuyerDTO>(buyerPack.value());
+
+    BuyerBUS::addToCart(*buyer, prod, 1);
+
+    // Voucher yêu cầu min 50.0 -> Đơn hàng 30.0 sẽ không được giảm
+    SellerVoucherDTO voucher("v_fail", "SALE10", "s_vouch_fail", 10.0, 50.0);
+    std::vector<VoucherDTO*> vouchers = { &voucher };
+
+    auto ck = BuyerBUS::checkout(*buyer, {"p_vouch_fail"}, vouchers, false);
+    ASSERT_TRUE(ck.has_value());
+
+    // Số dư phải là 100 - 30 = 70 (Voucher không được áp dụng)
+    EXPECT_DOUBLE_EQ(buyer->getBalance(), 70.0);
+
+    EXPECT_TRUE(ProductDAO::remove("p_vouch_fail"));
+}
+
+// Test 3: Thanh toán sử dụng Coin và kiểm tra tích lũy Coin mới
+TEST(BuyerBUSTest, CheckoutWithCoinsAndEarning) {
+    auto seller = makeSeller("s_coin");
+    auto prod = std::make_shared<ProductDTO>("p_coin", "CoinItem", 100.0, 10, seller);
+    ASSERT_TRUE(ProductDAO::insert(prod));
+
+    auto buyerPack = UserBUS::registerUser(UserRole::BUYER, "CoinUser", "cu@test.com", "pw123456", 200.0);
+    auto buyer = std::dynamic_pointer_cast<BuyerDTO>(buyerPack.value());
+
+    // Giả sử người dùng đang có 50 xu
+    buyer->setCoins(50.0);
+    BuyerBUS::addToCart(*buyer, prod, 1);
+
+    // Thanh toán có sử dụng xu (useCoins = true)
+    auto ck = BuyerBUS::checkout(*buyer, {"p_coin"}, {}, true);
+    ASSERT_TRUE(ck.has_value());
+
+    // 1. Kiểm tra tiền mặt: 200 - (100 - 50 xu) = 150
+    EXPECT_DOUBLE_EQ(buyer->getBalance(), 150.0);
+
+    // 2. Kiểm tra tích lũy xu mới:
+    // Số tiền thực trả là 50.0. Tích lũy 0.1% -> 50.0 * 0.001 = 0.05 xu
+    EXPECT_DOUBLE_EQ(buyer->getCoins(), 0.05);
+
+    EXPECT_TRUE(ProductDAO::remove("p_coin"));
+}
+
+// Test 4: Kết hợp Voucher + Coin trong một đơn hàng
+TEST(BuyerBUSTest, CheckoutCombinedVoucherAndCoins) {
+    auto seller = makeSeller("s_comb");
+    auto prod = std::make_shared<ProductDTO>("p_comb", "CombinedItem", 1000.0, 10, seller);
+    ASSERT_TRUE(ProductDAO::insert(prod));
+
+    auto buyerPack = UserBUS::registerUser(UserRole::BUYER, "CombUser", "comb@test.com", "pw123456", 2000.0);
+    auto buyer = std::dynamic_pointer_cast<BuyerDTO>(buyerPack.value());
+
+    buyer->setCoins(100.0);
+    BuyerBUS::addToCart(*buyer, prod, 1);
+
+    // Voucher giảm 10% (100.0)
+    SellerVoucherDTO voucher("v_comb", "BIGSALE", "s_comb", 10.0, 500.0);
+    std::vector<VoucherDTO*> vouchers = { &voucher };
+
+    // Thực hiện thanh toán dùng cả 2
+    auto ck = BuyerBUS::checkout(*buyer, {"p_comb"}, vouchers, true);
+    ASSERT_TRUE(ck.has_value());
+
+    // Tính toán:
+    // Giá gốc: 1000.0
+    // Sau voucher: 1000 - 100 = 900.0
+    // Sau coin: 900 - 100 = 800.0 (Giá thực trả)
+    EXPECT_DOUBLE_EQ(buyer->getBalance(), 2000.0 - 800.0);
+    EXPECT_DOUBLE_EQ(buyer->getBalance(), 1200.0);
+
+    // Tích lũy mới: 800.0 * 0.001 = 0.8 xu
+    EXPECT_DOUBLE_EQ(buyer->getCoins(), 0.8);
+
+    EXPECT_TRUE(ProductDAO::remove("p_comb"));
 }
