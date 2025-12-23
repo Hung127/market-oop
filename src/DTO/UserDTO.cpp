@@ -1,9 +1,5 @@
 #include "../../include/DTO/UserDTO.h"
 
-#include <memory>
-
-#include "../../include/DAO/UserDAO.h"
-
 UserDTO::UserDTO(const std::string& id, const std::string& name, const std::string& email,
                  const std::string& hashedPassword)
     : _id(id), _name(name), _email(email), _hashedPassword(hashedPassword) {

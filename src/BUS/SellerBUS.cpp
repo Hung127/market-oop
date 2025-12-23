@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include "../../include/DAO/BuyerDAO.h"
+#include "../../include/DAO/OrderDAO.h"
 #include "../../include/DTO/ProductDTO.h"
 #include "../../include/DTO/SellerDTO.h"
 #include "../../include/Utils/Utils.h"
@@ -239,4 +241,127 @@ std::expected<SellerBUS, BusError> SellerBUS::create(std::shared_ptr<SellerDTO> 
     }
 
     return SellerBUS(seller);
+}
+
+std::expected<std::shared_ptr<OrderItemDTO>, BusError>
+SellerBUS::findSellerOrderedProductById(const std::string& orderId, const std::string& productId) {
+    auto order = OrderDAO::getOrderById(orderId);
+    if (!order) {
+        return std::unexpected(BusError::NotFound);
+    }
+
+    auto item = order->findItemByProductId(productId);
+    if (!item) {
+        return std::unexpected(BusError::NotFound);
+    }
+
+    // Verify this item belongs to this seller
+    if (item->getSellerId() != _seller->getId()) {
+        return std::unexpected(BusError::ValidationFailed);
+    }
+
+    return item;
+}
+
+std::expected<std::vector<std::shared_ptr<OrderDTO>>, BusError>
+SellerBUS::getReceivedOrders() const {
+    return OrderDAO::getOrdersBySellerId(_seller->getId());
+}
+
+std::expected<std::vector<OrderItemDTO>, BusError>
+SellerBUS::getOrderItemsByStatus(OrderItemStatus status) const {
+    return OrderDAO::getSellerOrderItemByStatus(_seller->getId(), status);
+}
+
+std::expected<void, BusError> SellerBUS::confirmOrderItem(const std::string& orderId,
+                                                          const std::string& productId) {
+    auto itemPack = findSellerOrderedProductById(orderId, productId);
+    if (!itemPack.has_value()) {
+        return std::unexpected(itemPack.error());
+    }
+    std::shared_ptr<OrderItemDTO> item = itemPack.value();
+    // Can only confirm pending items
+    if (item->getStatus() != OrderItemStatus::PENDING) {
+        return std::unexpected(BusError::ValidationFailed);
+    }
+
+    item->setStatus(OrderItemStatus::CONFIRMED);
+    return {};
+}
+
+std::expected<void, BusError> SellerBUS::shipOrderItem(const std::string& orderId,
+                                                       const std::string& productId) {
+    auto itemPack = findSellerOrderedProductById(orderId, productId);
+    if (!itemPack.has_value()) {
+        return std::unexpected(itemPack.error());
+    }
+    std::shared_ptr<OrderItemDTO> item = itemPack.value();
+    // Can only ship confirmed items
+    if (item->getStatus() != OrderItemStatus::CONFIRMED) {
+        return std::unexpected(BusError::ValidationFailed);
+    }
+
+    item->setStatus(OrderItemStatus::SHIPPED);
+    return {};
+}
+
+std::expected<void, BusError> SellerBUS::deliverOrderItem(const std::string& orderId,
+                                                          const std::string& productId) {
+    auto itemPack = findSellerOrderedProductById(orderId, productId);
+    if (!itemPack.has_value()) {
+        return std::unexpected(itemPack.error());
+    }
+    std::shared_ptr<OrderItemDTO> item = itemPack.value();
+    // Can only deliver shipped items
+    if (item->getStatus() != OrderItemStatus::SHIPPED) {
+        return std::unexpected(BusError::ValidationFailed);
+    }
+
+    item->setStatus(OrderItemStatus::DELIVERED);
+    return {};
+}
+
+std::expected<void, BusError> SellerBUS::cancelOrderItem(const std::string& orderId,
+                                                         const std::string& productId) {
+    auto itemPack = findSellerOrderedProductById(orderId, productId);
+    if (!itemPack.has_value()) {
+        return std::unexpected(itemPack.error());
+    }
+
+    std::shared_ptr<OrderItemDTO> item = itemPack.value();
+    if (item->getStatus() != OrderItemStatus::PENDING &&
+        item->getStatus() != OrderItemStatus::CONFIRMED) {
+        return std::unexpected(BusError::ValidationFailed);
+    }
+
+    // 1. Update status
+    item->setStatus(OrderItemStatus::CANCELLED);
+
+    // 2. Restore stock
+    auto product = _seller->findProductById(productId);
+    if (product) {
+        product->setStock(product->getStock() + item->getQuantity());
+    }
+
+    auto order = OrderDAO::getOrderById(orderId);
+    if (!order) {
+        return std::unexpected(BusError::NotFound);
+    }
+
+    // 3. REFUND: Find buyer and return money
+    const std::string& buyerId = order->buyerId();
+    auto buyer = BuyerDAO::getBuyerById(buyerId);
+    if (buyer) {
+        // Refund the subtotal of this item only (price * quantity)
+        buyer->setBalance(buyer->getBalance() + item->getSubtotal());
+        BuyerDAO::save(*buyer);  // Save refund
+    }
+    // Note: If your order is already updated in memory (since everything is by reference),
+    // no need to call an update/save for the order.
+
+    // 4. Optionally, recalculate and update the order's total
+    order->recalculateTotal();
+    // If you persist purchase history or order record for the buyer, update that too
+
+    return {};
 }
