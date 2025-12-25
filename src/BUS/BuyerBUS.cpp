@@ -94,8 +94,15 @@ BuyerBUS::prepareOrderData(const BuyerDTO& buyer, const std::vector<std::string>
     OrderDTO order(orderItems, rawTotal, Utils::getCurrentDate());
     double totalDiscount = 0.0;
     for (const auto& voucher : vouchers) {
-        if (voucher && voucher->canApply(order)) {
+        if (!voucher) continue;
+
+        auto applyResult = voucher->canApply(order);
+        
+        if (applyResult.has_value()) {
             totalDiscount += voucher->calculateDiscount(order);
+        } else {
+            
+            std::cout << "[THÔNG BÁO] " << applyResult.error() << std::endl;
         }
     }
 

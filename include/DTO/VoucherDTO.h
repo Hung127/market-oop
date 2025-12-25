@@ -6,7 +6,8 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
-#include<expected>
+#include <expected>
+#include <format>
 #include "CartDTO.h"
 #include "OrderDTO.h"
 #include "ProductDTO.h"
@@ -16,18 +17,18 @@ protected:
     std::string _id;
     std::string _code;
     std::string _ownerId; 
+    std::string _expiryDate;
 
 public:
-    VoucherDTO(std::string id, std::string code, std::string owner) 
-        : _id(id), _code(code), _ownerId(owner) {}
+    VoucherDTO(std::string id, std::string code, std::string owner, std::string expiryDate) 
+        : _id(id), _code(code), _ownerId(owner), _expiryDate(expiryDate) {}
     virtual ~VoucherDTO() = default;
 
     std::string getCode() const { return _code; }
     std::string getOwnerId() const { return _ownerId; }
-
+    std::string getExpiryDate() const { return _expiryDate; }
     // Hàm thuần ảo: Kiểm tra xem giỏ hàng có thỏa mãn điều kiện dùng mã không
-    virtual bool canApply(const OrderDTO& order) const = 0;
-
+    virtual std::expected<void, std::string> canApply(const OrderDTO& order) const = 0;
     // Hàm thuần ảo: Tính toán số tiền được giảm
     virtual double calculateDiscount(const OrderDTO& order) const = 0;
 };
@@ -37,11 +38,15 @@ private:
     double _discountPercent;
     double _minOrderValue;
 public:
-    SellerVoucherDTO(std::string id, std::string code, std::string sellerId, double percent, double minVal)
-        : VoucherDTO(id, code, sellerId), _discountPercent(percent), _minOrderValue(minVal) {}
+    SellerVoucherDTO(std::string id, std::string code, std::string sellerId, double percent, double minVal, std::string expiryDate)
+        : VoucherDTO(id, code, sellerId, expiryDate), _discountPercent(percent), _minOrderValue(minVal) {}
     
-    bool canApply(const OrderDTO& order) const override {
+    std::expected<void, std::string> canApply(const OrderDTO& order) const override {
         double totalShopValue = 0.0;
+
+        if (order.date() > _expiryDate) {
+            return std::unexpected(std::format("Voucher '{}' đã hết hạn vào lúc {}!", _code, _expiryDate));
+        }
 
         for (const auto& item : order.items()) {
             if (item.getSellerId() == _ownerId) {
@@ -50,7 +55,10 @@ public:
         }
 
         // Voucher chỉ có hiệu lực nếu tổng tiền của shop đạt mức tối thiểu
-        return totalShopValue >= _minOrderValue;
+        if (totalShopValue < _minOrderValue) {
+            return std::unexpected(std::format("Voucher '{}' yêu cầu đơn hàng từ shop tối thiểu {:.2f}.", _code, _minOrderValue));
+        }
+        return {};
     }
 
     //

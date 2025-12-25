@@ -101,7 +101,8 @@ target_include_directories(app PRIVATE "${PROJECT_INCLUDE_DIR}")
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/data")
 
 # 2. Copy thư mục assets từ gốc vào thư mục build để app có thể truy cập
-file(COPY "${CMAKE_SOURCE_DIR}/assets" DESTINATION "${CMAKE_BINARY_DIR}")
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # 3. Định nghĩa PROJECT_ROOT cho code C++. 
 # Điều này cực kỳ quan trọng để code C++ luôn tìm thấy file dù bạn chạy app từ đâu.

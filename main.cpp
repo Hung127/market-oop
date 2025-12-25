@@ -42,7 +42,7 @@ int main() {
     std::shared_ptr<ProductDTO> prod2 = product2Pack.value();
 
     // 2) Thiết lập Voucher
-    SellerVoucherDTO aliceVoucher("v1", "ALICE_SALE", "s1", 10.0, 150.0);
+    SellerVoucherDTO aliceVoucher("v1", "ALICE_SALE", "s1", 10.0, 150.0, "2025-12-31 23:59:59");
 
     // ---------------------------------------------------------
     // SCENARIO 1: BOB
@@ -92,10 +92,10 @@ int main() {
         std::vector<VoucherDTO*> vouchersForDavid = { &aliceVoucher };
         
         // Xem hóa đơn tạm tính
-        BuyerBUS::checkout(*david, {"p1"}, vouchersForDavid, false);
+        BuyerBUS::checkout(*david, {"p1"}, vouchersForDavid, true);
 
         // Chốt đơn hàng
-        auto res2 = BuyerBUS::finalOrder(true, *david, {"p1"}, vouchersForDavid, false);
+        auto res2 = BuyerBUS::finalOrder(true, *david, {"p1"}, vouchersForDavid, true);
 
         if (res2.has_value()) {
             cout << "[SUCCESS] David thanh toán thành công!" << endl;

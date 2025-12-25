@@ -33,8 +33,8 @@ class ProductDAO {
     static bool remove(const std::string& productId);
 
     // Lưu ảnh
-    void saveToFile(const std::string& fileName, const ProductExtraInfoDTO& dto);
-    void loadFromFile(const std::string& fileName, ProductExtraInfoDTO& dto);
+    static void saveToFile(const std::string& fileName, const ProductExtraInfoDTO& dto);
+    static void loadFromFile(const std::string& fileName, ProductExtraInfoDTO& dto);
 };
 
 #endif  // DAO_PRODUCT_DAO_H
