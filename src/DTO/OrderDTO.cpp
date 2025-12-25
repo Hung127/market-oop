@@ -73,9 +73,3 @@ void OrderDTO::setDiscounts(double vDiscount, double cDiscount) {
     double OrderDTO::getCoinDiscount() const { 
         return _coinDiscount; 
     }
-    double OrderDTO::totalPrice() const { 
-        return _totalPrice; 
-    }
-    void OrderDTO::setTotalPrice(double price) { 
-        _totalPrice = price; 
-    }

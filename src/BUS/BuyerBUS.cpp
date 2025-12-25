@@ -53,111 +53,102 @@ void BuyerBUS::viewCart(const BuyerDTO& buyerDTO) {
 
 // ========== CHECKOUT LOGIC ==========
 // Hàm logic phức tạp nhất, chuyển từ BuyerDTO::checkout
-std::expected<void, std::string> BuyerBUS::checkout(BuyerDTO& buyer,const std::vector<std::string>& selectedProductIds, vector<VoucherDTO*> vouchers, bool useCoins) {
-    CartDTO& cart = buyer.getCart();
-
-    // 1. Kiểm tra giỏ hàng rỗng (Nghiệp vụ)
-    if (cart.getItems().empty()) {
-        return std::unexpected("Your cart is EMPTY, cannot checkout !");
-    }
-
-    // 2. Get items before clearing cart
+// ========== CHECKOUT LOGIC ==========
+std::expected<std::pair<OrderDTO, std::vector<size_t>>, std::string> 
+BuyerBUS::prepareOrderData(const BuyerDTO& buyer, const std::vector<std::string>& selectedProductIds, 
+                 const std::vector<VoucherDTO*>& vouchers, bool useCoins) {
+    
+    const CartDTO& cart = buyer.getCart();
     auto& cartItems = cart.getItems();
+
+    if (cartItems.empty()) return std::unexpected("Your cart is EMPTY!");
+
     std::vector<OrderItemDTO> orderItems;
     double rawTotal = 0.0;
-    
-    // Lưu lại vị trí các item trong giỏ hàng để xóa sau khi thanh toán xong
     std::vector<size_t> indicesToRemove;
 
-    // 1. Duyệt giỏ hàng để lọc ra các món được chọn
+    // --- LOGIC KIỂM TRA HÀNG HÓA ---
     for (const std::string& selectedId : selectedProductIds) {
-        // Tìm item trong giỏ hàng dựa trên ID
         auto it = std::find_if(cartItems.begin(), cartItems.end(), [&](const auto& item) {
             auto p = std::get<0>(item).lock();
             return p && p->getID() == selectedId;
         });
 
-        // TRƯỜNG HỢP 1: Không tìm thấy ID này trong giỏ (Lỗi hệ thống/UI)
-        if (it == cartItems.end()) {
-            return std::unexpected(std::format("Product ID {} is not in your current session.", selectedId));
-        }
+        if (it == cartItems.end()) 
+            return std::unexpected(std::format("Product ID {} not in cart.", selectedId));
         
         indicesToRemove.push_back(std::distance(cartItems.begin(), it));
         auto product = std::get<0>(*it).lock();
         int quantity = std::get<1>(*it);
 
-        // TRƯỜNG HỢP 2: Sản phẩm đã bị xóa khỏi hệ thống (Dù vẫn còn trong giỏ)
-        if (!product) {
-            return std::unexpected("One of your selected items is no longer available in our store.");
-        }
+        if (!product) return std::unexpected("Item no longer available.");
+        if (product->getStock() < quantity) 
+            return std::unexpected(std::format("Mặt hàng '{}' không đủ kho.", product->getName()));
 
-        // TRƯỜNG HỢP 3: Không đủ số lượng (Lỗi nghiệp vụ - Nhắc nhở người dùng)
-        if (product->getStock() < quantity) {
-            return std::unexpected(std::format(
-                "Mặt hàng '{}' không đủ số lượng trong kho (Còn: {}, Bạn cần: {}).", 
-                product->getName(), product->getStock(), quantity));
-        }
-
-        // Nếu mọi thứ ổn, thêm vào danh sách order
         orderItems.emplace_back(product->getID(), product->getSellerId(), 
                                product->getName(), product->getPrice(), quantity);
         rawTotal += product->getPrice() * quantity;
     }
 
-    // 2. Tạo Order từ những món ĐÃ CHỌN
+    // --- LOGIC TÍNH TOÁN GIẢM GIÁ ---
     OrderDTO order(orderItems, rawTotal, Utils::getCurrentDate());
-
-    double totalDiscount=0.0;
-
-    // 3.1 Áp dụng Voucher (nếu có)
+    double totalDiscount = 0.0;
     for (const auto& voucher : vouchers) {
         if (voucher && voucher->canApply(order)) {
             totalDiscount += voucher->calculateDiscount(order);
         }
     }
-    order.setTotalPrice(rawTotal - totalDiscount);
 
-    //3.2 Sử dụng coint nếu muốn
-    double coinDiscount=0.0;
-    if (useCoins) {
-    coinDiscount = std::min(buyer.getCoins(), order.totalPrice());
-    buyer.setCoins(buyer.getCoins() - coinDiscount); // Trừ xu ngay
-    }
-
-    double finalPrice = order.totalPrice() - coinDiscount;
+    double priceAfterVoucher = rawTotal - totalDiscount;
+    double coinDiscount = useCoins ? std::min(buyer.getCoins(), priceAfterVoucher) : 0.0;
     
+    order.setDiscounts(totalDiscount, coinDiscount);
+    order.setTotalPrice(priceAfterVoucher - coinDiscount);
 
-    // 4. Kiểm tra số dư
-    if (!hasEnoughBalance(buyer, finalPrice)) {
-        return std::unexpected("Insufficient balance.");
-    }
+    return std::make_pair(order, indicesToRemove);
+}
 
-    // --- THỰC THI GIAO DỊCH ---
-    
-    // Trừ kho và Trừ tiền
-    buyer.setBalance(buyer.getBalance() - finalPrice);
-    for (auto idx : indicesToRemove) {
+// ========== CÁC HÀM PUBLIC ==========
+
+std::expected<void, std::string> BuyerBUS::checkout(BuyerDTO& buyer, const std::vector<std::string>& ids, std::vector<VoucherDTO*> v, bool useC) {
+    auto res = prepareOrderData(buyer, ids, v, useC);
+    if (!res) return std::unexpected(res.error());
+
+    res->first.display(); 
+    return {}; 
+}
+
+std::expected<void, std::string> BuyerBUS::payment(BuyerDTO& buyer, const std::vector<std::string>& ids, std::vector<VoucherDTO*> v, bool useC) {
+    auto res = prepareOrderData(buyer, ids, v, useC);
+    if (!res) return std::unexpected(res.error());
+
+    OrderDTO& order = res->first;
+    std::vector<size_t>& indices = res->second;
+
+    if (!hasEnoughBalance(buyer, order.totalPrice())) return std::unexpected("Tài khoản không đủ tiền để thanh toán. Vui lòng nạp thêm.");
+
+    // THỰC THI GIAO DỊCH
+    buyer.setBalance(buyer.getBalance() - order.totalPrice());
+    buyer.setCoins(buyer.getCoins() - order.getCoinDiscount() + (order.totalPrice() * 0.001));
+
+    auto& cartItems = buyer.getCart().getItems();
+    for (auto idx : indices) {
         if (auto p = std::get<0>(cartItems[idx]).lock()) {
             p->setStock(p->getStock() - std::get<1>(cartItems[idx]));
         }
     }
 
-    // Thêm xu vào tài khoản
-    double earnedCoins = finalPrice * 0.001;
-    buyer.setCoins(buyer.getCoins() + earnedCoins);
-
-    // Lưu vào lịch sử
     buyer.getPurchasesHistory().addOrder(order);
+    std::sort(indices.rbegin(), indices.rend());
+    for (auto idx : indices) cartItems.erase(cartItems.begin() + idx);
+    
+    CartBUS::recalculateTotal(buyer.getCart());
+    return {}; 
+}
 
-    // Xóa CHỈ những món đã thanh toán khỏi giỏ hàng
-    // Xóa từ dưới lên để không làm lệch index
-    std::sort(indicesToRemove.rbegin(), indicesToRemove.rend());
-    for (auto idx : indicesToRemove) {
-        cartItems.erase(cartItems.begin() + idx);
+std::expected<void, std::string> BuyerBUS::finalOrder(bool check, BuyerDTO& buyer, const std::vector<std::string>& ids, std::vector<VoucherDTO*> v, bool useC) {
+    if (check) {
+        return payment(buyer, ids, v, useC); 
     }
-
-    // Cập nhật lại tổng tiền giỏ hàng sau khi đã bớt đồ
-    CartBUS::recalculateTotal(cart);
-
-    return {};
+    return std::unexpected("Không thanh toán đơn hàng.");
 }
