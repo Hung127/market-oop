@@ -1,3 +1,0 @@
-"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\ExclusiveEcommerce.dir/objects.a
-C:\mingw64\bin\ar.exe qc CMakeFiles\ExclusiveEcommerce.dir/objects.a @CMakeFiles\ExclusiveEcommerce.dir\objects1.rsp
-C:\mingw64\bin\g++.exe  -fno-stack-protector -g -mwindows -fno-stack-protector -Wl,--whole-archive CMakeFiles\ExclusiveEcommerce.dir/objects.a -Wl,--no-whole-archive -o ExclusiveEcommerce.exe -Wl,--out-implib,libExclusiveEcommerce.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\ExclusiveEcommerce.dir\linkLibs.rsp
