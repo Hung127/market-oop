@@ -2,23 +2,23 @@
 #define PRODUCT_DTO_H_
 
 #include <cstdint>
+#include <expected>
 #include <memory>
-#include <stdexcept>
 #include <string>
 #include <vector>
 
 using std::string;
 using std::vector;
 
-class SellerDTO; 
+class SellerDTO;
 
 // ================= PRODUCT EXTRA INFO DTO =================
 class ProductExtraInfoDTO {
-private:
+   private:
     string _description;
     std::vector<std::vector<uint8_t>> _imageRawData;
 
-public:
+   public:
     ProductExtraInfoDTO() = default;
     ProductExtraInfoDTO(const string& desc) : _description(desc) {}
 
@@ -28,14 +28,14 @@ public:
 
     // ===== GETTERS =====
     size_t getImageCount() const;
-    const std::vector<uint8_t>& getImageAt(size_t index) const;
     const std::string& getDescription() const;
     const std::vector<std::vector<uint8_t>>& getImageRawData() const;
+    std::expected<std::vector<uint8_t>, std::string> getImageAt(size_t index) const;
 };
 
 // ================= PRODUCT DTO =================
 class ProductDTO {
-private:
+   private:
     std::weak_ptr<SellerDTO> _owner;
     string _sellerId;
     string _id;
@@ -44,7 +44,7 @@ private:
     int _stock;
     std::shared_ptr<ProductExtraInfoDTO> _extraInfo;
 
-public:
+   public:
     ProductDTO(const string& id, const string& name, double price, int stock,
                const std::shared_ptr<SellerDTO>& owner);
 

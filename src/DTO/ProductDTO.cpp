@@ -1,7 +1,7 @@
 #include "../../include/DTO/ProductDTO.h"
 
+#include <expected>
 #include <memory>
-#include <stdexcept>
 
 #include "../../include/DTO/SellerDTO.h"
 
@@ -92,11 +92,13 @@ const std::vector<std::vector<uint8_t>>& ProductExtraInfoDTO::getImageRawData() 
     return _imageRawData;
 }
 
-const std::vector<uint8_t>& ProductExtraInfoDTO::getImageAt(size_t index) const {
+std::expected<std::vector<uint8_t>, std::string>
+ProductExtraInfoDTO::getImageAt(size_t index) const {
     if (index < _imageRawData.size()) {
         return _imageRawData[index];
     }
-    throw std::out_of_range("Index anh khong hop le!");
+
+    return std::unexpected("Index anh khong hop le!");
 }
 
 void ProductExtraInfoDTO::setDescription(const std::string& description) {

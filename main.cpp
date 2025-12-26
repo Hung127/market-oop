@@ -99,7 +99,7 @@ int main() {
     cout << "===== TEST QUY TRINH ANH NHI PHAN =====" << endl;
 
     // 1. Khai báo đường dẫn
-    std::string testImagePath = "assets/cpu.jpg";           // Đặt file này ở thư mục gốc Project
+    std::string testImagePath = "assets/cpu.jpg";    // Đặt file này ở thư mục gốc Project
     std::string databasePath = "data/database.bin";  // File này sẽ nằm trong folder data
 
     // --- KIỂM TRA FILE ẢNH GỐC ---
@@ -116,12 +116,12 @@ int main() {
 
     // Hàm này sẽ gọi ImageHelper để đọc byte và DAO để ghi file .bin
     bus.processAndSaveProduct("San pham CPU", paths);
-   if (fs::exists(databasePath)) {
-    cout << "-> XAC NHAN: File da ton tai tai: " << fs::absolute(databasePath) << endl;
-    cout << "-> Kich thuoc: " << fs::file_size(databasePath) << " bytes" << endl;
-} else {
-    cout << "-> [LOI THAT SU] File van chua duoc tao ra!" << endl;
-}
+    if (fs::exists(databasePath)) {
+        cout << "-> XAC NHAN: File da ton tai tai: " << fs::absolute(databasePath) << endl;
+        cout << "-> Kich thuoc: " << fs::file_size(databasePath) << " bytes" << endl;
+    } else {
+        cout << "-> [LOI THAT SU] File van chua duoc tao ra!" << endl;
+    }
 
     // 3. GIAI ĐOẠN XÓA: Xóa ảnh gốc để chứng minh "đọc sang ảnh luôn"
     /*cout << "\n[BUOC 2] Dang xoa anh goc de test tinh bao toan..." << endl;
@@ -147,7 +147,11 @@ int main() {
     cout << "So luong anh trong database: " << loadedDto.getImageCount() << endl;
 
     if (loadedDto.getImageCount() > 0) {
-        size_t imageSize = loadedDto.getImageAt(0).size();
+        auto pack = loadedDto.getImageAt(0);
+        if (!pack.has_value()) {
+            return 0;
+        }
+        size_t imageSize = pack.value().size();
         cout << "Kich thuoc anh thu nhat: " << imageSize << " bytes" << endl;
         cout << "=> KET LUAN: Anh van ton tai trong file .bin du anh goc da bi xoa!" << endl;
         cout << "=> Backend da san sang gui du lieu cho Qt hien thi." << endl;
