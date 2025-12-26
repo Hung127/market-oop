@@ -8,9 +8,16 @@
 #include <sstream>
 #include <string>
 
+#include "../DAO/ProductDAO.h"
+#include "../DTO/ProductDTO.h"
+#include "../Utils/Utils.h"
+
 class ProductDTO;
 
 class ProductBUS {
+   private:
+    ProductDAO _dao;
+
    public:
     // ========== STOCK MANAGEMENT ==========
 
@@ -41,6 +48,8 @@ class ProductBUS {
      * @brief Logic in ra màn hình
      */
     static void display(const ProductDTO& p);
+
+    void processAndSaveProduct(const std::string& desc, const std::vector<std::string>& paths);
 };
 
 #endif  // BUS_PRODUCT_BUS_H

@@ -2,6 +2,7 @@
 #define DAO_PRODUCT_DAO_H
 
 #include <expected>
+#include <fstream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -30,6 +31,10 @@ class ProductDAO {
 
     // Xóa sản phẩm
     static bool remove(const std::string& productId);
+
+    // Lưu ảnh
+    void saveToFile(const std::string& fileName, const ProductExtraInfoDTO& dto);
+    void loadFromFile(const std::string& fileName, ProductExtraInfoDTO& dto);
 };
 
 #endif  // DAO_PRODUCT_DAO_H

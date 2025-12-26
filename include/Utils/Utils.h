@@ -1,6 +1,15 @@
 #ifndef UTILS_H
 #define UTILS_H
+
+#include <algorithm>
+#include <chrono>
+#include <cstdint>
+#include <ctime>
 #include <expected>
+#include <filesystem>
+#include <fstream>
+#include <functional>
+#include <iostream>
 #include <string>
 
 #include <sodium.h>
@@ -50,6 +59,27 @@ class PasswordUtils {
 
 // TODO: rewrite this function
 std::string generateId();
+
+class ImageHelper {
+   public:
+    static std::vector<uint8_t> readImageToBytes(const std::string& filePath) {
+        std::ifstream file(filePath, std::ios::binary | std::ios::ate);
+        if (!file.is_open())
+            return {};
+
+        std::streamsize size = file.tellg();
+        file.seekg(0, std::ios::beg);
+
+        std::vector<uint8_t> buffer(size);
+        file.read(reinterpret_cast<char*>(buffer.data()), size);
+        return buffer;
+    }
+
+    static bool isValidImage(const std::string& filePath) {
+        std::string ext = std::filesystem::path(filePath).extension().string();
+        return (ext == ".jpg" || ext == ".png" || ext == ".jpeg");
+    }
+};
 
 }  // namespace Utils
 

@@ -58,3 +58,17 @@ std::string ProductBUS::toString(const ProductDTO& p) {
 void ProductBUS::display(const ProductDTO& p) {
     std::cout << toString(p) << std::endl;
 }
+
+// Lưu file vào database.bin
+void ProductBUS::processAndSaveProduct(const std::string& desc,
+                                       const std::vector<std::string>& paths) {
+    ProductExtraInfoDTO dto(desc);
+
+    for (const auto& path : paths) {
+        if (Utils::ImageHelper::isValidImage(path)) {
+            auto bytes = Utils::ImageHelper::readImageToBytes(path);
+            dto.addImageData(bytes);
+        }
+    }
+    _dao.saveToFile("data/database.bin", dto);
+}

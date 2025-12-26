@@ -1,44 +1,76 @@
 #ifndef PRODUCT_DTO_H_
 #define PRODUCT_DTO_H_
 
+#include <cstdint>
+#include <expected>
 #include <memory>
 #include <string>
+#include <vector>
+
+using std::string;
+using std::vector;
 
 class SellerDTO;
 
+// ================= PRODUCT EXTRA INFO DTO =================
+class ProductExtraInfoDTO {
+   private:
+    string _description;
+    std::vector<std::vector<uint8_t>> _imageRawData;
+
+   public:
+    ProductExtraInfoDTO() = default;
+    ProductExtraInfoDTO(const string& desc) : _description(desc) {}
+
+    // ===== SETTERS =====
+    void setDescription(const std::string& description);
+    void addImageData(const std::vector<uint8_t>& data);
+
+    // ===== GETTERS =====
+    size_t getImageCount() const;
+    const std::string& getDescription() const;
+    const std::vector<std::vector<uint8_t>>& getImageRawData() const;
+    std::expected<std::vector<uint8_t>, std::string> getImageAt(size_t index) const;
+};
+
+// ================= PRODUCT DTO =================
 class ProductDTO {
    private:
     std::weak_ptr<SellerDTO> _owner;
-    std::string _sellerId;
-    std::string _id;
-    std::string _name;
+    string _sellerId;
+    string _id;
+    string _name;
     double _price;
     int _stock;
+    std::shared_ptr<ProductExtraInfoDTO> _extraInfo;
 
    public:
-    ProductDTO(const std::string& id, const std::string& name, double price, int stock,
+    ProductDTO(const string& id, const string& name, double price, int stock,
                const std::shared_ptr<SellerDTO>& owner);
 
-    // ========== GETTERS (Non-const) ==========
-    std::string getName();
-    std::string getID();
+    // ===== GETTERS (non-const) =====
+    string getName();
+    string getID();
     double getPrice();
     int getStock();
     std::shared_ptr<SellerDTO> getOwner();
+    std::shared_ptr<ProductExtraInfoDTO> getExtraInfo();
 
-    std::string getSellerId() const;
-    // ========== GETTERS (Const) ==========
-    std::string getName() const;
-    std::string getID() const;
+    // ===== GETTERS (const) =====
+    string getName() const;
+    string getID() const;
     double getPrice() const;
     int getStock() const;
     std::shared_ptr<SellerDTO> getOwner() const;
+    string getSellerId() const;
+    std::shared_ptr<const ProductExtraInfoDTO> getExtraInfo() const;
 
-    // ========== SETTERS ==========
-    void setName(const std::string& name);
+    // ===== SETTERS =====
+    void setName(const string& name);
     void setPrice(double price);
     void setStock(int stock);
     void setOwner(const std::shared_ptr<SellerDTO>& owner);
+    void setExtraInfo(const std::shared_ptr<ProductExtraInfoDTO>& extra);
 };
 
 #endif

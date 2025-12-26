@@ -98,6 +98,17 @@ add_executable(app ${MAIN_SRC})
 target_link_libraries(app PRIVATE core)
 target_include_directories(app PRIVATE "${PROJECT_INCLUDE_DIR}")
 
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/data")
+
+# 2. Copy thư mục assets từ gốc vào thư mục build để app có thể truy cập
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+# 3. Định nghĩa PROJECT_ROOT cho code C++. 
+# Điều này cực kỳ quan trọng để code C++ luôn tìm thấy file dù bạn chạy app từ đâu.
+target_compile_definitions(core PUBLIC 
+    PROJECT_ROOT_DIR="${CMAKE_SOURCE_DIR}"
+)
 # -----------------------
 # Tests (GoogleTest) via FetchContent
 # -----------------------
@@ -118,7 +129,7 @@ if(BUILD_TESTS)
     add_executable(tests ${TEST_SOURCES})
     target_include_directories(tests PRIVATE "${PROJECT_INCLUDE_DIR}")
     target_link_libraries(tests PRIVATE core gtest_main)
-
+    
     # Discover and register individual GoogleTest cases with CTest
     include(GoogleTest)
     gtest_discover_tests(tests
