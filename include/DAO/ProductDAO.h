@@ -1,40 +1,55 @@
-#ifndef DAO_PRODUCT_DAO_H
-#define DAO_PRODUCT_DAO_H
+#ifndef PRODUCT_DAO_H
+#define PRODUCT_DAO_H
 
 #include <expected>
-#include <fstream>
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "../DTO/ProductDTO.h"
 
+class DatabaseManager;
+
 class ProductDAO {
+   private:
+    static std::shared_ptr<DatabaseManager> _dbManager;
+
    public:
-    // Tìm sản phẩm theo ID
+    static void setDatabaseManager(std::shared_ptr<DatabaseManager> dbManager);
+
+    // Basic CRUD operations
     static std::expected<std::shared_ptr<ProductDTO>, std::string>
     getProductById(const std::string& id);
 
-    // Lấy tất cả sản phẩm
     static std::vector<std::shared_ptr<ProductDTO>> getAllProducts();
 
-    // Lấy tất cả sản phẩm của một Seller cụ thể
     static std::vector<std::shared_ptr<ProductDTO>>
     getProductsBySeller(const std::string& sellerId);
 
-    // Lưu sản phẩm mới vào DB
     static bool insert(const ProductDTO& product);
-
     static bool insert(const std::shared_ptr<ProductDTO>& product);
-    // Cập nhật thông tin sản phẩm (ví dụ sau khi giảm stock)
     static bool update(const ProductDTO& product);
-
-    // Xóa sản phẩm
     static bool remove(const std::string& productId);
 
-    // Lưu ảnh
-    void saveToFile(const std::string& fileName, const ProductExtraInfoDTO& dto);
-    void loadFromFile(const std::string& fileName, ProductExtraInfoDTO& dto);
+    // Additional query methods
+    static std::vector<std::shared_ptr<ProductDTO>> searchByName(const std::string& keyword);
+
+    static std::vector<std::shared_ptr<ProductDTO>> getProductsByPriceRange(double minPrice,
+                                                                            double maxPrice);
+
+    static bool updateStock(const std::string& productId, int newStock);
+    static bool decrementStock(const std::string& productId, int quantity);
+    static bool incrementStock(const std::string& productId, int quantity);
+
+    static int getProductCount();
+    static int getProductCountBySeller(const std::string& sellerId);
+
+    static bool exists(const std::string& productId);
+
+    // void saveToFile(const std::string& fileName, const ProductExtraInfoDTO& dto);
+    // void loadFromFile(const std::string& fileName, ProductExtraInfoDTO& dto);
 };
 
-#endif  // DAO_PRODUCT_DAO_H
+// // Lưu ảnh
+//
+#endif

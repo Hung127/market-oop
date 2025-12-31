@@ -60,15 +60,15 @@ void ProductBUS::display(const ProductDTO& p) {
 }
 
 // Lưu file vào database.bin
-void ProductBUS::processAndSaveProduct(const std::string& desc,
-                                       const std::vector<std::string>& paths) {
-    ProductExtraInfoDTO dto(desc);
-
-    for (const auto& path : paths) {
-        if (Utils::ImageHelper::isValidImage(path)) {
-            auto bytes = Utils::ImageHelper::readImageToBytes(path);
-            dto.addImageData(bytes);
-        }
-    }
-    _dao.saveToFile("data/database.bin", dto);
-}
+// void ProductBUS::processAndSaveProduct(const std::string& desc,
+//                                        const std::vector<std::string>& paths) {
+//     ProductExtraInfoDTO dto(desc);
+//
+//     for (const auto& path : paths) {
+//         if (Utils::ImageHelper::isValidImage(path)) {
+//             auto bytes = Utils::ImageHelper::readImageToBytes(path);
+//             dto.addImageData(bytes);
+//         }
+//     }
+//     _dao.saveToFile("data/database.bin", dto);
+// }

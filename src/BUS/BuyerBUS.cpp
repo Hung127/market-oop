@@ -1,11 +1,11 @@
 #include "../../include/BUS/BuyerBUS.h"
 
 #include <expected>
+#include <format>
 #include <iterator>
 #include <memory>
 #include <string>
 #include <vector>
-#include <format>
 
 #include "../../include/BUS/CartBUS.h"
 #include "../../include/DAO/OrderDAO.h"
@@ -109,6 +109,10 @@ std::expected<void, std::string> BuyerBUS::checkout(BuyerDTO& buyer) {
     // 7. Deduct balance
     buyer.setBalance(buyer.getBalance() - totalPrice);
 
+    if (!BuyerDAO::save(buyer)) {
+        return std::unexpected("Failed to save buyer");
+    }
+
     // 8. CREATE ORDER AND SAVE TO HISTORY
     std::vector<std::shared_ptr<OrderItemDTO>> orderItems;
     for (const auto& [weakProduct, quantity] : items) {
@@ -131,12 +135,13 @@ std::expected<void, std::string> BuyerBUS::checkout(BuyerDTO& buyer) {
     buyer.getPurchasesHistory().addOrder(newOrder);
 
     // 9. Clear cart
-    CartBUS::clear(cart);
 
     auto orderPack = OrderDAO::addOrder(newOrder);
     if (!orderPack.has_value()) {
         return std::unexpected("Failed to add order");
     }
+
+    CartBUS::clear(cart);
 
     return {};
 }

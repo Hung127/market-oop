@@ -8,6 +8,8 @@
 
 #include "../../include/DAO/BuyerDAO.h"
 #include "../../include/DAO/OrderDAO.h"
+#include "../../include/DAO/ProductDAO.h"
+#include "../../include/DTO/BuyerDTO.h"
 #include "../../include/DTO/ProductDTO.h"
 #include "../../include/DTO/SellerDTO.h"
 #include "../../include/Utils/Utils.h"
@@ -21,14 +23,7 @@ std::shared_ptr<ProductDTO> SellerBUS::findProductInInventory(const std::string&
 
 std::expected<std::shared_ptr<ProductDTO>, BusError>
 SellerBUS::createProduct(const std::string& id, const std::string& name, double price, int stock) {
-    // clang-format off
-    if (
-        (id.empty())
-        || (name.empty())
-        || (price <= 0.0)
-        || (stock < 0)
-    ) {
-        // clang-format on
+    if (id.empty() || name.empty() || price <= 0.0 || stock < 0) {
         return std::unexpected(BusError::ValidationFailed);
     }
 
@@ -41,34 +36,6 @@ SellerBUS::createProduct(const std::string& id, const std::string& name, double 
     return p;
 }
 
-// std::expected<void, BusError> SellerBUS::deleteProduct(Market& market,
-//                                                        const std::string& productId) {
-//     if (productId.empty()) {
-//         return std::unexpected(BusError::ValidationFailed);
-//     }
-//
-//     std::shared_ptr<ProductDTO> prod = findProductInInventory(productId);
-//     if (!prod) {
-//         return std::unexpected(BusError::NotFound);
-//     }
-//
-//     auto listed = market.findProductById(productId);
-//     if (listed) {
-//         std::expected<void, BusError> unlistPack = market.unlistProduct(productId);
-//         if (!unlistPack.has_value()) {
-//             // Propagate market error from Market directly
-//             return std::unexpected(unlistPack.error());
-//         }
-//     }
-//
-//     bool removed = _seller->removeProductById(productId);
-//     if (!removed) {
-//         return std::unexpected(BusError::InternalError);
-//     }
-//
-//     return {};
-// }
-
 std::expected<void, BusError> SellerBUS::updateProduct(const std::string& productId,
                                                        const std::string& newName,
                                                        double newPrice) {
@@ -77,10 +44,6 @@ std::expected<void, BusError> SellerBUS::updateProduct(const std::string& produc
         return std::unexpected(BusError::NotFound);
     }
 
-    // Support partial updates:
-    // - newName empty => no change to name
-    // - newPrice < 0   => no change to price
-    // Nothing to update => validation failed
     if (newName.empty() && newPrice < 0) {
         return std::unexpected(BusError::ValidationFailed);
     }
@@ -113,52 +76,12 @@ std::expected<void, BusError> SellerBUS::updateStock(const std::string& productI
 }
 
 std::expected<std::vector<std::shared_ptr<ProductDTO>>, BusError> SellerBUS::getMyProducts() const {
-    return _seller->products();  // copy of vector of shared_ptrs
+    return _seller->products();
 }
 
 std::expected<int, BusError> SellerBUS::getProductCount() const {
     return static_cast<int>(_seller->products().size());
 }
-
-// ========== MARKET INTERACTION ==========
-// TODO: implement market
-
-// std::expected<void, BusError> SellerBUS::publishToMarket(Market& market,
-//                                                          const std::string& productId) {
-//     std::shared_ptr<ProductDTO> prod = findProductInInventory(productId);
-//     if (!prod) {
-//         return std::unexpected(BusError::NotFound);
-//     }
-//
-//     // Market API returns std::expected<void, BusError>
-//     std::expected<void, BusError> listPack = market.listProduct(prod);
-//     if (!listPack.has_value()) {
-//         return std::unexpected(listPack.error());
-//     }
-//
-//     return {};
-// }
-
-// std::expected<void, BusError> SellerBUS::unpublishFromMarket(Market& market,
-//                                                              const std::string& productId) {
-//     // clang-format off
-//     if (productId.empty()) {
-//         return std::unexpected(BusError::ValidationFailed);
-//     }
-//     // clang-format on
-//
-//     std::shared_ptr<ProductDTO> prod = findProductInInventory(productId);
-//     if (!prod) {
-//         return std::unexpected(BusError::NotFound);
-//     }
-//
-//     std::expected<void, BusError> res = market.unlistProduct(productId);
-//     if (!res.has_value()) {
-//         return std::unexpected(res.error());
-//     }
-//
-//     return {};
-// }
 
 // ========== SEARCH IN INVENTORY ==========
 
@@ -169,17 +92,14 @@ SellerBUS::searchMyProductsByName(const std::string& keyword) const {
         return out;
     }
 
-    // Collect substring matches (case-insensitive)
     for (const auto& p : _seller->products()) {
-        if (!p) {
+        if (!p)
             continue;
-        }
         if (Utils::SearchHelper::containsIgnoreCase(p->getName(), keyword)) {
             out.push_back(p);
         }
     }
 
-    // Compute similarity scores once to avoid repeated expensive computations
     std::vector<std::pair<std::shared_ptr<ProductDTO>, double>> scored;
     scored.reserve(out.size());
     for (const auto& p : out) {
@@ -193,7 +113,6 @@ SellerBUS::searchMyProductsByName(const std::string& keyword) const {
         return a.second > b.second;
     });
 
-    // Unpack back to out
     for (size_t i = 0; i < scored.size(); ++i) {
         out[i] = std::move(scored[i].first);
     }
@@ -210,11 +129,9 @@ std::shared_ptr<ProductDTO> SellerBUS::searchMyClosestProduct(const std::string&
     std::shared_ptr<ProductDTO> best = nullptr;
     double bestScore = -1.0;
 
-    // Use similarity score (based on edit distance) to pick the closest match.
     for (const auto& p : _seller->products()) {
-        if (!p) {
+        if (!p)
             continue;
-        }
         double score = Utils::SearchHelper::similarityScore(p->getName(), keyword);
         if (score > bestScore) {
             bestScore = score;
@@ -223,14 +140,9 @@ std::shared_ptr<ProductDTO> SellerBUS::searchMyClosestProduct(const std::string&
     }
 
     constexpr double MIN_ACCEPTABLE_SCORE = 0.25;
-    // clang-format off
-    if (
-        (best)
-        && (bestScore >= MIN_ACCEPTABLE_SCORE)
-    ) {
+    if (best && bestScore >= MIN_ACCEPTABLE_SCORE) {
         return best;
     }
-    // clang-format on
 
     return nullptr;
 }
@@ -239,7 +151,6 @@ std::expected<SellerBUS, BusError> SellerBUS::create(std::shared_ptr<SellerDTO> 
     if (!seller) {
         return std::unexpected(BusError::ValidationFailed);
     }
-
     return SellerBUS(seller);
 }
 
@@ -255,7 +166,6 @@ SellerBUS::findSellerOrderedProductById(const std::string& orderId, const std::s
         return std::unexpected(BusError::NotFound);
     }
 
-    // Verify this item belongs to this seller
     if (item->getSellerId() != _seller->getId()) {
         return std::unexpected(BusError::ValidationFailed);
     }
@@ -280,12 +190,18 @@ std::expected<void, BusError> SellerBUS::confirmOrderItem(const std::string& ord
         return std::unexpected(itemPack.error());
     }
     std::shared_ptr<OrderItemDTO> item = itemPack.value();
-    // Can only confirm pending items
+
     if (item->getStatus() != OrderItemStatus::PENDING) {
         return std::unexpected(BusError::ValidationFailed);
     }
 
     item->setStatus(OrderItemStatus::CONFIRMED);
+
+    // Save to database
+    if (!OrderDAO::updateOrderItem(*item)) {
+        return std::unexpected(BusError::InternalError);
+    }
+
     return {};
 }
 
@@ -296,12 +212,17 @@ std::expected<void, BusError> SellerBUS::shipOrderItem(const std::string& orderI
         return std::unexpected(itemPack.error());
     }
     std::shared_ptr<OrderItemDTO> item = itemPack.value();
-    // Can only ship confirmed items
+
     if (item->getStatus() != OrderItemStatus::CONFIRMED) {
         return std::unexpected(BusError::ValidationFailed);
     }
 
     item->setStatus(OrderItemStatus::SHIPPED);
+
+    if (!OrderDAO::updateOrderItem(*item)) {
+        return std::unexpected(BusError::InternalError);
+    }
+
     return {};
 }
 
@@ -312,12 +233,17 @@ std::expected<void, BusError> SellerBUS::deliverOrderItem(const std::string& ord
         return std::unexpected(itemPack.error());
     }
     std::shared_ptr<OrderItemDTO> item = itemPack.value();
-    // Can only deliver shipped items
+
     if (item->getStatus() != OrderItemStatus::SHIPPED) {
         return std::unexpected(BusError::ValidationFailed);
     }
 
     item->setStatus(OrderItemStatus::DELIVERED);
+
+    if (!OrderDAO::updateOrderItem(*item)) {
+        return std::unexpected(BusError::InternalError);
+    }
+
     return {};
 }
 
@@ -329,6 +255,8 @@ std::expected<void, BusError> SellerBUS::cancelOrderItem(const std::string& orde
     }
 
     std::shared_ptr<OrderItemDTO> item = itemPack.value();
+
+    // Can only cancel pending or confirmed items
     if (item->getStatus() != OrderItemStatus::PENDING &&
         item->getStatus() != OrderItemStatus::CONFIRMED) {
         return std::unexpected(BusError::ValidationFailed);
@@ -341,6 +269,10 @@ std::expected<void, BusError> SellerBUS::cancelOrderItem(const std::string& orde
     auto product = _seller->findProductById(productId);
     if (product) {
         product->setStock(product->getStock() + item->getQuantity());
+        // Save product stock update to database
+        if (!ProductDAO::update(*product)) {
+            return std::unexpected(BusError::InternalError);
+        }
     }
 
     auto order = OrderDAO::getOrderById(orderId);
@@ -348,20 +280,28 @@ std::expected<void, BusError> SellerBUS::cancelOrderItem(const std::string& orde
         return std::unexpected(BusError::NotFound);
     }
 
-    // 3. REFUND: Find buyer and return money
+    // 3. REFUND:  Find buyer and return money
     const std::string& buyerId = order->buyerId();
     auto buyer = BuyerDAO::getBuyerById(buyerId);
     if (buyer) {
-        // Refund the subtotal of this item only (price * quantity)
         buyer->setBalance(buyer->getBalance() + item->getSubtotal());
-        BuyerDAO::save(*buyer);  // Save refund
-    }
-    // Note: If your order is already updated in memory (since everything is by reference),
-    // no need to call an update/save for the order.
 
-    // 4. Optionally, recalculate and update the order's total
+        if (!BuyerDAO::save(*buyer)) {
+            return std::unexpected(BusError::InternalError);
+        }
+    }
+
+    // 4. Save order item status to database
+    if (!OrderDAO::updateOrderItem(*item)) {
+        return std::unexpected(BusError::InternalError);
+    }
+
+    // 5. Recalculate and update order total in database
     order->recalculateTotal();
-    // If you persist purchase history or order record for the buyer, update that too
+    auto updateResult = OrderDAO::updateOrder(*order);
+    if (!updateResult.has_value()) {
+        return std::unexpected(BusError::InternalError);
+    }
 
     return {};
 }

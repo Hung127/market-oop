@@ -15,12 +15,15 @@ TEST(CartBUSTest, AddNullOrInvalidQuantityAndRecalculateExpiredItems) {
     {
         auto seller = makeSeller("cart_s1", "CartSeller1");
         prod = makeProduct("cart_p1", "Temp", 2.0, 5, seller);
-    }  // seller still exists but prod is in DAO and also held by 'prod' shared_ptr
 
-    ASSERT_TRUE(CartBUS::add(cart, prod, 2).has_value());
-    EXPECT_EQ(cart.getItems().size(), 1U);
+        ASSERT_TRUE(CartBUS::add(cart, prod, 2).has_value());
+        EXPECT_EQ(cart.getItems().size(), 1U);
 
-    // simulate product going out of scope by resetting the shared_ptr and removing from DAO
+        // Remove from global registry to allow expiration
+        g_testProducts.erase("cart_p1");
+    }
+
+    // simulate product going out of scope by resetting the shared_ptr
     prod.reset();
     ProductDAO::remove("cart_p1");
 

@@ -7,6 +7,7 @@
 
 class OrderItemDTO {
    private:
+    int _id;  // Database ID
     std::string _productId;
     std::string _productName;
     std::string _sellerId;
@@ -19,17 +20,21 @@ class OrderItemDTO {
     // Updated constructor
     OrderItemDTO(const std::string& productId, const std::string& productName,
                  const std::string& sellerId, const std::string& sellerName, double price, int qty)
-        : _productId(productId),
+        : _id(-1),  // -1 means not yet saved to database
+          _productId(productId),
           _productName(productName),
           _sellerId(sellerId),
           _sellerName(sellerName),
           _price(price),
           _quantity(qty),
-          _status(OrderItemStatus::PENDING) {  // set default status to pending
-        // Do noting
+          _status(OrderItemStatus::PENDING) {
+        // Do nothing
     }
 
     // Getters
+    int getId() const {
+        return _id;
+    }
     std::string getProductId() const {
         return _productId;
     }
@@ -52,7 +57,10 @@ class OrderItemDTO {
         return _status;
     }
 
-    // Setter for status
+    // Setters
+    void setId(int id) {
+        _id = id;
+    }
     void setStatus(OrderItemStatus status) {
         _status = status;
     }

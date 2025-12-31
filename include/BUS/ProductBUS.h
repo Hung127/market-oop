@@ -49,7 +49,7 @@ class ProductBUS {
      */
     static void display(const ProductDTO& p);
 
-    void processAndSaveProduct(const std::string& desc, const std::vector<std::string>& paths);
+    // void processAndSaveProduct(const std::string& desc, const std::vector<std::string>& paths);
 };
 
 #endif  // BUS_PRODUCT_BUS_H

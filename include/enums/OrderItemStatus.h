@@ -11,42 +11,40 @@ enum class OrderItemStatus {
     CANCELLED   // Item cancelled
 };
 
-// Helper function to convert enum to string
 inline std::string orderItemStatusToString(OrderItemStatus status) {
     switch (status) {
         case OrderItemStatus::PENDING:
-            return "Pending";
+            return "pending";  // Changed from "Pending"
         case OrderItemStatus::CONFIRMED:
-            return "Confirmed";
+            return "confirmed";  // Changed from "Confirmed"
         case OrderItemStatus::SHIPPED:
-            return "Shipped";
+            return "shipped";  // Changed from "Shipped"
         case OrderItemStatus::DELIVERED:
-            return "Delivered";
+            return "delivered";  // Changed from "Delivered"
         case OrderItemStatus::CANCELLED:
-            return "Cancelled";
+            return "cancelled";  // Changed from "Cancelled"
         default:
-            return "Unknown";
+            return "pending";
     }
 }
 
-// Helper to parse string to enum
 inline OrderItemStatus stringToOrderItemStatus(const std::string& str) {
-    if (str == "Pending") {
+    if (str == "pending") {  // Changed from "Pending"
         return OrderItemStatus::PENDING;
     }
-    if (str == "Confirmed") {
+    if (str == "confirmed") {  // Changed from "Confirmed"
         return OrderItemStatus::CONFIRMED;
     }
-    if (str == "Shipped") {
+    if (str == "shipped") {  // Changed from "Shipped"
         return OrderItemStatus::SHIPPED;
     }
-    if (str == "Delivered") {
+    if (str == "delivered") {  // Changed from "Delivered"
         return OrderItemStatus::DELIVERED;
     }
-    if (str == "Cancelled") {
+    if (str == "cancelled") {  // Changed from "Cancelled"
         return OrderItemStatus::CANCELLED;
     }
     return OrderItemStatus::PENDING;
 }
 
-#endif  // ORDERITEMSTATUSDTO_H
+#endif

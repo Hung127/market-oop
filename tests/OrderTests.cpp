@@ -2,7 +2,6 @@
 
 #include "TestsCommon.h"
 
-// ORDER DAO: add order, duplicate id, get by seller id filtering
 TEST(OrderDAOTest, AddOrderDuplicateAndSellerFilter) {
     // prepare two sellers and products
     auto s1 = makeSeller("od_s1", "OD Seller1");
@@ -18,12 +17,12 @@ TEST(OrderDAOTest, AddOrderDuplicateAndSellerFilter) {
 
     std::vector<std::shared_ptr<OrderItemDTO>> items1{it1};
     std::vector<std::shared_ptr<OrderItemDTO>> items2{it2};
+    auto b1Id = makeBuyer("buyer_x", 50000.0)->getId();
+    auto b2Id = makeBuyer("buyer_y", 50000.0)->getId();
 
     // Construct orders using vector<shared_ptr<OrderItemDTO>> as OrderDTO expects
-    OrderDTO order1(Utils::generateId(), "buyer_x", items1, it1->getSubtotal(),
-                    Utils::getCurrentDate());
-    OrderDTO order2(Utils::generateId(), "buyer_y", items2, it2->getSubtotal(),
-                    Utils::getCurrentDate());
+    OrderDTO order1(Utils::generateId(), b1Id, items1, it1->getSubtotal(), Utils::getCurrentDate());
+    OrderDTO order2(Utils::generateId(), b2Id, items2, it2->getSubtotal(), Utils::getCurrentDate());
 
     ASSERT_TRUE(OrderDAO::addOrder(order1).has_value());
     ASSERT_TRUE(OrderDAO::addOrder(order2).has_value());
@@ -54,14 +53,13 @@ TEST(OrderDAOTest, AddOrderDuplicateAndSellerFilter) {
     }
     EXPECT_TRUE(contains);
 
-    // cleanup products
-    EXPECT_TRUE(ProductDAO::remove(p1->getID()));
-    EXPECT_TRUE(ProductDAO::remove(p2->getID()));
+    // No need to remove products - they're not referenced by FK anymore
+    // The order items store product_id as TEXT, not FK
 }
 
 // --------------------------Order status tests-----------------------------------------
 /**
- * Main happy-path test: create full order and run order item through all statuses.
+ * Main happy-path test:  create full order and run order item through all statuses.
  */
 TEST(OrderStatusFlow, FullLifecycle_SuccessSingleItem) {
     auto seller = makeSeller("selleros1", "OrderSeller1");
@@ -81,6 +79,8 @@ TEST(OrderStatusFlow, FullLifecycle_SuccessSingleItem) {
 
     ASSERT_TRUE(order != nullptr);
     ASSERT_EQ(order->items().size(), 1U);
+
+    std::string orderId = order->orderId();
     auto item = order->items()[0];
 
     EXPECT_EQ(item->getStatus(), OrderItemStatus::PENDING);
@@ -89,25 +89,37 @@ TEST(OrderStatusFlow, FullLifecycle_SuccessSingleItem) {
     auto busPack = SellerBUS::create(seller);
     ASSERT_TRUE(busPack.has_value());
     SellerBUS sbus = busPack.value();
-    auto confRes = sbus.confirmOrderItem(order->orderId(), product->getID());
+    auto confRes = sbus.confirmOrderItem(orderId, product->getID());
     EXPECT_TRUE(confRes.has_value());
+
+    // Reload order to see updated status
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::CONFIRMED);
 
     // Seller ships
-    auto shipRes = sbus.shipOrderItem(order->orderId(), product->getID());
+    auto shipRes = sbus.shipOrderItem(orderId, product->getID());
     EXPECT_TRUE(shipRes.has_value());
+
+    // Reload order
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::SHIPPED);
 
     // Seller delivers
-    auto delvRes = sbus.deliverOrderItem(order->orderId(), product->getID());
+    auto delvRes = sbus.deliverOrderItem(orderId, product->getID());
     EXPECT_TRUE(delvRes.has_value());
+
+    // Reload order
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::DELIVERED);
 
     // No balance/stock changes on confirm/ship/deliver
     EXPECT_DOUBLE_EQ(buyer->getBalance(), 60.0);
     EXPECT_EQ(product->getStock(), 8);
 
-    // Cleanup
+    // Cleanup - now this should work
     EXPECT_TRUE(ProductDAO::remove(product->getID()));
 }
 
@@ -125,22 +137,31 @@ TEST(OrderStatusFlow, Cancel_BeforeConfirm_RefundsBuyerAndRestoresStock) {
     auto orders = OrderDAO::getOrdersByBuyerId(buyer->getId());
     ASSERT_EQ(orders.size(), 1U);
     auto order = orders[0];
+    std::string orderId = order->orderId();
+
     auto item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::PENDING);
 
     // Cancel order item before confirm
     SellerBUS sbus = SellerBUS::create(seller).value();
-    ASSERT_TRUE(sbus.cancelOrderItem(order->orderId(), product->getID()).has_value());
+    ASSERT_TRUE(sbus.cancelOrderItem(orderId, product->getID()).has_value());
 
+    // Reload to check status
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::CANCELLED);
 
-    // Buyer refunded full item price
+    // Reload buyer to check refund
+    buyer = BuyerDAO::getBuyerById(buyer->getId());
     EXPECT_DOUBLE_EQ(buyer->getBalance(), 100.0);
 
-    // Stock restored
-    EXPECT_EQ(product->getStock(), 5);
+    // Reload product to check stock
+    auto productReloaded = ProductDAO::getProductById(product->getID());
+    EXPECT_TRUE(productReloaded.has_value());
+    EXPECT_EQ(productReloaded.value()->getStock(), 5);
 
-    // Order total recalculated to 0
+    // Reload order to check total
+    order = OrderDAO::getOrderById(orderId);
     EXPECT_DOUBLE_EQ(order->totalPrice(), 0.0);
 
     // Cleanup
@@ -161,31 +182,46 @@ TEST(OrderStatusFlow, Cancel_AfterConfirm_RefundsBuyerAndRestoresStock) {
     auto orders = OrderDAO::getOrdersByBuyerId(buyer->getId());
     ASSERT_EQ(orders.size(), 1U);
     auto order = orders[0];
+    std::string orderId = order->orderId();
+
     auto item = order->items()[0];
     ASSERT_EQ(item->getStatus(), OrderItemStatus::PENDING);
 
     SellerBUS sbus = SellerBUS::create(seller).value();
-    ASSERT_TRUE(sbus.confirmOrderItem(order->orderId(), product->getID()).has_value());
+    ASSERT_TRUE(sbus.confirmOrderItem(orderId, product->getID()).has_value());
+
+    // Reload to check confirm
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::CONFIRMED);
     EXPECT_EQ(product->getStock(), 1);  // 3 - 2
 
     // Now cancel
-    EXPECT_TRUE(sbus.cancelOrderItem(order->orderId(), product->getID()).has_value());
+    EXPECT_TRUE(sbus.cancelOrderItem(orderId, product->getID()).has_value());
+
+    // Reload to check cancel
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::CANCELLED);
 
-    // Balance refunded
+    // Reload buyer - balance refunded
+    buyer = BuyerDAO::getBuyerById(buyer->getId());
     EXPECT_DOUBLE_EQ(buyer->getBalance(), 200.0);
-    // Stock restored
-    EXPECT_EQ(product->getStock(), 3);
 
-    // Order total recalculated
+    // Reload product - stock restored
+    auto productReloaded = ProductDAO::getProductById(product->getID());
+    EXPECT_TRUE(productReloaded.has_value());
+    EXPECT_EQ(productReloaded.value()->getStock(), 3);
+
+    // Reload order - total recalculated
+    order = OrderDAO::getOrderById(orderId);
     EXPECT_DOUBLE_EQ(order->totalPrice(), 0.0);
 
     EXPECT_TRUE(ProductDAO::remove(product->getID()));
 }
 
 /**
- * Cancel after ship: should fail and not change status
+ * Cancel after ship:  should fail and not change status
  */
 TEST(OrderStatusFlow, Cancel_AfterShip_NotAllowed) {
     auto seller = makeSeller("s_os4", "OrderSeller4");
@@ -198,17 +234,27 @@ TEST(OrderStatusFlow, Cancel_AfterShip_NotAllowed) {
     auto orders = OrderDAO::getOrdersByBuyerId(buyer->getId());
     ASSERT_EQ(orders.size(), 1U);
     auto order = orders[0];
+    std::string orderId = order->orderId();
+
     auto item = order->items()[0];
 
     SellerBUS sbus = SellerBUS::create(seller).value();
-    ASSERT_TRUE(sbus.confirmOrderItem(order->orderId(), product->getID()).has_value());
-    ASSERT_TRUE(sbus.shipOrderItem(order->orderId(), product->getID()).has_value());
+    ASSERT_TRUE(sbus.confirmOrderItem(orderId, product->getID()).has_value());
+    ASSERT_TRUE(sbus.shipOrderItem(orderId, product->getID()).has_value());
+
+    // Reload to check shipped
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::SHIPPED);
 
-    auto cancelRes = sbus.cancelOrderItem(order->orderId(), product->getID());
+    auto cancelRes = sbus.cancelOrderItem(orderId, product->getID());
     EXPECT_FALSE(cancelRes.has_value());
-    // Status unchanged
+
+    // Reload - status unchanged
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::SHIPPED);
+
     // No refund, no stock update
     EXPECT_DOUBLE_EQ(buyer->getBalance(), 30.0);
     EXPECT_EQ(product->getStock(), 0);
@@ -230,17 +276,28 @@ TEST(OrderStatusFlow, Cancel_AfterDelivery_NotAllowed) {
     auto orders = OrderDAO::getOrdersByBuyerId(buyer->getId());
     ASSERT_EQ(orders.size(), 1U);
     auto order = orders[0];
+    std::string orderId = order->orderId();
+
     auto item = order->items()[0];
 
     SellerBUS sbus = SellerBUS::create(seller).value();
-    ASSERT_TRUE(sbus.confirmOrderItem(order->orderId(), product->getID()).has_value());
-    ASSERT_TRUE(sbus.shipOrderItem(order->orderId(), product->getID()).has_value());
-    ASSERT_TRUE(sbus.deliverOrderItem(order->orderId(), product->getID()).has_value());
+    ASSERT_TRUE(sbus.confirmOrderItem(orderId, product->getID()).has_value());
+    ASSERT_TRUE(sbus.shipOrderItem(orderId, product->getID()).has_value());
+    ASSERT_TRUE(sbus.deliverOrderItem(orderId, product->getID()).has_value());
+
+    // Reload to check delivered
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::DELIVERED);
 
-    auto cancelRes = sbus.cancelOrderItem(order->orderId(), product->getID());
+    auto cancelRes = sbus.cancelOrderItem(orderId, product->getID());
     EXPECT_FALSE(cancelRes.has_value());
+
+    // Reload - status unchanged
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::DELIVERED);
+
     EXPECT_DOUBLE_EQ(buyer->getBalance(), 20.0);
     EXPECT_EQ(product->getStock(), 0);
 
@@ -261,19 +318,28 @@ TEST(OrderStatusFlow, Confirm_NotYourOrderItem) {
 
     auto orders = OrderDAO::getOrdersByBuyerId(buyer->getId());
     auto order = orders[0];
+    std::string orderId = order->orderId();
+
     auto item = order->items()[0];
     EXPECT_EQ(item->getSellerId(), seller1->getId());
 
     SellerBUS fakeSellerBUS = SellerBUS::create(seller2).value();
-    auto confRes = fakeSellerBUS.confirmOrderItem(order->orderId(), product->getID());
+    auto confRes = fakeSellerBUS.confirmOrderItem(orderId, product->getID());
     EXPECT_FALSE(confRes.has_value());
-    // Order remains pending
+
+    // Reload - order remains pending
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::PENDING);
 
     // Now real seller confirms
     SellerBUS trueSellerBUS = SellerBUS::create(seller1).value();
-    auto confRes2 = trueSellerBUS.confirmOrderItem(order->orderId(), product->getID());
+    auto confRes2 = trueSellerBUS.confirmOrderItem(orderId, product->getID());
     EXPECT_TRUE(confRes2.has_value());
+
+    // Reload - now confirmed
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::CONFIRMED);
 
     EXPECT_TRUE(ProductDAO::remove(product->getID()));
@@ -291,39 +357,59 @@ TEST(OrderStatusFlow, Transitions_OutOfOrderNotAllowed) {
     ASSERT_TRUE(BuyerBUS::checkout(*buyer).has_value());
     auto orders = OrderDAO::getOrdersByBuyerId(buyer->getId());
     auto order = orders[0];
+    std::string orderId = order->orderId();
+
     auto item = order->items()[0];
     SellerBUS sbus = SellerBUS::create(seller).value();
 
     // Try to ship before confirm
-    auto shipRes = sbus.shipOrderItem(order->orderId(), product->getID());
+    auto shipRes = sbus.shipOrderItem(orderId, product->getID());
     EXPECT_FALSE(shipRes.has_value());
+
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::PENDING);
 
     // Try to deliver before confirm/ship
-    auto deliverRes = sbus.deliverOrderItem(order->orderId(), product->getID());
+    auto deliverRes = sbus.deliverOrderItem(orderId, product->getID());
     EXPECT_FALSE(deliverRes.has_value());
+
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::PENDING);
 
     // Confirm, then try to deliver before ship
-    ASSERT_TRUE(sbus.confirmOrderItem(order->orderId(), product->getID()).has_value());
+    ASSERT_TRUE(sbus.confirmOrderItem(orderId, product->getID()).has_value());
+
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::CONFIRMED);
 
-    auto deliverRes2 = sbus.deliverOrderItem(order->orderId(), product->getID());
+    auto deliverRes2 = sbus.deliverOrderItem(orderId, product->getID());
     EXPECT_FALSE(deliverRes2.has_value());
+
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::CONFIRMED);
 
     // Finish the flow
-    ASSERT_TRUE(sbus.shipOrderItem(order->orderId(), product->getID()).has_value());
+    ASSERT_TRUE(sbus.shipOrderItem(orderId, product->getID()).has_value());
+
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::SHIPPED);
 
-    ASSERT_TRUE(sbus.deliverOrderItem(order->orderId(), product->getID()).has_value());
+    ASSERT_TRUE(sbus.deliverOrderItem(orderId, product->getID()).has_value());
+
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::DELIVERED);
 
     EXPECT_TRUE(ProductDAO::remove(product->getID()));
 }
 
 /**
- * Multi-item order: Cancel one item but not others, refund partial, recalc total.
+ * Multi-item order:  Cancel one item but not others, refund partial, recalc total.
  */
 TEST(OrderStatusFlow, MultiItemOrder_PartialCancel) {
     auto seller1 = makeSeller("s_mio1", "SellerA");
@@ -339,31 +425,42 @@ TEST(OrderStatusFlow, MultiItemOrder_PartialCancel) {
     auto orders = OrderDAO::getOrdersByBuyerId(buyer->getId());
     ASSERT_EQ(orders.size(), 1U);
     auto order = orders[0];
+    std::string orderId = order->orderId();
+
     ASSERT_EQ(order->items().size(), 2U);
 
     auto itemA = order->findItemByProductId(prodA->getID());
     auto itemB = order->findItemByProductId(prodB->getID());
     ASSERT_TRUE(itemA && itemB);
 
-    EXPECT_DOUBLE_EQ(order->totalPrice(), 10.0 * 2 + 20.0 * 1);  // 40.0
+    EXPECT_DOUBLE_EQ(order->totalPrice(), 10.0 * 2 + 20.0 * 1);  // 40. 0
 
     // Seller1 cancels Alpha, Seller2 confirms and ships Beta
     SellerBUS sbusA = SellerBUS::create(seller1).value();
     SellerBUS sbusB = SellerBUS::create(seller2).value();
 
-    ASSERT_TRUE(sbusA.cancelOrderItem(order->orderId(), prodA->getID()).has_value());
+    ASSERT_TRUE(sbusA.cancelOrderItem(orderId, prodA->getID()).has_value());
+
+    // Reload to check itemA cancelled
+    order = OrderDAO::getOrderById(orderId);
+    itemA = order->findItemByProductId(prodA->getID());
     EXPECT_EQ(itemA->getStatus(), OrderItemStatus::CANCELLED);
 
-    EXPECT_TRUE(sbusB.confirmOrderItem(order->orderId(), prodB->getID()).has_value());
-    EXPECT_TRUE(sbusB.shipOrderItem(order->orderId(), prodB->getID()).has_value());
+    EXPECT_TRUE(sbusB.confirmOrderItem(orderId, prodB->getID()).has_value());
+    EXPECT_TRUE(sbusB.shipOrderItem(orderId, prodB->getID()).has_value());
 
-    // Buyer should be refunded for prodA: +20, remaining total = 20
+    // Reload buyer - should be refunded for prodA:  +20, remaining total = 20
+    buyer = BuyerDAO::getBuyerById(buyer->getId());
     EXPECT_DOUBLE_EQ(buyer->getBalance(), 100.0 - 20.0);  // Paid 40, got 20 back
 
+    // Reload order - total updated
+    order = OrderDAO::getOrderById(orderId);
     EXPECT_DOUBLE_EQ(order->totalPrice(), 20.0);
 
-    // Stock restored for A, decremented for B
-    EXPECT_EQ(prodA->getStock(), 5);
+    // Reload products - stock restored for A, decremented for B
+    auto prodAReloaded = ProductDAO::getProductById(prodA->getID());
+    EXPECT_TRUE(prodAReloaded.has_value());
+    EXPECT_EQ(prodAReloaded.value()->getStock(), 5);
     EXPECT_EQ(prodB->getStock(), 2);
 
     EXPECT_TRUE(ProductDAO::remove(prodA->getID()));
@@ -371,7 +468,7 @@ TEST(OrderStatusFlow, MultiItemOrder_PartialCancel) {
 }
 
 /**
- * Edge: Nonexistent order and product IDs
+ * Edge:  Nonexistent order and product IDs
  */
 TEST(OrderStatusFlow, NonexistentIDs_ReturnNotFound) {
     auto seller = makeSeller("nex_sid", "NexSeller");
@@ -388,7 +485,7 @@ TEST(OrderStatusFlow, NonexistentIDs_ReturnNotFound) {
 }
 
 /**
- * Edge: Multiple cancels allowed? (Cancel twice: second cancel should be no-op or error)
+ * Edge: Multiple cancels allowed?  (Cancel twice:  second cancel should be no-op or error)
  */
 TEST(OrderStatusFlow, DoubleCancel_NotAllowed) {
     auto seller = makeSeller("s_dcanc", "SellerDoubleCancel");
@@ -399,23 +496,33 @@ TEST(OrderStatusFlow, DoubleCancel_NotAllowed) {
     ASSERT_TRUE(BuyerBUS::checkout(*buyer).has_value());
     auto orders = OrderDAO::getOrdersByBuyerId(buyer->getId());
     auto order = orders[0];
+    std::string orderId = order->orderId();
+
     auto item = order->items()[0];
     SellerBUS sbus = SellerBUS::create(seller).value();
 
     // First cancel succeeds
-    ASSERT_TRUE(sbus.cancelOrderItem(order->orderId(), product->getID()).has_value());
+    ASSERT_TRUE(sbus.cancelOrderItem(orderId, product->getID()).has_value());
+
+    // Reload to check cancelled
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::CANCELLED);
 
-    // Second cancel fails: can't cancel an already-cancelled item
-    auto result2 = sbus.cancelOrderItem(order->orderId(), product->getID());
+    // Second cancel fails:  can't cancel an already-cancelled item
+    auto result2 = sbus.cancelOrderItem(orderId, product->getID());
     EXPECT_FALSE(result2.has_value());
+
+    // Reload - still cancelled
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::CANCELLED);
 
     EXPECT_TRUE(ProductDAO::remove(product->getID()));
 }
 
 /**
- * Edge: Confirm/ship/deliver/cancel for non-matching product in the order
+ * Edge:  Confirm/ship/deliver/cancel for non-matching product in the order
  */
 TEST(OrderStatusFlow, InvalidProductIdInOrder) {
     auto seller = makeSeller("sid_invprod", "SidInvProd");
@@ -441,17 +548,31 @@ TEST(OrderStatusFlow, ShipDeliver_CancelledItem_NotAllowed) {
     ASSERT_TRUE(BuyerBUS::checkout(*buyer).has_value());
     auto orders = OrderDAO::getOrdersByBuyerId(buyer->getId());
     auto order = orders[0];
+    std::string orderId = order->orderId();
+
     auto item = order->items()[0];
     SellerBUS sbus = SellerBUS::create(seller).value();
 
-    ASSERT_TRUE(sbus.cancelOrderItem(order->orderId(), product->getID()).has_value());
+    ASSERT_TRUE(sbus.cancelOrderItem(orderId, product->getID()).has_value());
+
+    // Reload to check cancelled
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::CANCELLED);
 
     // Now try to ship/deliver the cancelled item
-    EXPECT_FALSE(sbus.shipOrderItem(order->orderId(), product->getID()).has_value());
+    EXPECT_FALSE(sbus.shipOrderItem(orderId, product->getID()).has_value());
+
+    // Reload - still cancelled
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::CANCELLED);
 
-    EXPECT_FALSE(sbus.deliverOrderItem(order->orderId(), product->getID()).has_value());
+    EXPECT_FALSE(sbus.deliverOrderItem(orderId, product->getID()).has_value());
+
+    // Reload - still cancelled
+    order = OrderDAO::getOrderById(orderId);
+    item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::CANCELLED);
 
     EXPECT_TRUE(ProductDAO::remove(product->getID()));

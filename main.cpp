@@ -115,13 +115,13 @@ int main() {
     std::vector<std::string> paths = {testImagePath};
 
     // Hàm này sẽ gọi ImageHelper để đọc byte và DAO để ghi file .bin
-    bus.processAndSaveProduct("San pham CPU", paths);
-    if (fs::exists(databasePath)) {
-        cout << "-> XAC NHAN: File da ton tai tai: " << fs::absolute(databasePath) << endl;
-        cout << "-> Kich thuoc: " << fs::file_size(databasePath) << " bytes" << endl;
-    } else {
-        cout << "-> [LOI THAT SU] File van chua duoc tao ra!" << endl;
-    }
+    // bus.processAndSaveProduct("San pham CPU", paths);
+    // if (fs::exists(databasePath)) {
+    //     cout << "-> XAC NHAN: File da ton tai tai: " << fs::absolute(databasePath) << endl;
+    //     cout << "-> Kich thuoc: " << fs::file_size(databasePath) << " bytes" << endl;
+    // } else {
+    //     cout << "-> [LOI THAT SU] File van chua duoc tao ra!" << endl;
+    // }
 
     // 3. GIAI ĐOẠN XÓA: Xóa ảnh gốc để chứng minh "đọc sang ảnh luôn"
     /*cout << "\n[BUOC 2] Dang xoa anh goc de test tinh bao toan..." << endl;
@@ -134,32 +134,32 @@ int main() {
     }*/
 
     // 4. GIAI ĐOẠN ĐỌC: Sài dữ liệu từ file .bin (Lúc nộp bài chỉ cần bước này)
-    cout << "\n[BUOC 3] Dang khoi phuc anh tu file .bin (Load database)..." << endl;
-    ProductDAO dao;
-    ProductExtraInfoDTO loadedDto;
+    // cout << "\n[BUOC 3] Dang khoi phuc anh tu file .bin (Load database)..." << endl;
+    // ProductDAO dao;
+    // ProductExtraInfoDTO loadedDto;
 
     // DAO sẽ giải mã file .bin nạp lại vào DTO
-    dao.loadFromFile(databasePath, loadedDto);
+    // dao.loadFromFile(databasePath, loadedDto);
 
     // 5. KIỂM TRA KẾT QUẢ
-    cout << "\n===== KET QUA KIEM TRA =====" << endl;
-    cout << "Mo ta san pham: " << loadedDto.getDescription() << endl;
-    cout << "So luong anh trong database: " << loadedDto.getImageCount() << endl;
-
-    if (loadedDto.getImageCount() > 0) {
-        auto pack = loadedDto.getImageAt(0);
-        if (!pack.has_value()) {
-            return 0;
-        }
-        size_t imageSize = pack.value().size();
-        cout << "Kich thuoc anh thu nhat: " << imageSize << " bytes" << endl;
-        cout << "=> KET LUAN: Anh van ton tai trong file .bin du anh goc da bi xoa!" << endl;
-        cout << "=> Backend da san sang gui du lieu cho Qt hien thi." << endl;
-    } else {
-        cout << "=> THAT BAI: Khong tim thay du lieu anh trong file .bin." << endl;
-    }
-
-    cout << "========================================" << endl;
+    // cout << "\n===== KET QUA KIEM TRA =====" << endl;
+    // cout << "Mo ta san pham: " << loadedDto.getDescription() << endl;
+    // cout << "So luong anh trong database: " << loadedDto.getImageCount() << endl;
+    //
+    // if (loadedDto.getImageCount() > 0) {
+    //     auto pack = loadedDto.getImageAt(0);
+    //     if (!pack.has_value()) {
+    //         return 0;
+    //     }
+    //     size_t imageSize = pack.value().size();
+    //     cout << "Kich thuoc anh thu nhat: " << imageSize << " bytes" << endl;
+    //     cout << "=> KET LUAN: Anh van ton tai trong file .bin du anh goc da bi xoa!" << endl;
+    //     cout << "=> Backend da san sang gui du lieu cho Qt hien thi." << endl;
+    // } else {
+    //     cout << "=> THAT BAI: Khong tim thay du lieu anh trong file .bin." << endl;
+    // }
+    //
+    // cout << "========================================" << endl;
 
     return 0;
 }
