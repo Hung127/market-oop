@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include <sqlite3.h>
+
 #include "../DTO/UserDTO.h"
 
 class UserDAO {
