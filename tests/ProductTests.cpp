@@ -317,3 +317,102 @@ TEST(ImageHelperTest, ReadImageValidAndInvalidFiles) {
         EXPECT_TRUE(Utils::ImageHelper::isValidImage("photo.jpg"));
     }
 }
+
+// Test ProductDTO with extra info and images
+TEST(ProductDTO_ExtraInfo, SetAndGetExtraInfoWithImages) {
+    auto seller = makeSeller("s_extra", "ExtraSeller");
+    ProductDTO product("p_extra", "Extra Product", 50.0, 10, seller);
+
+    // Create extra info
+    auto extra = std::make_shared<ProductExtraInfoDTO>("Detailed description");
+    
+    // Add some dummy image data
+    std::vector<uint8_t> img1 = {0xFF, 0xD8, 0xFF, 0xE0}; // JPEG header
+    std::vector<uint8_t> img2 = {0x89, 0x50, 0x4E, 0x47}; // PNG header
+    extra->addImageData(img1);
+    extra->addImageData(img2);
+
+    // Set extra info to product
+    product.setExtraInfo(extra);
+
+    // Verify
+    auto retrievedExtra = product.getExtraInfo();
+    ASSERT_TRUE(retrievedExtra != nullptr);
+    EXPECT_EQ(retrievedExtra->getDescription(), "Detailed description");
+    EXPECT_EQ(retrievedExtra->getImageCount(), 2);
+    EXPECT_EQ(retrievedExtra->getImageAt(0), img1);
+    EXPECT_EQ(retrievedExtra->getImageAt(1), img2);
+
+    // Test const version
+    auto constExtra = product.getExtraInfo();
+    EXPECT_EQ(constExtra->getDescription(), "Detailed description");
+}
+
+// Test ImageHelper reading image bytes
+TEST(ImageHelper_ReadImage, ValidAndInvalidFiles) {
+    // Test invalid file (non-existent)
+    auto invalid = Utils::ImageHelper::readImageToBytes("nonexistent.jpg");
+    EXPECT_TRUE(invalid.empty());
+
+    // Test valid image file (assets/ copied to build/ by CMake)
+    auto valid = Utils::ImageHelper::readImageToBytes("assets/cpu.jpg");
+    EXPECT_FALSE(valid.empty());
+    EXPECT_GT(valid.size(), 0);
+
+    // Test isValidImage
+    EXPECT_TRUE(Utils::ImageHelper::isValidImage("assets/cpu.jpg"));
+    EXPECT_FALSE(Utils::ImageHelper::isValidImage("invalid.txt"));
+}
+
+// Test 10: Lưu và nạp lại 1 ảnh duy nhất (Sử dụng cpu.jpg thật)
+TEST(ProductDAO_Binary, SaveLoadSingleImage) {
+    // Đường dẫn dựa trên cấu trúc thư mục của bạn
+    std::string imagePath = "assets/cpu.jpg";
+    std::string binFile = "data/single_test.bin";
+    
+    ProductExtraInfoDTO original("Mo ta mot anh CPU");
+    // Bước 1: Đọc dữ liệu thực từ file assets/cpu.jpg
+    auto imgData = Utils::ImageHelper::readImageToBytes(imagePath);
+    ASSERT_FALSE(imgData.empty()) << "Khong the doc file: " << imagePath;
+    
+    original.addImageData(imgData);
+    // Bước 2: Lưu vào file nhị phân trong thư mục data
+    ProductDAO::saveToFile(binFile, original);
+    
+    // Bước 3: Nạp lại từ file
+    ProductExtraInfoDTO loaded;
+    ProductDAO::loadFromFile(binFile, loaded);
+
+    // Bước 4: Kiểm tra tính toàn vẹn
+    EXPECT_EQ(loaded.getDescription(), "Mo ta mot anh CPU");
+    EXPECT_EQ(loaded.getImageCount(), 1);
+    EXPECT_EQ(loaded.getImageAt(0), imgData); // So khớp từng byte ảnh thật
+}
+
+// Test 11: Lưu và nạp lại danh sách 2 ảnh (Sử dụng cpu.jpg và ram.jpg)
+TEST(ProductDAO_Binary, SaveLoadMultipleImages) {
+    std::string binFile = "data/multi_test.bin";
+    ProductExtraInfoDTO original("Mo ta CPU va RAM");
+    
+    // Bước 1: Đọc dữ liệu từ cả 2 file trong assets
+    auto img1 = Utils::ImageHelper::readImageToBytes("assets/cpu.jpg");
+    auto img2 = Utils::ImageHelper::readImageToBytes("assets/ram.jpg");
+    
+    ASSERT_FALSE(img1.empty()) << "Khong tim thay assets/cpu.jpg. Kiem tra thu muc lam viec!";
+    ASSERT_FALSE(img2.empty()) << "Khong tim thay assets/ram.jpg. Kiem tra thu muc lam viec!";
+    
+    original.addImageData(img1);
+    original.addImageData(img2);
+
+    // Bước 2: Lưu toàn bộ danh sách vào file duy nhất
+    ProductDAO::saveToFile(binFile, original);
+    
+    ProductExtraInfoDTO loaded;
+    ProductDAO::loadFromFile(binFile, loaded);
+
+    // Bước 3: Kiểm tra số lượng và nội dung từng ảnh
+    EXPECT_EQ(loaded.getImageCount(), 2);
+    EXPECT_EQ(loaded.getImageAt(0), img1); // Anh 1 (cpu) phai dung
+    EXPECT_EQ(loaded.getImageAt(1), img2); // Anh 2 (ram) phai dung
+}
+

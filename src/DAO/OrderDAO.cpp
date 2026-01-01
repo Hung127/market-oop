@@ -2,17 +2,15 @@
 
 #include <memory>
 #include <vector>
+#include <expected>
 
 #include "../../include/DTO/OrderDTO.h"
 #include "../../include/DTO/OrderItemDTO.h"
 
 std::expected<void, std::string> OrderDAO::addOrder(const OrderDTO& order) {
-    for (auto o : _orders) {
-        if (!o) {
-            continue;
-        }
-        if (o->orderId() == order.orderId()) {
-            return std::unexpected("There is alreay an order with this");
+    for (const auto& o : _orders) {
+        if (o && o->orderId() == order.orderId()) {
+            return std::unexpected("Order ID already exists: " + order.orderId());
         }
     }
 

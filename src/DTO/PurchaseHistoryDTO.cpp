@@ -28,7 +28,7 @@ void PurchaseHistoryDTO::printHistory() const {
         std::cout << "Order #" << (i + 1) << '\n';
         std::cout << "Date: " << order.date() << '\n';
 
-        // Header
+        // --- GIỮ NGUYÊN PHẦN HEADER CŨ ---
         std::cout << std::left << std::setw(30) << "Product" << std::right << std::setw(8) << "Qty"
                   << std::right << std::setw(12) << "Unit" << std::right << std::setw(12)
                   << "Subtotal" << '\n';
@@ -51,7 +51,20 @@ void PurchaseHistoryDTO::printHistory() const {
         }
 
         std::cout << std::string(62, '-') << '\n';
-        std::cout << std::right << std::setw(50) << "Total: " << std::setw(12) << std::fixed
+
+        // --- PHẦN THÊM MỚI: CHI TIẾT GIẢM GIÁ ---
+        // Chỉ hiện nếu có giá trị giảm giá để giao diện vẫn sạch sẽ như cũ
+        if (order.getVoucherDiscount() > 0) {
+            std::cout << std::right << std::setw(50) << "Voucher Discount: " 
+                      << "-" << std::setw(11) << order.getVoucherDiscount() << '\n';
+        }
+        if (order.getCoinDiscount() > 0) {
+            std::cout << std::right << std::setw(50) << "Coins Used: " 
+                      << "-" << std::setw(11) << order.getCoinDiscount() << '\n';
+        }
+
+        // --- GIỮ NGUYÊN DÒNG TOTAL CŨ (Chỉ đổi nhãn thành Final Total cho rõ) ---
+        std::cout << std::right << std::setw(50) << "Final Total: " << std::setw(12) << std::fixed
                   << std::setprecision(2) << order.totalPrice() << "\n\n";
     }
 }

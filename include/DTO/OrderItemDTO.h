@@ -7,9 +7,9 @@
 
 class OrderItemDTO {
    private:
-    std::string _productId;
+std::string _productId;
     std::string _productName;
-    std::string _sellerId;
+    std::string _sellerId;   
     std::string _sellerName;
     double _price;
     int _quantity;

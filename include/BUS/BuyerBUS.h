@@ -8,6 +8,7 @@
 
 #include "../DAO/BuyerDAO.h"
 #include "../DTO/BuyerDTO.h"
+#include "../DTO/VoucherDTO.h"
 #include "UserBUS.h"
 
 class BuyerBUS : public UserBUS {
@@ -37,7 +38,13 @@ class BuyerBUS : public UserBUS {
 
     // ========== CHECKOUT LOGIC ==========
     // Hàm logic phức tạp nhất, chuyển từ BuyerDTO::checkout
-    static std::expected<void, std::string> checkout(BuyerDTO& BuyerDTO);
+    static std::expected<std::pair<OrderDTO, std::vector<size_t>>, std::string> prepareOrderData(const BuyerDTO& buyer, const std::vector<std::string>& selectedProductIds, const std::vector<VoucherDTO*>& vouchers, bool useCoins);
+
+    static std::expected<void, std::string> checkout(BuyerDTO& BuyerDTO, const std::vector<std::string>& selectedProductIds,vector<VoucherDTO*> voucher, bool useCoint);
+
+    static std::expected<void, std::string> payment(BuyerDTO& buyer, const std::vector<std::string>& selectedProductIds, vector<VoucherDTO*> vouchers, bool useCoins) ;
+
+    static std::expected<void, std::string> finalOrder(bool check, BuyerDTO& buyer, const std::vector<std::string>& selectedProductIds, vector<VoucherDTO*> vouchers, bool useCoins);
 
     // TODO: move this to ui
     // // ========== HISTORY LOGIC ==========

@@ -4,17 +4,28 @@
 
 #include "../../include/DTO/OrderItemDTO.h"
 
-OrderDTO::OrderDTO() : _totalPrice(0.0) {
-    // Do nothing
-}
-
+OrderDTO::OrderDTO() : _totalPrice(0.0), _rawTotal(0.0), _voucherDiscount(0.0), _coinDiscount(0.0) {}
 OrderDTO::OrderDTO(const std::string& orderId, const std::string& buyerId,
-                   const std::vector<std::shared_ptr<OrderItemDTO>>& items, double total,
+                   const std::vector<std::shared_ptr<OrderItemDTO>>& items, double rawTotal,
                    const std::string& date)
-    : _orderId(orderId), _buyerId(buyerId), _items(items), _totalPrice(total), _date(date) {
-    // Do nothing
-}
+    : _orderId(orderId),
+      _buyerId(buyerId),
+      _items(items),
+      _date(date),
+      _totalPrice(rawTotal), 
+      _rawTotal(rawTotal),   
+      _voucherDiscount(0.0),
+      _coinDiscount(0.0) {}
 
+// --- Cần bổ sung hàm này vì SellerBUS đang gọi mà .cpp Duy đang thiếu ---
+std::shared_ptr<OrderItemDTO> OrderDTO::findItemByProductId(const std::string& productId) {
+    for (auto& item : _items) {
+        if (item && item->getProductId() == productId) {
+            return item;
+        }
+    }
+    return nullptr;
+}
 // Accessors
 const std::vector<std::shared_ptr<OrderItemDTO>>& OrderDTO::items() const {
     return this->_items;
@@ -68,13 +79,17 @@ void OrderDTO::recalculateTotal() {
     }
 }
 
-std::shared_ptr<OrderItemDTO> OrderDTO::findItemByProductId(const std::string& productId) {
-    for (auto it : _items) {
-        if (it) {
-            if (it->getProductId() == productId) {
-                return it;
-            }
-        }
+
+void OrderDTO::setDiscounts(double vDiscount, double cDiscount) {
+        _voucherDiscount = vDiscount;
+        _coinDiscount = cDiscount;
     }
-    return nullptr;
-}
+    double OrderDTO::getRawTotal() const { 
+        return _rawTotal; 
+    }
+    double OrderDTO::getVoucherDiscount() const { 
+        return _voucherDiscount; 
+    }
+    double OrderDTO::getCoinDiscount() const { 
+        return _coinDiscount; 
+    }
