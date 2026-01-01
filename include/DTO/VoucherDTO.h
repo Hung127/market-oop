@@ -40,37 +40,37 @@ private:
 public:
     SellerVoucherDTO(std::string id, std::string code, std::string sellerId, double percent, double minVal, std::string expiryDate)
         : VoucherDTO(id, code, sellerId, expiryDate), _discountPercent(percent), _minOrderValue(minVal) {}
+    virtual ~SellerVoucherDTO() = default;
     
     std::expected<void, std::string> canApply(const OrderDTO& order) const override {
         double totalShopValue = 0.0;
 
         if (order.date() > _expiryDate) {
-            return std::unexpected(std::format("Voucher '{}' đã hết hạn vào lúc {}!", _code, _expiryDate));
+            return std::unexpected(std::format("Voucher '{}' đã hết hạn!", _code));
         }
 
         for (const auto& item : order.items()) {
-            if (item.getSellerId() == _ownerId) {
-                totalShopValue += item.getSubtotal(); // Cộng dồn giá trị từng món
+            // SỬA: Dùng -> thay vì .
+            if (item->getSellerId() == _ownerId) {
+                totalShopValue += item->getSubtotal(); 
             }
         }
 
-        // Voucher chỉ có hiệu lực nếu tổng tiền của shop đạt mức tối thiểu
         if (totalShopValue < _minOrderValue) {
-            return std::unexpected(std::format("Voucher '{}' yêu cầu đơn hàng từ shop tối thiểu {:.2f}.", _code, _minOrderValue));
+            return std::unexpected(std::format("Voucher '{}' yêu cầu đơn tối thiểu {:.2f}.", _code, _minOrderValue));
         }
         return {};
     }
 
-    //
     double calculateDiscount(const OrderDTO& order) const override {
         double shopTotal = 0;
         for (const auto& item : order.items()) {
-            if (item.getSellerId() == _ownerId) 
-                shopTotal += item.getPrice() * item.getQuantity(); // Dùng snapshot giá trong Order
+            // SỬA: Dùng -> thay vì .
+            if (item->getSellerId() == _ownerId) 
+                shopTotal += item->getPrice() * item->getQuantity(); 
         }
         return shopTotal * (_discountPercent / 100.0);
     }
-
 };
 
 

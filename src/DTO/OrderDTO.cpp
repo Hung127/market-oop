@@ -12,10 +12,20 @@ OrderDTO::OrderDTO(const std::string& orderId, const std::string& buyerId,
       _buyerId(buyerId),
       _items(items),
       _date(date),
-      _rawTotal(rawTotal),
+      _totalPrice(rawTotal), 
+      _rawTotal(rawTotal),   
       _voucherDiscount(0.0),
-      _coinDiscount(0.0),
-      _totalPrice(rawTotal) {}
+      _coinDiscount(0.0) {}
+
+// --- Cần bổ sung hàm này vì SellerBUS đang gọi mà .cpp Duy đang thiếu ---
+std::shared_ptr<OrderItemDTO> OrderDTO::findItemByProductId(const std::string& productId) {
+    for (auto& item : _items) {
+        if (item && item->getProductId() == productId) {
+            return item;
+        }
+    }
+    return nullptr;
+}
 // Accessors
 const std::vector<std::shared_ptr<OrderItemDTO>>& OrderDTO::items() const {
     return this->_items;

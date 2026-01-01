@@ -298,8 +298,8 @@ TEST(SellerBUS_Orders, GetItemsByAllStatuses) {
     auto buyer = makeBuyer("StatusBuyer", 100.0);
 
     ASSERT_TRUE(BuyerBUS::addToCart(*buyer, product, 2).has_value());
-    ASSERT_TRUE(BuyerBUS::checkout(*buyer).has_value());
-
+    std::vector<std::string> selectedIds = {product->getID()};
+    ASSERT_TRUE(BuyerBUS::payment(*buyer, selectedIds, {}, false).has_value());
     SellerBUS sbus = SellerBUS::create(seller).value();
 
     // Check all statuses
