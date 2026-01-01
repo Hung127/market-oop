@@ -1,0 +1,5 @@
+C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/CMakeFiles/ExclusiveEcommerce.dir
+C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/CMakeFiles/edit_cache.dir
+C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/CMakeFiles/rebuild_cache.dir
+C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/CMakeFiles/ExclusiveEcommerce_autogen_timestamp_deps.dir
+C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/CMakeFiles/ExclusiveEcommerce_autogen.dir

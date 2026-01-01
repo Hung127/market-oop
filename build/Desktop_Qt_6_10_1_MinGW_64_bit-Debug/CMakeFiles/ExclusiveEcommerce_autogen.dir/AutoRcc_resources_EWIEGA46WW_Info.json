@@ -1,0 +1,36 @@
+{
+	"BUILD_DIR" : "C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/ExclusiveEcommerce_autogen",
+	"CMAKE_BINARY_DIR" : "C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug",
+	"CMAKE_CURRENT_BINARY_DIR" : "C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug",
+	"CMAKE_CURRENT_SOURCE_DIR" : "C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce",
+	"CMAKE_SOURCE_DIR" : "C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce",
+	"CROSS_CONFIG" : false,
+	"GENERATOR" : "Ninja",
+	"INCLUDE_DIR" : "C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/ExclusiveEcommerce_autogen/include",
+	"INPUTS" : 
+	[
+		"C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/qml/Main.qml",
+		"C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/qml/BestSellingSection.qml",
+		"C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/qml/CategoryPanel.qml",
+		"C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/qml/FlashSaleSection.qml",
+		"C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/qml/ProductCard.qml",
+		"C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/qml/FooterBar.qml",
+		"C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/qml/ServicesStrip.qml",
+		"C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/qml/FlashSaleTimer.qml",
+		"C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/qml/BrowseCategorySection.qml",
+		"C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/qml/HeaderBar.qml",
+		"C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/qml/HeroBanner.qml",
+		"C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/qml/ExploreProductsSection.qml"
+	],
+	"LOCK_FILE" : "C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/CMakeFiles/ExclusiveEcommerce_autogen.dir/AutoRcc_resources_EWIEGA46WW_Lock.lock",
+	"MULTI_CONFIG" : false,
+	"OPTIONS" : [ "--no-zstd", "-name", "resources" ],
+	"OUTPUT_CHECKSUM" : "EWIEGA46WW",
+	"OUTPUT_NAME" : "qrc_resources.cpp",
+	"RCC_EXECUTABLE" : "C:/Qt/6.10.1/mingw_64/bin/rcc.exe",
+	"RCC_LIST_OPTIONS" : [ "--list" ],
+	"SETTINGS_FILE" : "C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/build/Desktop_Qt_6_10_1_MinGW_64_bit-Debug/CMakeFiles/ExclusiveEcommerce_autogen.dir/AutoRcc_resources_EWIEGA46WW_Used.txt",
+	"SOURCE" : "C:/Users/Admin/Documents/OOP_PROJ/ExclusiveEcommerce/resources.qrc",
+	"USE_BETTER_GRAPH" : true,
+	"VERBOSITY" : 0
+}

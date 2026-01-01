@@ -1,0 +1,21 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+<qresource prefix="/qml">
+    <file alias="BestSellingSection.qml">qml/BestSellingSection.qml</file>
+    <file alias="BrowseCategorySection.qml">qml/BrowseCategorySection.qml</file>
+    <file alias="CategoryPanel.qml">qml/CategoryPanel.qml</file>
+    <file alias="ExploreProductsSection.qml">qml/ExploreProductsSection.qml</file>
+    <file alias="FlashSaleSection.qml">qml/FlashSaleSection.qml</file>
+    <file alias="FlashSaleTimer.qml">qml/FlashSaleTimer.qml</file>
+    <file alias="FooterBar.qml">qml/FooterBar.qml</file>
+    <file alias="HeaderBar.qml">qml/HeaderBar.qml</file>
+    <file alias="HeroBanner.qml">qml/HeroBanner.qml</file>
+    <file alias="Main.qml">qml/Main.qml</file>
+    <file alias="ProductCard.qml">qml/ProductCard.qml</file>
+    <file alias="ServicesStrip.qml">qml/ServicesStrip.qml</file>
+</qresource>
+<qresource prefix="/icons">
+</qresource>
+<qresource prefix="/images">
+</qresource>
+</RCC>
