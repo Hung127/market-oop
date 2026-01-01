@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include "../DTO/OrderDTO.h"
+#include "../DTO/OrderItemDTO.h"
 #include "../DTO/ProductDTO.h"
 
 class SellerDTO;
@@ -21,6 +23,9 @@ class SellerBUS {
 
     // Helper
     std::shared_ptr<ProductDTO> findProductInInventory(const std::string& id) const;
+
+    std::expected<std::shared_ptr<OrderItemDTO>, BusError>
+    findSellerOrderedProductById(const std::string& orderId, const std::string& productId);
 
    private:
     SellerBUS(const std::shared_ptr<SellerDTO>& seller) : _seller(seller) {
@@ -121,6 +126,41 @@ class SellerBUS {
     std::shared_ptr<ProductDTO> searchMyClosestProduct(const std::string& keyword) const;  // NOLINT
 
     static std::expected<SellerBUS, BusError> create(std::shared_ptr<SellerDTO> seller);
+
+    /**
+     * @brief Get all orders received by this seller (with items belonging to them)
+     */
+    std::expected<std::vector<std::shared_ptr<OrderDTO>>, BusError> getReceivedOrders() const;
+
+    /**
+     * @brief Get order items belonging to this seller filtered by status
+     */
+    std::expected<std::vector<OrderItemDTO>, BusError>
+    getOrderItemsByStatus(OrderItemStatus status) const;
+
+    /**
+     * @brief Confirm a pending order item (change status from PENDING to CONFIRMED)
+     */
+    std::expected<void, BusError> confirmOrderItem(const std::string& orderId,
+                                                   const std::string& productId);
+
+    /**
+     * @brief Mark an order item as shipped
+     */
+    std::expected<void, BusError> shipOrderItem(const std::string& orderId,
+                                                const std::string& productId);
+
+    /**
+     * @brief Mark an order item as delivered
+     */
+    std::expected<void, BusError> deliverOrderItem(const std::string& orderId,
+                                                   const std::string& productId);
+
+    /**
+     * @brief Cancel an order item
+     */
+    std::expected<void, BusError> cancelOrderItem(const std::string& orderId,
+                                                  const std::string& productId);
 };
 
 #endif

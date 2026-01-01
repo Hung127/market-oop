@@ -2,6 +2,7 @@
 
 #include <iomanip>
 #include <iostream>
+#include <memory>
 
 #include "../../include/DTO/OrderDTO.h"
 #include "../../include/DTO/OrderItemDTO.h"
@@ -33,12 +34,20 @@ void PurchaseHistoryDTO::printHistory() const {
                   << "Subtotal" << '\n';
         std::cout << std::string(62, '-') << '\n';
 
-        // --- GIỮ NGUYÊN VÒNG LẶP IN ITEM CŨ ---
-        for (const OrderItemDTO& item : order.items()) {
-            std::cout << std::left << std::setw(30) << item.getProductName() << std::right
-                      << std::setw(8) << item.getQuantity() << std::right << std::setw(12) << std::fixed
-                      << std::setprecision(2) << item.getPrice() << std::right << std::setw(12) << std::fixed
-                      << std::setprecision(2) << (item.getPrice() * item.getQuantity()) << '\n';
+        double running = 0.0;
+        for (const std::shared_ptr<OrderItemDTO>& item : order.items()) {
+            if (!item) {
+                continue;
+            }
+            double price = item->getPrice();
+            int qty = item->getQuantity();
+            double subtotal = price * qty;
+            running += subtotal;
+
+            std::cout << std::left << std::setw(30) << item->getProductName() << std::right
+                      << std::setw(8) << qty << std::right << std::setw(12) << std::fixed
+                      << std::setprecision(2) << price << std::right << std::setw(12) << std::fixed
+                      << std::setprecision(2) << subtotal << '\n';
         }
 
         std::cout << std::string(62, '-') << '\n';

@@ -3,27 +3,45 @@
 
 #include <string>
 
+#include "../enums/OrderItemStatus.h"
+
 class OrderItemDTO {
    private:
     std::string _productId;
     std::string _sellerId;
     std::string _productName;
+    std::string _sellerId;
+    std::string _sellerName;
     double _price;
     int _quantity;
+    OrderItemStatus _status;
 
    public:
-    OrderItemDTO(const std::string& id, const std::string& sId, const std::string& name, double price, int qty)
-        : _productId(id), _sellerId(sId), _productName(name), _price(price), _quantity(qty) {}
-
-    std::string getSellerId() const { 
-        return _sellerId; 
+    // Updated constructor
+    OrderItemDTO(const std::string& productId, const std::string& productName,
+                 const std::string& sellerId, const std::string& sellerName, double price, int qty)
+        : _productId(productId),
+          _productName(productName),
+          _sellerId(sellerId),
+          _sellerName(sellerName),
+          _price(price),
+          _quantity(qty),
+          _status(OrderItemStatus::PENDING) {  // set default status to pending
+        // Do noting
     }
 
+    // Getters
     std::string getProductId() const {
         return _productId;
     }
     std::string getProductName() const {
         return _productName;
+    }
+    std::string getSellerId() const {
+        return _sellerId;
+    }
+    std::string getSellerName() const {
+        return _sellerName;
     }
     double getPrice() const {
         return _price;
@@ -31,8 +49,16 @@ class OrderItemDTO {
     int getQuantity() const {
         return _quantity;
     }
+    OrderItemStatus getStatus() const {
+        return _status;
+    }
 
-    // Tính tổng tiền của item này
+    // Setter for status
+    void setStatus(OrderItemStatus status) {
+        _status = status;
+    }
+
+    // Calculate subtotal
     double getSubtotal() const {
         return _price * _quantity;
     }

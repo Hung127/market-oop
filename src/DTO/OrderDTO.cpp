@@ -1,26 +1,32 @@
 #include "../../include/DTO/OrderDTO.h"
 
+#include <memory>
+
 #include "../../include/DTO/OrderItemDTO.h"
 
-/*
-  Lưu ý:
-  - Đoạn recalculateTotal() dưới đây giả định OrderItemDTO có các phương thức:
-      double getPrice() const;
-      int getQuantity() const;
-    Nếu tên phương thức trong OrderItemDTO của bạn khác, hãy thay các gọi tương ứng.
-*/
-
-OrderDTO::OrderDTO() : _items(), _totalPrice(0.0), _date() {
-    // khởi tạo đã thực hiện trong initializer list
+OrderDTO::OrderDTO() : _totalPrice(0.0), _rawTotal(0.0), _voucherDiscount(0.0), _coinDiscount(0.0) {}
+OrderDTO::OrderDTO(const std::string& orderId, const std::string& buyerId,
+                   const std::vector<std::shared_ptr<OrderItemDTO>>& items, double rawTotal,
+                   const std::string& date)
+    : _orderId(orderId),
+      _buyerId(buyerId),
+      _items(items),
+      _date(date),
+      _rawTotal(rawTotal),
+      _voucherDiscount(0.0),
+      _coinDiscount(0.0),
+      _totalPrice(rawTotal) {}
+// Accessors
+const std::vector<std::shared_ptr<OrderItemDTO>>& OrderDTO::items() const {
+    return this->_items;
 }
 
-OrderDTO::OrderDTO(const std::vector<OrderItemDTO>& items, double rawTotal, const std::string& date)
-        : _items(items), _rawTotal(rawTotal), _date(date), 
-          _voucherDiscount(0), _coinDiscount(0), _totalPrice(rawTotal) {}
+const std::string& OrderDTO::orderId() const {
+    return _orderId;
+}
 
-// Accessors
-const std::vector<OrderItemDTO>& OrderDTO::items() const {
-    return this->_items;
+const std::string& OrderDTO::buyerId() const {
+    return _buyerId;
 }
 
 double OrderDTO::totalPrice() const {
@@ -32,7 +38,7 @@ const std::string& OrderDTO::date() const {
 }
 
 // Mutators / helpers
-void OrderDTO::setItems(const std::vector<OrderItemDTO>& items) {
+void OrderDTO::setItems(const std::vector<std::shared_ptr<OrderItemDTO>>& items) {
     this->_items = items;
 }
 
@@ -46,16 +52,20 @@ void OrderDTO::setDate(const std::string& date) {
 
 // Convenience
 void OrderDTO::addItem(const OrderItemDTO& item) {
-    this->_items.push_back(item);
+    this->_items.push_back(std::make_shared<OrderItemDTO>(item));
 }
 
 // Recalculate total from items
 void OrderDTO::recalculateTotal() {
     this->_totalPrice = 0.0;
 
-    // Giả sử OrderItemDTO có getPrice() và getQuantity()
     for (const auto& it : this->_items) {
-        this->_totalPrice += it.getPrice() * static_cast<double>(it.getQuantity());
+        if (!it) {
+            continue;
+        }
+        if (it->getStatus() != OrderItemStatus::CANCELLED) {
+            this->_totalPrice += it->getPrice() * static_cast<double>(it->getQuantity());
+        }
     }
 }
 

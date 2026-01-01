@@ -1,15 +1,18 @@
 #include "../../include/BUS/BuyerBUS.h"
 
 #include <expected>
+#include <iterator>
 #include <memory>
 #include <string>
 #include <vector>
 #include <format>
 
 #include "../../include/BUS/CartBUS.h"
+#include "../../include/DAO/OrderDAO.h"
 #include "../../include/DTO/BuyerDTO.h"
 #include "../../include/DTO/OrderDTO.h"
 #include "../../include/DTO/OrderItemDTO.h"
+#include "../../include/DTO/SellerDTO.h"
 #include "../../include/Utils/Utils.h"
 
 // ========== BALANCE LOGIC ==========
