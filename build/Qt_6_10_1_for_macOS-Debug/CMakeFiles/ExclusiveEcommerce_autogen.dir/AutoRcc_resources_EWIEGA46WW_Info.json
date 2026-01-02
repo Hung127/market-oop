@@ -1,0 +1,22 @@
+{
+	"BUILD_DIR" : "/Users/khoahoang/market-oop/build/Qt_6_10_1_for_macOS-Debug/ExclusiveEcommerce_autogen",
+	"CMAKE_BINARY_DIR" : "/Users/khoahoang/market-oop/build/Qt_6_10_1_for_macOS-Debug",
+	"CMAKE_CURRENT_BINARY_DIR" : "/Users/khoahoang/market-oop/build/Qt_6_10_1_for_macOS-Debug",
+	"CMAKE_CURRENT_SOURCE_DIR" : "/Users/khoahoang/market-oop",
+	"CMAKE_SOURCE_DIR" : "/Users/khoahoang/market-oop",
+	"CROSS_CONFIG" : false,
+	"GENERATOR" : "Ninja",
+	"INCLUDE_DIR" : "/Users/khoahoang/market-oop/build/Qt_6_10_1_for_macOS-Debug/ExclusiveEcommerce_autogen/include",
+	"INPUTS" : [ "/Users/khoahoang/market-oop/qml/Main.qml" ],
+	"LOCK_FILE" : "/Users/khoahoang/market-oop/build/Qt_6_10_1_for_macOS-Debug/CMakeFiles/ExclusiveEcommerce_autogen.dir/AutoRcc_resources_EWIEGA46WW_Lock.lock",
+	"MULTI_CONFIG" : false,
+	"OPTIONS" : [ "--no-zstd", "-name", "resources" ],
+	"OUTPUT_CHECKSUM" : "EWIEGA46WW",
+	"OUTPUT_NAME" : "qrc_resources.cpp",
+	"RCC_EXECUTABLE" : "/Users/khoahoang/Qt/6.10.1/macos/libexec/rcc",
+	"RCC_LIST_OPTIONS" : [ "--list" ],
+	"SETTINGS_FILE" : "/Users/khoahoang/market-oop/build/Qt_6_10_1_for_macOS-Debug/CMakeFiles/ExclusiveEcommerce_autogen.dir/AutoRcc_resources_EWIEGA46WW_Used.txt",
+	"SOURCE" : "/Users/khoahoang/market-oop/resources.qrc",
+	"USE_BETTER_GRAPH" : true,
+	"VERBOSITY" : 0
+}

@@ -1,5 +1,0 @@
-/workspaces/market-oop/build/CMakeFiles/ExclusiveEcommerce.dir
-/workspaces/market-oop/build/CMakeFiles/edit_cache.dir
-/workspaces/market-oop/build/CMakeFiles/rebuild_cache.dir
-/workspaces/market-oop/build/CMakeFiles/ExclusiveEcommerce_autogen_timestamp_deps.dir
-/workspaces/market-oop/build/CMakeFiles/ExclusiveEcommerce_autogen.dir

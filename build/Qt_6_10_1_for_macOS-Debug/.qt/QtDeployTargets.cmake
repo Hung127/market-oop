@@ -1,0 +1,2 @@
+set(__QT_DEPLOY_TARGET_ExclusiveEcommerce_FILE /Users/khoahoang/market-oop/build/Qt_6_10_1_for_macOS-Debug/ExclusiveEcommerce)
+set(__QT_DEPLOY_TARGET_ExclusiveEcommerce_TYPE EXECUTABLE)
