@@ -1,0 +1,20 @@
+{
+	"BUILD_DIR" : "/workspaces/market-oop/build/ExclusiveEcommerce_autogen",
+	"CMAKE_BINARY_DIR" : "/workspaces/market-oop/build",
+	"CMAKE_CURRENT_BINARY_DIR" : "/workspaces/market-oop/build",
+	"CMAKE_CURRENT_SOURCE_DIR" : "/workspaces/market-oop",
+	"CMAKE_SOURCE_DIR" : "/workspaces/market-oop",
+	"GENERATOR" : "Ninja",
+	"INCLUDE_DIR" : "/workspaces/market-oop/build/ExclusiveEcommerce_autogen/include",
+	"INPUTS" : [ "/workspaces/market-oop/qml/Main.qml" ],
+	"LOCK_FILE" : "/workspaces/market-oop/build/CMakeFiles/ExclusiveEcommerce_autogen.dir/AutoRcc_resources_EWIEGA46WW_Lock.lock",
+	"MULTI_CONFIG" : false,
+	"OPTIONS" : [ "-name", "resources" ],
+	"OUTPUT_CHECKSUM" : "EWIEGA46WW",
+	"OUTPUT_NAME" : "qrc_resources.cpp",
+	"RCC_EXECUTABLE" : "/usr/lib/qt6/libexec/rcc",
+	"RCC_LIST_OPTIONS" : [ "--list" ],
+	"SETTINGS_FILE" : "/workspaces/market-oop/build/CMakeFiles/ExclusiveEcommerce_autogen.dir/AutoRcc_resources_EWIEGA46WW_Used.txt",
+	"SOURCE" : "/workspaces/market-oop/resources.qrc",
+	"VERBOSITY" : 0
+}

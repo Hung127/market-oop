@@ -67,8 +67,8 @@ file(APPEND ${QRC_FILE} "</RCC>\n")
 # Create executable with resources
 add_executable(ExclusiveEcommerce
     src/main.cpp
-    src/productmodel.h
-    src/productmodel.cpp
+    src/models/productmodel.h
+    src/models/productmodel.cpp
     resources.qrc
 )
 
@@ -77,6 +77,14 @@ target_link_libraries(ExclusiveEcommerce PRIVATE
     Qt6::Core
     Qt6::Gui
     Qt6::Quick
+)
+
+# Add include directories so headers in src/models, src/services and src/controllers are found
+target_include_directories(ExclusiveEcommerce PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/models
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/services
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/controllers
 )
 
 # Fix stack protector for MinGW
