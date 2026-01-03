@@ -254,7 +254,7 @@ bool DatabaseManager::createTables() {
             SUM(oi.subtotal) as total_revenue,
             oi.status as item_status
         FROM order_items oi
-        JOIN users u ON oi. seller_id = u.id
+        JOIN users u ON oi.seller_id = u.id
         GROUP BY oi.seller_id, oi.status;
     )";
 
@@ -469,4 +469,16 @@ bool DatabaseManager::vacuum() {
 bool DatabaseManager::analyze() {
     std::cout << "[INFO] Running ANALYZE to update statistics..." << std::endl;
     return executeSQL("ANALYZE;");
+}
+
+// Singleton Pattern implementation
+std::unique_ptr<DatabaseManager> DatabaseManager::_instance = nullptr;
+std::mutex DatabaseManager::_mutex;
+
+DatabaseManager& DatabaseManager::getInstance(const std::string& dbPath) {
+    std::lock_guard<std::mutex> lock(_mutex);  // Thread-safe
+    if (!_instance) {
+        _instance = std::unique_ptr<DatabaseManager>(new DatabaseManager(dbPath));
+    }
+    return *_instance;
 }

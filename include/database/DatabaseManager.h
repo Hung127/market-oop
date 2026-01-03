@@ -3,6 +3,7 @@
 
 #include <expected>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -12,7 +13,13 @@ class DatabaseManager {
    private:
     sqlite3* _db;
     std::string _dbPath;
+    
+    // Singleton Pattern: Ensures only one instance of DatabaseManager exists globally.
+    // This prevents multiple database connections and ensures thread-safety for DB operations.
+    static std::unique_ptr<DatabaseManager> _instance;  // Singleton instance holder
+    static std::mutex _mutex;  // For thread-safety in multi-threaded environments
 
+    
     // Internal helper to execute SQL without parameters
     bool executeSQL(const std::string& sql);
 
@@ -20,6 +27,10 @@ class DatabaseManager {
     std::expected<void, std::string> executeSQLWithError(const std::string& sql);
 
    public:
+    // Singleton Pattern: Get the single instance of DatabaseManager.
+    // Call this instead of new DatabaseManager() to ensure uniqueness.
+    static DatabaseManager& getInstance(const std::string& dbPath = "data/market.db");
+
     DatabaseManager(const std::string& dbPath = "data/market.db");
     ~DatabaseManager();
 

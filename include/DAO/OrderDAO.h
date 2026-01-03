@@ -32,6 +32,8 @@ class OrderDAO {
 
     static std::vector<std::shared_ptr<OrderDTO>> getOrdersBySellerId(const std::string& sellerId);
 
+    static bool deleteOrder(const std::string& orderId);
+
     // Order item operations
     static std::vector<OrderItemDTO> getSellerOrderItemByStatus(const std::string& sellerId,
                                                                 OrderItemStatus status);

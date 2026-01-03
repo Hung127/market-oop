@@ -119,7 +119,8 @@ TEST(OrderStatusFlow, FullLifecycle_SuccessSingleItem) {
     EXPECT_DOUBLE_EQ(buyer->getBalance(), 60.0);
     EXPECT_EQ(product->getStock(), 8);
 
-    // Cleanup - now this should work
+    // Cleanup - delete order first, then product
+    EXPECT_TRUE(OrderDAO::deleteOrder(orderId));
     EXPECT_TRUE(ProductDAO::remove(product->getID()));
 }
 
@@ -165,6 +166,7 @@ TEST(OrderStatusFlow, Cancel_BeforeConfirm_RefundsBuyerAndRestoresStock) {
     EXPECT_DOUBLE_EQ(order->totalPrice(), 0.0);
 
     // Cleanup
+    EXPECT_TRUE(OrderDAO::deleteOrder(orderId));
     EXPECT_TRUE(ProductDAO::remove(product->getID()));
 }
 
@@ -217,6 +219,7 @@ TEST(OrderStatusFlow, Cancel_AfterConfirm_RefundsBuyerAndRestoresStock) {
     order = OrderDAO::getOrderById(orderId);
     EXPECT_DOUBLE_EQ(order->totalPrice(), 0.0);
 
+    EXPECT_TRUE(OrderDAO::deleteOrder(orderId));
     EXPECT_TRUE(ProductDAO::remove(product->getID()));
 }
 
@@ -259,6 +262,7 @@ TEST(OrderStatusFlow, Cancel_AfterShip_NotAllowed) {
     EXPECT_DOUBLE_EQ(buyer->getBalance(), 30.0);
     EXPECT_EQ(product->getStock(), 0);
 
+    EXPECT_TRUE(OrderDAO::deleteOrder(orderId));
     EXPECT_TRUE(ProductDAO::remove(product->getID()));
 }
 
@@ -301,6 +305,7 @@ TEST(OrderStatusFlow, Cancel_AfterDelivery_NotAllowed) {
     EXPECT_DOUBLE_EQ(buyer->getBalance(), 20.0);
     EXPECT_EQ(product->getStock(), 0);
 
+    EXPECT_TRUE(OrderDAO::deleteOrder(orderId));
     EXPECT_TRUE(ProductDAO::remove(product->getID()));
 }
 
@@ -342,6 +347,7 @@ TEST(OrderStatusFlow, Confirm_NotYourOrderItem) {
     item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::CONFIRMED);
 
+    EXPECT_TRUE(OrderDAO::deleteOrder(orderId));
     EXPECT_TRUE(ProductDAO::remove(product->getID()));
 }
 
@@ -405,6 +411,7 @@ TEST(OrderStatusFlow, Transitions_OutOfOrderNotAllowed) {
     item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::DELIVERED);
 
+    EXPECT_TRUE(OrderDAO::deleteOrder(orderId));
     EXPECT_TRUE(ProductDAO::remove(product->getID()));
 }
 
@@ -463,6 +470,7 @@ TEST(OrderStatusFlow, MultiItemOrder_PartialCancel) {
     EXPECT_EQ(prodAReloaded.value()->getStock(), 5);
     EXPECT_EQ(prodB->getStock(), 2);
 
+    EXPECT_TRUE(OrderDAO::deleteOrder(orderId));
     EXPECT_TRUE(ProductDAO::remove(prodA->getID()));
     EXPECT_TRUE(ProductDAO::remove(prodB->getID()));
 }

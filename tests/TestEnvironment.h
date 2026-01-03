@@ -7,6 +7,7 @@
 #include <gtest/gtest.h>
 
 class DatabaseManager;
+class ProductRepository;
 
 /**
  * Global test environment that initializes a shared SQLite test database
@@ -21,9 +22,11 @@ class GlobalDbEnvironment : public ::testing::Environment {
     void TearDown() override;
 
     std::shared_ptr<DatabaseManager> getDbManager() const;
+    std::shared_ptr<ProductRepository> getProductRepository() const;
 
    private:
     std::shared_ptr<DatabaseManager> dbManager;
+    std::shared_ptr<ProductRepository> productRepository;  // Repository Pattern: Instance for testing
     std::string testDbPath;
 };
 

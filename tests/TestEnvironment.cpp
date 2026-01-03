@@ -10,6 +10,7 @@
 #include "../include/DAO/SellerDAO.h"
 #include "../include/DAO/UserDAO.h"
 #include "../include/database/DatabaseManager.h"
+#include "../include/repository/RepositoryFactory.h"  // Factory Pattern: For creating repositories
 
 void GlobalDbEnvironment::SetUp() {
     testDbPath = "test_market_global.db";
@@ -33,6 +34,10 @@ void GlobalDbEnvironment::SetUp() {
     BuyerDAO::setDatabaseManager(dbManager);
     SellerDAO::setDatabaseManager(dbManager);
 
+    // Repository Pattern: Create repository instance with injected DB manager
+    // This demonstrates using Repository instead of static DAO for better design
+    productRepository = RepositoryFactory::createProductRepository(*dbManager);
+
     std::cout << "[INFO] GlobalDbEnvironment: test DB initialized at " << testDbPath << std::endl;
 }
 
@@ -54,4 +59,8 @@ void GlobalDbEnvironment::TearDown() {
 
 std::shared_ptr<DatabaseManager> GlobalDbEnvironment::getDbManager() const {
     return dbManager;
+}
+
+std::shared_ptr<ProductRepository> GlobalDbEnvironment::getProductRepository() const {
+    return productRepository;
 }

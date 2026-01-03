@@ -206,6 +206,9 @@ std::shared_ptr<OrderDTO> OrderDAO::getOrderById(const std::string& id) {
 
         auto order = std::make_shared<OrderDTO>(orderId, buyerId, items, totalAmount, date);
 
+        // Recalculate total based on current items to ensure consistency
+        order->recalculateTotal();
+
         return order;
     }
 
@@ -485,4 +488,40 @@ double OrderDAO::getTotalRevenueBySeller(const std::string& sellerId) {
 
     sqlite3_finalize(stmt);
     return revenue;
+}
+
+bool OrderDAO::deleteOrder(const std::string& orderId) {
+    if (!_dbManager) {
+        return false;
+    }
+
+    sqlite3* db = _dbManager->getConnection();
+
+    // Delete order items first (due to foreign key)
+    const char* sqlItems = "DELETE FROM order_items WHERE order_id = ?";
+    sqlite3_stmt* stmtItems;
+    if (sqlite3_prepare_v2(db, sqlItems, -1, &stmtItems, nullptr) != SQLITE_OK) {
+        return false;
+    }
+    sqlite3_bind_text(stmtItems, 1, orderId.c_str(), -1, SQLITE_TRANSIENT);
+    if (sqlite3_step(stmtItems) != SQLITE_DONE) {
+        sqlite3_finalize(stmtItems);
+        return false;
+    }
+    sqlite3_finalize(stmtItems);
+
+    // Delete order
+    const char* sqlOrder = "DELETE FROM orders WHERE id = ?";
+    sqlite3_stmt* stmtOrder;
+    if (sqlite3_prepare_v2(db, sqlOrder, -1, &stmtOrder, nullptr) != SQLITE_OK) {
+        return false;
+    }
+    sqlite3_bind_text(stmtOrder, 1, orderId.c_str(), -1, SQLITE_TRANSIENT);
+    if (sqlite3_step(stmtOrder) != SQLITE_DONE) {
+        sqlite3_finalize(stmtOrder);
+        return false;
+    }
+    sqlite3_finalize(stmtOrder);
+
+    return true;
 }
