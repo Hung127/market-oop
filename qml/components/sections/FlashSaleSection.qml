@@ -1,10 +1,8 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-
-import "../products"
 import "../common"
-
+import "../products"
 Column {
     id: root
     property var model
@@ -43,9 +41,11 @@ Column {
             }
         }
 
-        FlashSaleTimer {
+        Loader {
             Layout.alignment: Qt.AlignVCenter
+            source: "qrc:/qml/qml/components/common/FlashSaleTimer.qml"
         }
+
 
         Item { Layout.fillWidth: true }  // Giờ đây hoạt động đúng trong RowLayout
 

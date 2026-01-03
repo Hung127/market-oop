@@ -6,40 +6,87 @@ Item {
     id: root
     width: 260
 
-    Column {
+    ColumnLayout {
         anchors.fill: parent
         anchors.margins: 16
-        spacing: 8
+        spacing: 12
 
-        // 2 mục đầu có dropdown, giống Frame 558/559
-        Row {
-            spacing: 4
-            Text {
-                text: qsTr("Woman's Fashion")
-                font.pixelSize: 16
-                color: "#000000"
+        // ===== WOMEN =====
+        Rectangle {
+            Layout.fillWidth: true
+            height: 36
+            radius: 4
+            color: womanMouse.containsMouse ? "#F5F5F5" : "transparent"
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.margins: 4
+
+                Text {
+                    text: qsTr("Woman's Fashion")
+                    font.pixelSize: 16
+                    Layout.fillWidth: true
+                }
+
+                Image {
+                    source: "qrc:/icons/dropdown.svg"
+                    width: 16
+                    height: 16
+                    Layout.alignment: Qt.AlignVCenter
+                }
             }
-            Image {
-                source: "qrc:/icons/dropdown.svg"
-                width: 16; height: 16
+
+            MouseArea {
+                id: womanMouse
+                anchors.fill: parent   // OK vì Rectangle không phải Layout item
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: console.log("Woman clicked")
             }
         }
 
-        Row {
-            spacing: 4
-            Text {
-                text: qsTr("Men's Fashion")
-                font.pixelSize: 16
-                color: "#000000"
+        // ===== MEN =====
+        Rectangle {
+            Layout.fillWidth: true
+            height: 36
+            radius: 4
+            color: menMouse.containsMouse ? "#F5F5F5" : "transparent"
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.margins: 4
+
+                Text {
+                    text: qsTr("Men's Fashion")
+                    font.pixelSize: 16
+                    Layout.fillWidth: true
+                }
+
+                Image {
+                    source: "qrc:/icons/dropdown.svg"
+                    width: 16
+                    height: 16
+                    Layout.alignment: Qt.AlignVCenter
+                }
             }
-            Image {
-                source: "qrc:/icons/dropdown.svg"
-                width: 16; height: 16
+
+            MouseArea {
+                id: menMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: console.log("Men clicked")
             }
         }
 
-        Rectangle { height: 1; width: parent.width; color: "#E0E0E0"; opacity: 0.3 }
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
+            color: "#E0E0E0"
+            opacity: 0.3
+        }
 
+        // ===== OTHER CATEGORIES =====
         Repeater {
             model: [
                 qsTr("Electronics"),
@@ -51,11 +98,27 @@ Item {
                 qsTr("Health & Beauty")
             ]
 
-            delegate: Text {
-                text: modelData
-                font.pixelSize: 16
-                color: "#000000"
-                padding: 4
+            delegate: Rectangle {
+                Layout.fillWidth: true
+                height: 36
+                radius: 4
+                color: mouse.containsMouse ? "#F5F5F5" : "transparent"
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.leftMargin: 4
+                    text: modelData
+                    font.pixelSize: 16
+                }
+
+                MouseArea {
+                    id: mouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: console.log("Category clicked:", modelData)
+                }
             }
         }
     }

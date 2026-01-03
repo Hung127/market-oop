@@ -1,9 +1,8 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-
 import "../products"
-
+import "../products"
 Item {
     id: root
     width: parent ? parent.width : 1440

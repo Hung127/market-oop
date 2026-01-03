@@ -10,10 +10,6 @@ import "components/dialogs"
 import "pages"
 import "styles"
 
-
-
-
-
 ApplicationWindow {
     id: window
     width: 1440
@@ -29,40 +25,40 @@ ApplicationWindow {
     RowLayout {
         anchors.fill: parent
         anchors.topMargin: headerBar.height
+        spacing: 0
 
+        // ===== LEFT SIDEBAR =====
         CategoryPanel {
-            id: categoryPanel
             Layout.preferredWidth: 260
             Layout.fillHeight: true
         }
 
+        // ===== MAIN CONTENT =====
         Flickable {
             id: mainScroll
             Layout.fillWidth: true
             Layout.fillHeight: true
+
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
+            pressDelay: 120
+
             contentWidth: width
             contentHeight: contentColumn.implicitHeight
-            clip: true
 
             Column {
                 id: contentColumn
                 width: mainScroll.width
-                spacing: 32
+                spacing: 48
 
-                HeroBanner {
-                    id: heroBanner
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    width: parent.width
-                }
+                HeroBanner { width: parent.width }
 
                 FlashSaleSection {
                     width: parent.width
                     model: flashSaleModel
                 }
 
-                BrowseCategorySection {
-                    width: parent.width
-                }
+                BrowseCategorySection { width: parent.width }
 
                 BestSellingSection {
                     width: parent.width
@@ -74,15 +70,11 @@ ApplicationWindow {
                     model: allProductsModel
                 }
 
-                ServicesStrip {
-                    width: parent.width
-                }
+                ServicesStrip { width: parent.width }
 
-                FooterBar {
-                    width: parent.width
-                }
+                FooterBar { width: parent.width }
 
-                Rectangle { // padding bottom
+                Rectangle {
                     width: parent.width
                     height: 40
                     color: "transparent"

@@ -19,25 +19,25 @@ Item {
         interval: 1000
         repeat: true
         running: true
-        
+
         onTriggered: {
             root.seconds--
-            
+
             if (root.seconds < 0) {
                 root.seconds = 59
                 root.minutes--
             }
-            
+
             if (root.minutes < 0) {
                 root.minutes = 59
                 root.hours--
             }
-            
+
             if (root.hours < 0) {
                 root.hours = 23
                 root.days--
             }
-            
+
             if (root.days < 0) {
                 // Reset or stop timer when countdown ends
                 root.days = 0
@@ -56,14 +56,14 @@ Item {
         // Days
         Column {
             spacing: 4
-            
+
             Text {
                 text: qsTr("Days")
                 font.pixelSize: 12
                 color: "#000000"
                 font.bold: true
             }
-            
+
             Rectangle {
                 width: 62
                 height: 62
@@ -71,7 +71,7 @@ Item {
                 color: "#FFFFFF"
                 border.color: "#E0E0E0"
                 border.width: 1
-                
+
                 Text {
                     anchors.centerIn: parent
                     text: root.days.toString().padStart(2, '0')
@@ -95,14 +95,14 @@ Item {
         // Hours
         Column {
             spacing: 4
-            
+
             Text {
                 text: qsTr("Hours")
                 font.pixelSize: 12
                 color: "#000000"
                 font.bold: true
             }
-            
+
             Rectangle {
                 width: 62
                 height: 62
@@ -110,7 +110,7 @@ Item {
                 color: "#FFFFFF"
                 border.color: "#E0E0E0"
                 border.width: 1
-                
+
                 Text {
                     anchors.centerIn: parent
                     text: root.hours.toString().padStart(2, '0')
@@ -134,14 +134,14 @@ Item {
         // Minutes
         Column {
             spacing: 4
-            
+
             Text {
                 text: qsTr("Minutes")
                 font.pixelSize: 12
                 color: "#000000"
                 font.bold: true
             }
-            
+
             Rectangle {
                 width: 62
                 height: 62
@@ -149,7 +149,7 @@ Item {
                 color: "#FFFFFF"
                 border.color: "#E0E0E0"
                 border.width: 1
-                
+
                 Text {
                     anchors.centerIn: parent
                     text: root.minutes.toString().padStart(2, '0')
@@ -173,14 +173,14 @@ Item {
         // Seconds
         Column {
             spacing: 4
-            
+
             Text {
                 text: qsTr("Seconds")
                 font.pixelSize: 12
                 color: "#000000"
                 font.bold: true
             }
-            
+
             Rectangle {
                 width: 62
                 height: 62
@@ -188,7 +188,7 @@ Item {
                 color: "#FFFFFF"
                 border.color: "#E0E0E0"
                 border.width: 1
-                
+
                 Text {
                     anchors.centerIn: parent
                     text: root.seconds.toString().padStart(2, '0')
