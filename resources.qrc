@@ -2,7 +2,7 @@
 <RCC version="1.0">
 
 <qresource prefix="/qml">
-    <file alias="Main.qml">qml/Main.qml</file>
+    <file>qml/Main.qml</file>
 
     <!-- pages -->
     <file>qml/pages/CartPage.qml</file>
