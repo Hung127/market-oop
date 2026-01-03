@@ -2,6 +2,15 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
+import "components/layout"
+import "components/sections"
+import "components/products"
+import "components/common"
+import "components/dialogs"
+import "pages"
+import "styles"
+
+
 ApplicationWindow {
     id: window
     width: 1440
