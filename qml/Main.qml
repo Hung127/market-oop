@@ -2,18 +2,14 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
-/* layout */
-import "qrc:/qml/components/layout/HeaderBar.qml"
-import "qrc:/qml/components/layout/FooterBar.qml"
-import "qrc:/qml/components/layout/CategoryPanel.qml"
+import "components/layout"
+import "components/sections"
+import "components/products"
+import "components/common"
+import "components/dialogs"
+import "pages"
+import "styles"
 
-/* sections */
-import "qrc:/qml/components/sections/HeroBanner.qml"
-import "qrc:/qml/components/sections/FlashSaleSection.qml"
-import "qrc:/qml/components/sections/BrowseCategorySection.qml"
-import "qrc:/qml/components/sections/BestSellingSection.qml"
-import "qrc:/qml/components/sections/ExploreProductsSection.qml"
-import "qrc:/qml/components/sections/ServicesStrip.qml"
 
 
 
