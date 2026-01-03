@@ -1,0 +1,89 @@
+#include <QDebug>
+
+#include "../../include/UI/AuthController.h"
+
+AuthController::AuthController(QObject* parent) : QObject(parent), m_currentUser(nullptr) {}
+
+bool AuthController::login(const QString& email, const QString& password) {
+    qDebug() << "Login attempt for:" << email;
+
+    // Call your backend
+    auto result = UserBUS::login(email.toStdString(), password.toStdString());
+
+    if (result.has_value()) {
+        m_currentUser = result.value();
+
+        QString userId = QString::fromStdString(m_currentUser->getId());
+        QString userName = QString::fromStdString(m_currentUser->getName());
+        QString role = QString::fromStdString(m_currentUser->getRole());
+
+        qDebug() << "Login successful!" << userName << "-" << role;
+
+        emit loginSuccess(userId, userName, role);
+        emit loginStatusChanged();
+        return true;
+    } else {
+        QString error = QString::fromStdString(result.error());
+        qDebug() << "Login failed:" << error;
+        emit loginFailed(error);
+        return false;
+    }
+}
+
+bool AuthController::registerUser(const QString& name, const QString& email,
+                                  const QString& password, const QString& role, double balance) {
+    qDebug() << "Register attempt:" << name << email << role;
+
+    // Convert role string to UserRole enum
+    UserRole userRole;
+    if (role.toLower() == "buyer") {
+        userRole = UserRole::BUYER;
+    } else if (role.toLower() == "seller") {
+        userRole = UserRole::SELLER;
+    } else {
+        QString error = "Invalid role: " + role;
+        qDebug() << error;
+        emit registerFailed(error);
+        return false;
+    }
+
+    // Call your backend
+    auto result = UserBUS::registerUser(userRole, name.toStdString(), email.toStdString(),
+                                        password.toStdString(), balance);
+
+    if (result.has_value()) {
+        qDebug() << "Registration successful! ";
+        emit registerSuccess();
+        return true;
+    } else {
+        QString error = QString::fromStdString(result.error());
+        qDebug() << "Registration failed:" << error;
+        emit registerFailed(error);
+        return false;
+    }
+}
+
+void AuthController::logout() {
+    qDebug() << "Logout";
+    UserBUS::logout(m_currentUser);
+    m_currentUser = nullptr;
+    emit loginStatusChanged();
+}
+
+bool AuthController::isLoggedIn() const {
+    return m_currentUser != nullptr;
+}
+
+QString AuthController::currentUserName() const {
+    if (m_currentUser) {
+        return QString::fromStdString(m_currentUser->getName());
+    }
+    return "";
+}
+
+QString AuthController::currentUserRole() const {
+    if (m_currentUser) {
+        return QString::fromStdString(m_currentUser->getRole());
+    }
+    return "";
+}

@@ -1,0 +1,46 @@
+#ifndef AUTHCONTROLLER_H
+#define AUTHCONTROLLER_H
+
+#include <QObject>
+#include <QString>
+#include <memory>
+
+#include "../UserFactory.h"
+#include "BUS/UserBUS.h"
+#include "DTO/BuyerDTO.h"
+#include "DTO/SellerDTO.h"
+#include "DTO/UserDTO.h"
+
+class AuthController : public QObject {
+    Q_OBJECT
+    Q_PROPERTY(bool isLoggedIn READ isLoggedIn NOTIFY loginStatusChanged)
+    Q_PROPERTY(QString currentUserName READ currentUserName NOTIFY loginStatusChanged)
+    Q_PROPERTY(QString currentUserRole READ currentUserRole NOTIFY loginStatusChanged)
+
+   public:
+    explicit AuthController(QObject* parent = nullptr);
+
+    // Q_INVOKABLE methods callable from QML
+    Q_INVOKABLE bool login(const QString& email, const QString& password);
+    Q_INVOKABLE bool registerUser(const QString& name, const QString& email,
+                                  const QString& password, const QString& role,
+                                  double balance = 0.0);
+    Q_INVOKABLE void logout();
+
+    // Properties
+    bool isLoggedIn() const;
+    QString currentUserName() const;
+    QString currentUserRole() const;
+
+   signals:
+    void loginSuccess(const QString& userId, const QString& userName, const QString& role);
+    void loginFailed(const QString& error);
+    void registerSuccess();
+    void registerFailed(const QString& error);
+    void loginStatusChanged();
+
+   private:
+    std::shared_ptr<UserDTO> m_currentUser;
+};
+
+#endif  // AUTHCONTROLLER_H

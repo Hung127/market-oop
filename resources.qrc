@@ -1,57 +1,17 @@
 <!DOCTYPE RCC>
-<RCC version="1.0">
-
-	<!-- QML -->
-	<qresource prefix="/qml">
-		<file>qml/Main.qml</file>
-
-		<file>qml/styles/Colors.qml</file>
-		<file>qml/styles/Dimensions.qml</file>
-
-		<file>qml/pages/HomePage.qml</file>
-		<file>qml/pages/CartPage.qml</file>
-		<file>qml/pages/CheckoutPage.qml</file>
-		<file>qml/pages/ProductDetailPage.qml</file>
-		<file>qml/pages/ProfilePage.qml</file>
-
-		<file>qml/components/common/CustomButton.qml</file>
-		<file>qml/components/common/FlashSaleTimer.qml</file>
-		<file>qml/components/common/RatingStars.qml</file>
-		<file>qml/components/common/SearchBar.qml</file>
-
-		<file>qml/components/dialogs/AddToCartDialog.qml</file>
-		<file>qml/components/dialogs/LoginDialog.qml</file>
-
-		<file>qml/components/layout/HeaderBar.qml</file>
-		<file>qml/components/layout/FooterBar.qml</file>
-		<file>qml/components/layout/CategoryPanel.qml</file>
-
-		<file>qml/components/products/ProductCard.qml</file>
-		<file>qml/components/products/ProductGrid.qml</file>
-		<file>qml/components/products/ProductListItem.qml</file>
-
-		<file>qml/components/sections/HeroBanner.qml</file>
-		<file>qml/components/sections/FlashSaleSection.qml</file>
-		<file>qml/components/sections/BrowseCategorySection.qml</file>
-		<file>qml/components/sections/BestSellingSection.qml</file>
-		<file>qml/components/sections/ExploreProductsSection.qml</file>
-		<file>qml/components/sections/ServicesStrip.qml</file>
-	</qresource>
-
-	<!-- IMAGES -->
-	<qresource prefix="/images">
-		<file>images/laptop.png</file>
-		<file>images/gamepad.png</file>
-		<file>images/hero_iphone.png</file>
-	</qresource>
-
-	<!-- ICONS -->
-	<qresource prefix="/icons">
-		<file>icons/cart.svg</file>
-		<file>icons/heart.svg</file>
-		<file>icons/star_empty.svg</file>
-		<file>icons/star_filled.svg</file>
-		<file>icons/dropdown.svg</file>
-	</qresource>
-
+<RCC>
+    <qresource prefix="/">
+        <file>qml/Main.qml</file>
+        <file>qml/LoginPage.qml</file>
+        <file>qml/RegisterPage.qml</file>
+        <file>qml/BuyerHomePage.qml</file>
+        <file>qml/SellerDashboard.qml</file>
+        <file>qml/CartPage.qml</file>
+        <file>qml/ProductDetailPage.qml</file>
+        <file>qml/AddEditProductPage.qml</file>
+        <file>qml/ProfilePage.qml</file>
+        <file>qml/CheckoutPage.qml</file>
+        <file>qml/OrderHistoryPage.qml</file>
+        <file>qml/SellerOrderManagementPage.qml</file>
+    </qresource>
 </RCC>
