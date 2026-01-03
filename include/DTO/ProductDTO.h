@@ -12,41 +12,22 @@ using std::vector;
 
 class SellerDTO;
 
-// ================= PRODUCT EXTRA INFO DTO =================
-class ProductExtraInfoDTO {
-   private:
-    string _description;
-    std::vector<std::vector<uint8_t>> _imageRawData;
-
-   public:
-    ProductExtraInfoDTO() = default;
-    ProductExtraInfoDTO(const string& desc) : _description(desc) {}
-
-    // ===== SETTERS =====
-    void setDescription(const std::string& description);
-    void addImageData(const std::vector<uint8_t>& data);
-
-    // ===== GETTERS =====
-    size_t getImageCount() const;
-    const std::string& getDescription() const;
-    const std::vector<std::vector<uint8_t>>& getImageRawData() const;
-    std::expected<std::vector<uint8_t>, std::string> getImageAt(size_t index) const;
-};
-
-// ================= PRODUCT DTO =================
 class ProductDTO {
    private:
     std::weak_ptr<SellerDTO> _owner;
     string _sellerId;
     string _id;
+    string _description;
     string _name;
     double _price;
     int _stock;
-    std::shared_ptr<ProductExtraInfoDTO> _extraInfo;
+    string _imagePath;
 
    public:
+    // constructor: description and imagePath are optional
     ProductDTO(const string& id, const string& name, double price, int stock,
-               const std::shared_ptr<SellerDTO>& owner);
+               const std::shared_ptr<SellerDTO>& owner, const string& description = "NONE",
+               const string& imagePath = "NONE");
 
     // ===== GETTERS (non-const) =====
     string getName();
@@ -54,7 +35,6 @@ class ProductDTO {
     double getPrice();
     int getStock();
     std::shared_ptr<SellerDTO> getOwner();
-    std::shared_ptr<ProductExtraInfoDTO> getExtraInfo();
 
     // ===== GETTERS (const) =====
     string getName() const;
@@ -63,14 +43,18 @@ class ProductDTO {
     int getStock() const;
     std::shared_ptr<SellerDTO> getOwner() const;
     string getSellerId() const;
-    std::shared_ptr<const ProductExtraInfoDTO> getExtraInfo() const;
+    const std::string& getImagePath() const;
+    const std::string& getDescription() const;
 
     // ===== SETTERS =====
     void setName(const string& name);
     void setPrice(double price);
     void setStock(int stock);
     void setOwner(const std::shared_ptr<SellerDTO>& owner);
-    void setExtraInfo(const std::shared_ptr<ProductExtraInfoDTO>& extra);
+
+    // New setters for description / image path
+    void setImagePath(const std::string& path);
+    void setDescription(const std::string& desc);
 };
 
 #endif

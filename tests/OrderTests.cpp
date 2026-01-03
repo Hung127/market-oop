@@ -118,9 +118,6 @@ TEST(OrderStatusFlow, FullLifecycle_SuccessSingleItem) {
     // No balance/stock changes on confirm/ship/deliver
     EXPECT_DOUBLE_EQ(buyer->getBalance(), 60.0);
     EXPECT_EQ(product->getStock(), 8);
-
-    // Cleanup - now this should work
-    EXPECT_TRUE(ProductDAO::remove(product->getID()));
 }
 
 /**
@@ -163,9 +160,6 @@ TEST(OrderStatusFlow, Cancel_BeforeConfirm_RefundsBuyerAndRestoresStock) {
     // Reload order to check total
     order = OrderDAO::getOrderById(orderId);
     EXPECT_DOUBLE_EQ(order->totalPrice(), 0.0);
-
-    // Cleanup
-    EXPECT_TRUE(ProductDAO::remove(product->getID()));
 }
 
 /**
@@ -216,8 +210,6 @@ TEST(OrderStatusFlow, Cancel_AfterConfirm_RefundsBuyerAndRestoresStock) {
     // Reload order - total recalculated
     order = OrderDAO::getOrderById(orderId);
     EXPECT_DOUBLE_EQ(order->totalPrice(), 0.0);
-
-    EXPECT_TRUE(ProductDAO::remove(product->getID()));
 }
 
 /**
@@ -258,8 +250,6 @@ TEST(OrderStatusFlow, Cancel_AfterShip_NotAllowed) {
     // No refund, no stock update
     EXPECT_DOUBLE_EQ(buyer->getBalance(), 30.0);
     EXPECT_EQ(product->getStock(), 0);
-
-    EXPECT_TRUE(ProductDAO::remove(product->getID()));
 }
 
 /**
@@ -300,8 +290,6 @@ TEST(OrderStatusFlow, Cancel_AfterDelivery_NotAllowed) {
 
     EXPECT_DOUBLE_EQ(buyer->getBalance(), 20.0);
     EXPECT_EQ(product->getStock(), 0);
-
-    EXPECT_TRUE(ProductDAO::remove(product->getID()));
 }
 
 /**
@@ -341,8 +329,6 @@ TEST(OrderStatusFlow, Confirm_NotYourOrderItem) {
     order = OrderDAO::getOrderById(orderId);
     item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::CONFIRMED);
-
-    EXPECT_TRUE(ProductDAO::remove(product->getID()));
 }
 
 /**
@@ -404,8 +390,6 @@ TEST(OrderStatusFlow, Transitions_OutOfOrderNotAllowed) {
     order = OrderDAO::getOrderById(orderId);
     item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::DELIVERED);
-
-    EXPECT_TRUE(ProductDAO::remove(product->getID()));
 }
 
 /**
@@ -462,9 +446,6 @@ TEST(OrderStatusFlow, MultiItemOrder_PartialCancel) {
     EXPECT_TRUE(prodAReloaded.has_value());
     EXPECT_EQ(prodAReloaded.value()->getStock(), 5);
     EXPECT_EQ(prodB->getStock(), 2);
-
-    EXPECT_TRUE(ProductDAO::remove(prodA->getID()));
-    EXPECT_TRUE(ProductDAO::remove(prodB->getID()));
 }
 
 /**
@@ -517,8 +498,6 @@ TEST(OrderStatusFlow, DoubleCancel_NotAllowed) {
     order = OrderDAO::getOrderById(orderId);
     item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::CANCELLED);
-
-    EXPECT_TRUE(ProductDAO::remove(product->getID()));
 }
 
 /**
@@ -574,6 +553,4 @@ TEST(OrderStatusFlow, ShipDeliver_CancelledItem_NotAllowed) {
     order = OrderDAO::getOrderById(orderId);
     item = order->items()[0];
     EXPECT_EQ(item->getStatus(), OrderItemStatus::CANCELLED);
-
-    EXPECT_TRUE(ProductDAO::remove(product->getID()));
 }

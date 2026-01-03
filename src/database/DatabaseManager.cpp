@@ -123,6 +123,7 @@ bool DatabaseManager::createTables() {
             stock INTEGER NOT NULL CHECK(stock >= 0),
             seller_id TEXT NOT NULL,
             description TEXT,
+            image_path TEXT,                      -- new column to store single image path
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE
@@ -193,7 +194,7 @@ bool DatabaseManager::createTables() {
         CREATE TABLE IF NOT EXISTS order_items (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             order_id TEXT NOT NULL,
-            product_id TEXT NOT NULL,     -- Just store the ID, no FK
+            product_id TEXT NOT NULL,
             product_name TEXT NOT NULL,
             seller_id TEXT NOT NULL,
             quantity INTEGER NOT NULL CHECK(quantity > 0),

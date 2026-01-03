@@ -1,3 +1,4 @@
+// (permalink omitted)
 #include "../../include/DAO/OrderDAO.h"
 
 #include <iostream>
@@ -27,11 +28,11 @@ std::vector<std::shared_ptr<OrderItemDTO>> OrderDAO::loadOrderItems(const std::s
     sqlite3_stmt* stmt;
 
     const char* sql = R"(
-        SELECT oi.id, oi.product_id, oi. product_name, oi.seller_id, u.name as seller_name, 
+        SELECT oi.id, oi.product_id, oi.product_name, oi.seller_id, u.name as seller_name,
                oi.price, oi.quantity, oi.subtotal, oi.status
         FROM order_items oi
         LEFT JOIN users u ON oi.seller_id = u.id
-        WHERE oi.order_id = ?  
+        WHERE oi.order_id = ?
     )";
 
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
@@ -76,7 +77,15 @@ std::expected<void, std::string> OrderDAO::addOrder(const OrderDTO& order) {
         return std::unexpected("Failed to begin transaction");
     }
 
-    // 1. Insert order
+    // Compute the total from item subtotals to avoid inconsistencies
+    double computedTotal = 0.0;
+    for (const auto& item : order.items()) {
+        if (item) {
+            computedTotal += item->getSubtotal();
+        }
+    }
+
+    // 1. Insert order (use computedTotal to ensure consistency)
     sqlite3_stmt* stmt;
     const char* orderSql = R"(
         INSERT INTO orders (id, buyer_id, total_amount, status, created_at)
@@ -90,7 +99,7 @@ std::expected<void, std::string> OrderDAO::addOrder(const OrderDTO& order) {
 
     sqlite3_bind_text(stmt, 1, order.orderId().c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(stmt, 2, order.buyerId().c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_double(stmt, 3, order.totalPrice());
+    sqlite3_bind_double(stmt, 3, computedTotal);
     sqlite3_bind_text(stmt, 4, order.date().c_str(), -1, SQLITE_TRANSIENT);
 
     if (sqlite3_step(stmt) != SQLITE_DONE) {
@@ -153,6 +162,24 @@ std::expected<void, std::string> OrderDAO::updateOrder(const OrderDTO& order) {
     sqlite3* db = _dbManager->getConnection();
     sqlite3_stmt* stmt;
 
+    // Compute the new total from the database to be authoritative.
+    const char* sumSql = "SELECT SUM(subtotal) FROM order_items WHERE order_id = ? AND status != ?";
+
+    if (sqlite3_prepare_v2(db, sumSql, -1, &stmt, nullptr) != SQLITE_OK) {
+        return std::unexpected("Failed to prepare sum query");
+    }
+
+    sqlite3_bind_text(stmt, 1, order.orderId().c_str(), -1, SQLITE_TRANSIENT);
+    std::string cancelledStr = orderItemStatusToString(OrderItemStatus::CANCELLED);
+    sqlite3_bind_text(stmt, 2, cancelledStr.c_str(), -1, SQLITE_TRANSIENT);
+
+    double newTotal = 0.0;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        // sqlite3_column_double returns 0.0 for NULL; that's fine (no active items => 0)
+        newTotal = sqlite3_column_double(stmt, 0);
+    }
+    sqlite3_finalize(stmt);
+
     const char* sql = R"(
         UPDATE orders 
         SET total_amount = ?, updated_at = CURRENT_TIMESTAMP
@@ -163,7 +190,7 @@ std::expected<void, std::string> OrderDAO::updateOrder(const OrderDTO& order) {
         return std::unexpected("Failed to prepare update");
     }
 
-    sqlite3_bind_double(stmt, 1, order.totalPrice());
+    sqlite3_bind_double(stmt, 1, newTotal);
     sqlite3_bind_text(stmt, 2, order.orderId().c_str(), -1, SQLITE_TRANSIENT);
 
     bool success = sqlite3_step(stmt) == SQLITE_DONE;
@@ -264,7 +291,7 @@ std::vector<std::shared_ptr<OrderDTO>> OrderDAO::getOrdersBySellerId(const std::
         SELECT DISTINCT o.id, o.buyer_id, o.total_amount, o.created_at
         FROM orders o
         JOIN order_items oi ON o.id = oi.order_id
-        WHERE oi.seller_id = ?  
+        WHERE oi.seller_id = ?
         ORDER BY o.created_at DESC
     )";
 
@@ -302,11 +329,11 @@ std::vector<OrderItemDTO> OrderDAO::getSellerOrderItemByStatus(const std::string
     sqlite3_stmt* stmt;
 
     const char* sql = R"(
-        SELECT oi.id, oi.product_id, oi.product_name, oi.seller_id, u.name as seller_name, 
+        SELECT oi.id, oi.product_id, oi.product_name, oi.seller_id, u.name as seller_name,
                oi.price, oi.quantity, oi.status
         FROM order_items oi
-        LEFT JOIN users u ON oi.seller_id = u. id
-        WHERE oi.seller_id = ? AND oi. status = ? 
+        LEFT JOIN users u ON oi.seller_id = u.id
+        WHERE oi.seller_id = ? AND oi.status = ?
     )";
 
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
@@ -469,7 +496,7 @@ double OrderDAO::getTotalRevenueBySeller(const std::string& sellerId) {
     const char* sql = R"(
         SELECT SUM(subtotal)
         FROM order_items
-        WHERE seller_id = ? AND status != 'cancelled'
+        WHERE seller_id = ? AND status != 'Cancelled'
     )";
 
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {

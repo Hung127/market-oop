@@ -18,9 +18,6 @@ TEST(CartBUSTest, AddNullOrInvalidQuantityAndRecalculateExpiredItems) {
 
         ASSERT_TRUE(CartBUS::add(cart, prod, 2).has_value());
         EXPECT_EQ(cart.getItems().size(), 1U);
-
-        // Remove from global registry to allow expiration
-        g_testProducts.erase("cart_p1");
     }
 
     // simulate product going out of scope by resetting the shared_ptr
