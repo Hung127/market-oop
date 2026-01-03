@@ -13,8 +13,66 @@ Page {
     signal profileClicked()
 
     Component.onCompleted: {
+        console.log("[BuyerHomePage] Component completed")
         console.log("[BuyerHomePage] Loading products...")
-        authController.productModel. loadProducts()
+        authController.productModel.loadProducts()
+        
+        // Log the model count after loading
+        Qt.callLater(function() {
+            console.log("[BuyerHomePage] Product count:", authController.productModel.rowCount())
+        })
+    }
+
+    // Toast notification for cart actions
+    Rectangle {
+        id: toast
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 50
+        width: toastLabel.width + 40
+        height: 50
+        color: "#4CAF50"
+        radius: 25
+        opacity: 0
+        z: 1000
+        
+        Label {
+            id: toastLabel
+            anchors.centerIn: parent
+            color: "white"
+            font.pixelSize: 14
+            font.bold: true
+        }
+        
+        PropertyAnimation {
+            id: toastAnimation
+            target: toast
+            property: "opacity"
+            from: 0
+            to: 1
+            duration: 200
+        }
+        
+        PropertyAnimation {
+            id: toastFadeOut
+            target: toast
+            property: "opacity"
+            from: 1
+            to:  0
+            duration: 200
+        }
+        
+        Timer {
+            id: toastTimer
+            interval:  2000
+            onTriggered: toastFadeOut.start()
+        }
+    }
+    
+    function showToast(message) {
+        toastLabel.text = message
+        toastAnimation.start()
+        toastTimer.restart()
     }
 
     header: ToolBar {
@@ -39,7 +97,7 @@ Page {
 
             // Search Bar
             TextField {
-                id: searchField
+                id:  searchField
                 Layout.preferredWidth: 300
                 placeholderText: "Search products..."
                 
@@ -67,7 +125,7 @@ Page {
                     font: parent.font
                     color: "white"
                     horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text. AlignVCenter
+                    verticalAlignment:  Text.AlignVCenter
                 }
                 
                 onClicked: {
@@ -78,8 +136,9 @@ Page {
 
             Item { Layout.fillWidth: true }
 
+            // Cart Button with Item Count
             Button {
-                text: "🛒 Cart"
+                text: "🛒 Cart (" + authController.cartController.itemCount + ")"
                 font.pixelSize: 14
                 flat: true
                 
@@ -95,9 +154,9 @@ Page {
             Button {
                 text: "👤 " + userName
                 font.pixelSize: 14
-                flat:  true
+                flat: true
                 
-                contentItem:  Text {
+                contentItem: Text {
                     text: parent.text
                     font: parent.font
                     color: "white"
@@ -118,7 +177,7 @@ Page {
                 
                 background: Rectangle {
                     color:  parent.pressed ? "#D32F2F" : (parent.hovered ? "#E53935" : "#F44336")
-                    radius:  5
+                    radius: 5
                 }
                 
                 onClicked: buyerHomePage.logoutClicked()
@@ -144,7 +203,7 @@ Page {
                 border.width: 1
 
                 ColumnLayout {
-                    anchors. fill: parent
+                    anchors.fill: parent
                     anchors.margins: 20
                     spacing: 10
 
@@ -156,7 +215,7 @@ Page {
                     }
 
                     Repeater {
-                        model:  ["All Products", "Electronics", "Clothing", "Books", "Home & Garden", "Sports", "Toys"]
+                        model:  ["All Products", "Laptop", "Mouse", "Keyboard", "Monitor", "Phone", "Headphone", "Watch", "Speaker"]
                         
                         Button {
                             Layout.fillWidth: true
@@ -165,7 +224,7 @@ Page {
                             
                             contentItem: Text {
                                 text: parent.text
-                                font. pixelSize: 14
+                                font.pixelSize: 14
                                 color: "#666"
                                 horizontalAlignment: Text.AlignLeft
                             }
@@ -192,12 +251,12 @@ Page {
 
             // Product Grid
             Rectangle {
-                Layout. fillWidth: true
+                Layout.fillWidth: true
                 Layout.fillHeight: true
                 color: "#f5f5f5"
 
                 ScrollView {
-                    anchors. fill: parent
+                    anchors.fill: parent
                     anchors.margins: 20
                     clip: true
 
@@ -224,15 +283,15 @@ Page {
                             color: "white"
                             radius: 10
                             border.color: "#e0e0e0"
-                            border. width: 1
+                            border.width: 1
 
                             MouseArea {
-                                anchors. fill: parent
+                                anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 
                                 onEntered: parent.border.color = "#2196F3"
-                                onExited:  parent.border.color = "#e0e0e0"
+                                onExited: parent.border.color = "#e0e0e0"
                                 onClicked: {
                                     console.log("[BuyerHomePage] Product clicked:", model.productId)
                                     buyerHomePage.productClicked(model.productId)
@@ -240,14 +299,14 @@ Page {
                             }
 
                             ColumnLayout {
-                                anchors. fill: parent
+                                anchors.fill: parent
                                 anchors.margins: 15
                                 spacing: 10
 
                                 // Product Image
                                 Label {
                                     text: model.image
-                                    font. pixelSize: 80
+                                    font.pixelSize: 80
                                     Layout.alignment: Qt.AlignHCenter
                                 }
 
@@ -265,7 +324,7 @@ Page {
 
                                 // Seller
                                 Label {
-                                    text: "by " + model. seller
+                                    text: "by " + model.seller
                                     font.pixelSize: 12
                                     color: "#999"
                                 }
@@ -274,7 +333,7 @@ Page {
                                 Label {
                                     text: model.stock > 0 ? "In Stock (" + model.stock + ")" : "Out of Stock"
                                     font.pixelSize: 11
-                                    color: model. stock > 0 ? "#4CAF50" : "#F44336"
+                                    color: model.stock > 0 ? "#4CAF50" : "#F44336"
                                 }
 
                                 Item { Layout.fillHeight: true }
@@ -310,8 +369,13 @@ Page {
                                     }
                                     
                                     onClicked: {
-                                        console.log("[BuyerHomePage] Add to cart:", model. name)
-                                        // TODO:  Implement cart functionality
+                                        console.log("[BuyerHomePage] Add to cart:", model.name)
+                                        var success = authController.cartController.addToCart(model.productId, 1)
+                                        if (success) {
+                                            showToast("✓ Added " + model.name + " to cart")
+                                        } else {
+                                            showToast("✗ Failed to add to cart")
+                                        }
                                     }
                                 }
                             }

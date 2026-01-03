@@ -5,11 +5,66 @@ import QtQuick.Layouts 1.12
 Page {
     id: cartPage
 
-    property string userName: "Buyer"
+    property string userName: authController.currentUserName
     
     signal backClicked()
     signal checkoutClicked()
     signal continueShoppingClicked()
+
+    // Listen for cart changes
+    Connections {
+        target: authController.cartController
+        
+        function onCartChanged() {
+            console.log("[CartPage] Cart changed, updating...")
+            updateTotal()
+        }
+        
+        function onCheckoutSuccess(message) {
+            console.log("[CartPage] Checkout success:", message)
+            successDialog.open()
+        }
+        
+        function onCheckoutFailed(error) {
+            console.log("[CartPage] Checkout failed:", error)
+            errorDialog.errorMessage = error
+            errorDialog.open()
+        }
+    }
+
+    // Success Dialog
+    Dialog {
+        id: successDialog
+        title: "Order Placed!"
+        standardButtons: Dialog.Ok
+        
+        Label {
+            text: "Your order has been placed successfully!\nThank you for your purchase."
+        }
+        
+        onAccepted: {
+            cartPage.backClicked()
+        }
+    }
+
+    // Error Dialog
+    Dialog {
+        id: errorDialog
+        property string errorMessage: ""
+        title: "Checkout Failed"
+        standardButtons:  Dialog.Ok
+        
+        Label {
+            text: errorDialog.errorMessage
+            wrapMode: Text.WordWrap
+        }
+    }
+
+    Component.onCompleted: {
+        console.log("[CartPage] Loading cart items...")
+        cartListView.model = authController.cartController.getCartItems()
+        updateTotal()
+    }
 
     header: ToolBar {
         background: Rectangle {
@@ -28,7 +83,7 @@ Page {
                 flat: true
                 
                 contentItem: Text {
-                    text:  parent.text
+                    text: parent.text
                     font: parent.font
                     color: "white"
                 }
@@ -39,7 +94,7 @@ Page {
             Label {
                 text: "🛒 Shopping Cart"
                 font.pixelSize: 24
-                font. bold: true
+                font.bold: true
                 color: "white"
             }
 
@@ -48,13 +103,13 @@ Page {
             Label {
                 text: "👤 " + userName
                 font.pixelSize: 14
-                color: "white"
+                color:  "white"
             }
         }
     }
 
     Rectangle {
-        anchors. fill: parent
+        anchors.fill: parent
         color: "#f5f5f5"
 
         RowLayout {
@@ -93,36 +148,11 @@ Page {
                         id: cartListView
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        clip:  true
+                        clip: true
                         spacing: 15
 
-                        model: ListModel {
-                            id: cartModel
-                            ListElement {
-                                productId: 1
-                                name: "Laptop Pro 15"
-                                price: 1299.99
-                                quantity: 1
-                                image: "💻"
-                            }
-                            ListElement {
-                                productId: 2
-                                name: "Wireless Mouse"
-                                price: 29.99
-                                quantity: 2
-                                image: "🖱️"
-                            }
-                            ListElement {
-                                productId: 3
-                                name: "Mechanical Keyboard"
-                                price: 89.99
-                                quantity: 1
-                                image: "⌨️"
-                            }
-                        }
-
                         delegate: Rectangle {
-                            width: ListView.view.width
+                            width:  ListView.view.width
                             height: 120
                             color: "#fafafa"
                             radius:  8
@@ -136,7 +166,7 @@ Page {
 
                                 // Product Image
                                 Label {
-                                    text: model.image
+                                    text: modelData.image
                                     font.pixelSize: 50
                                     Layout.preferredWidth: 80
                                     Layout.alignment: Qt.AlignVCenter
@@ -148,20 +178,20 @@ Page {
                                     spacing: 5
 
                                     Label {
-                                        text: model.name
+                                        text: modelData.name
                                         font.pixelSize: 18
                                         font.bold: true
                                         color: "#333"
                                     }
 
                                     Label {
-                                        text: "$" + model. price.toFixed(2) + " each"
+                                        text: "$" + modelData.price.toFixed(2) + " each"
                                         font.pixelSize: 14
                                         color: "#666"
                                     }
 
                                     Label {
-                                        text: "Subtotal: $" + (model. price * model.quantity).toFixed(2)
+                                        text: "Subtotal: $" + modelData.subtotal.toFixed(2)
                                         font.pixelSize: 16
                                         font.bold: true
                                         color: "#4CAF50"
@@ -183,12 +213,13 @@ Page {
                                         font.pixelSize: 18
                                         font.bold: true
                                         implicitWidth: 40
-                                        implicitHeight: 40
+                                        implicitHeight:  40
+                                        enabled: modelData.quantity > 1
                                         
                                         contentItem: Text {
                                             text: parent.text
                                             font: parent.font
-                                            color: "#666"
+                                            color: parent.enabled ? "#666" : "#ccc"
                                             horizontalAlignment: Text.AlignHCenter
                                             verticalAlignment: Text.AlignVCenter
                                         }
@@ -196,20 +227,19 @@ Page {
                                         background: Rectangle {
                                             color: parent.hovered ? "#f0f0f0" : "white"
                                             border.color: "#ddd"
-                                            border. width: 1
+                                            border.width: 1
                                             radius: 5
                                         }
                                         
                                         onClicked: {
-                                            if (model.quantity > 1) {
-                                                cartModel.setProperty(index, "quantity", model. quantity - 1)
-                                                updateTotal()
-                                            }
+                                            var newQty = modelData.quantity - 1
+                                            authController.cartController.updateQuantity(modelData.productId, newQty)
+                                            refreshCart()
                                         }
                                     }
 
                                     Label {
-                                        text: model.quantity
+                                        text:  modelData.quantity
                                         font.pixelSize: 16
                                         font.bold: true
                                         Layout.preferredWidth: 30
@@ -221,26 +251,28 @@ Page {
                                         font.pixelSize: 18
                                         font.bold: true
                                         implicitWidth: 40
-                                        implicitHeight: 40
+                                        implicitHeight:  40
+                                        enabled:  modelData.quantity < modelData.stock
                                         
                                         contentItem: Text {
                                             text: parent.text
                                             font: parent.font
-                                            color: "#666"
-                                            horizontalAlignment:  Text.AlignHCenter
-                                            verticalAlignment: Text. AlignVCenter
+                                            color: parent.enabled ? "#666" :  "#ccc"
+                                            horizontalAlignment: Text.AlignHCenter
+                                            verticalAlignment: Text.AlignVCenter
                                         }
                                         
                                         background: Rectangle {
-                                            color: parent.hovered ?  "#f0f0f0" : "white"
+                                            color: parent.hovered ? "#f0f0f0" : "white"
                                             border.color: "#ddd"
                                             border.width: 1
-                                            radius:  5
+                                            radius: 5
                                         }
                                         
                                         onClicked: {
-                                            cartModel.setProperty(index, "quantity", model.quantity + 1)
-                                            updateTotal()
+                                            var newQty = modelData.quantity + 1
+                                            authController.cartController.updateQuantity(modelData.productId, newQty)
+                                            refreshCart()
                                         }
                                     }
                                 }
@@ -260,8 +292,8 @@ Page {
                                     }
                                     
                                     onClicked: {
-                                        cartModel.remove(index)
-                                        updateTotal()
+                                        authController.cartController.removeFromCart(modelData.productId)
+                                        refreshCart()
                                     }
                                 }
                             }
@@ -270,16 +302,16 @@ Page {
 
                     // Empty Cart Message
                     Label {
-                        visible: cartModel.count === 0
+                        visible: cartListView.count === 0
                         text: "Your cart is empty"
-                        font. pixelSize: 18
+                        font.pixelSize: 18
                         color: "#999"
                         Layout.alignment: Qt.AlignHCenter
                         Layout.topMargin: 50
                     }
 
                     Button {
-                        visible: cartModel.count === 0
+                        visible: cartListView.count === 0
                         text: "Continue Shopping"
                         font.pixelSize: 16
                         Layout.alignment: Qt.AlignHCenter
@@ -289,7 +321,7 @@ Page {
                             font: parent.font
                             color: "white"
                             horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment:  Text.AlignVCenter
+                            verticalAlignment: Text.AlignVCenter
                         }
                         
                         background: Rectangle {
@@ -313,7 +345,7 @@ Page {
 
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors. margins: 20
+                    anchors.margins: 20
                     spacing: 20
 
                     Label {
@@ -330,8 +362,8 @@ Page {
                     }
 
                     ColumnLayout {
-                        Layout. fillWidth: true
-                        spacing: 15
+                        Layout.fillWidth: true
+                        spacing:  15
 
                         RowLayout {
                             Layout.fillWidth: true
@@ -347,7 +379,7 @@ Page {
                             Label {
                                 id: subtotalLabel
                                 text: "$0.00"
-                                font. pixelSize: 16
+                                font.pixelSize: 16
                                 color: "#333"
                             }
                         }
@@ -357,7 +389,7 @@ Page {
 
                             Label {
                                 text: "Tax (10%):"
-                                font. pixelSize: 16
+                                font.pixelSize: 16
                                 color: "#666"
                             }
 
@@ -385,7 +417,7 @@ Page {
                             Label {
                                 id: shippingLabel
                                 text: "$10.00"
-                                font. pixelSize: 16
+                                font.pixelSize: 16
                                 color: "#333"
                             }
                         }
@@ -410,7 +442,7 @@ Page {
 
                             Label {
                                 id: totalLabel
-                                text:  "$0.00"
+                                text: "$0.00"
                                 font.pixelSize: 24
                                 font.bold: true
                                 color: "#4CAF50"
@@ -425,24 +457,27 @@ Page {
                         text: "Proceed to Checkout"
                         font.pixelSize: 16
                         font.bold: true
-                        enabled: cartModel.count > 0
+                        enabled: cartListView.count > 0
                         
                         contentItem: Text {
-                            text:  parent.text
+                            text: parent.text
                             font: parent.font
                             color: "white"
                             horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
+                            verticalAlignment:  Text.AlignVCenter
                         }
                         
                         background: Rectangle {
-                            color:  parent.enabled ? (parent.pressed ? "#388E3C" : (parent.hovered ? "#43A047" : "#4CAF50")) : "#ccc"
+                            color: parent.enabled ? (parent.pressed ? "#388E3C" : (parent.hovered ? "#43A047" : "#4CAF50")) : "#ccc"
                             radius: 5
                         }
                         
                         Layout.preferredHeight: 50
                         
-                        onClicked: cartPage.checkoutClicked()
+                        onClicked: {
+                            console.log("[CartPage] Checkout clicked")
+                            authController.cartController.checkout()
+                        }
                     }
 
                     Button {
@@ -474,24 +509,20 @@ Page {
         }
     }
 
-    Component.onCompleted: {
+    function refreshCart() {
+        cartListView.model = authController.cartController.getCartItems()
         updateTotal()
     }
 
     function updateTotal() {
-        var subtotal = 0
-        for (var i = 0; i < cartModel.count; i++) {
-            var item = cartModel.get(i)
-            subtotal += item. price * item.quantity
-        }
-        
+        var subtotal = authController.cartController.totalPrice
         var tax = subtotal * 0.1
-        var shipping = cartModel.count > 0 ? 10.00 : 0.00
+        var shipping = authController.cartController.itemCount > 0 ? 10.00 : 0.00
         var total = subtotal + tax + shipping
         
         subtotalLabel.text = "$" + subtotal.toFixed(2)
         taxLabel.text = "$" + tax.toFixed(2)
         shippingLabel.text = "$" + shipping.toFixed(2)
-        totalLabel. text = "$" + total.toFixed(2)
+        totalLabel.text = "$" + total.toFixed(2)
     }
 }

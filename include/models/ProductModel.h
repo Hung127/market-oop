@@ -25,6 +25,7 @@ class ProductModel : public QAbstractListModel {
     };
 
     explicit ProductModel(QObject* parent = nullptr);
+    ~ProductModel() override = default;
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
@@ -34,6 +35,7 @@ class ProductModel : public QAbstractListModel {
     Q_INVOKABLE void loadProducts();
     Q_INVOKABLE void searchProducts(const QString& keyword);
     Q_INVOKABLE void filterByCategory(const QString& category);
+    Q_INVOKABLE void refresh();
 
    private:
     std::vector<std::shared_ptr<ProductDTO>> m_products;

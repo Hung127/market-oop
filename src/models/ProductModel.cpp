@@ -3,12 +3,11 @@
 #include <QDebug>
 
 #include "../../include/DAO/ProductDAO.h"
-#include "../../include/DAO/UserDAO.h"
 #include "../../include/DTO/ProductDTO.h"
 #include "../../include/DTO/SellerDTO.h"
 
 ProductModel::ProductModel(QObject* parent) : QAbstractListModel(parent) {
-    // Constructor
+    qDebug() << "[ProductModel] Initialized";
 }
 
 int ProductModel::rowCount(const QModelIndex& parent) const {
@@ -35,7 +34,7 @@ QVariant ProductModel::data(const QModelIndex& index, int role) const {
         case StockRole:
             return product->getStock();
         case ImageRole: {
-            // Return emoji based on product name (for now)
+            // Return emoji based on product name
             QString name = QString::fromStdString(product->getName()).toLower();
             if (name.contains("laptop"))
                 return "💻";
@@ -51,6 +50,22 @@ QVariant ProductModel::data(const QModelIndex& index, int role) const {
                 return "🎧";
             if (name.contains("camera"))
                 return "📷";
+            if (name.contains("watch"))
+                return "⌚";
+            if (name.contains("tablet"))
+                return "📱";
+            if (name.contains("speaker"))
+                return "🔊";
+            if (name.contains("printer"))
+                return "🖨️";
+            if (name.contains("router"))
+                return "📡";
+            if (name.contains("drive") || name.contains("ssd") || name.contains("hdd"))
+                return "💾";
+            if (name.contains("cable"))
+                return "🔌";
+            if (name.contains("charger"))
+                return "🔋";
             return "📦";  // Default
         }
         case SellerIdRole:
@@ -85,9 +100,19 @@ QHash<int, QByteArray> ProductModel::roleNames() const {
 void ProductModel::loadProducts() {
     qDebug() << "[ProductModel] Loading all products... ";
 
+    // Use ProductDAO to get all products
     auto products = ProductDAO::getAllProducts();
 
     qDebug() << "[ProductModel] Loaded" << products.size() << "products";
+
+    // Debug: Print product details
+    for (const auto& product : products) {
+        if (product) {
+            qDebug() << "  - ID:" << QString::fromStdString(product->getID())
+                     << "Name:" << QString::fromStdString(product->getName())
+                     << "Price:" << product->getPrice() << "Stock:" << product->getStock();
+        }
+    }
 
     setProducts(products);
 }
@@ -100,6 +125,7 @@ void ProductModel::searchProducts(const QString& keyword) {
         return;
     }
 
+    // Use ProductDAO to search by name
     auto products = ProductDAO::searchByName(keyword.toStdString());
 
     qDebug() << "[ProductModel] Found" << products.size() << "products";
@@ -119,7 +145,14 @@ void ProductModel::filterByCategory(const QString& category) {
     // In a real app, you'd have a category field in the database
     auto products = ProductDAO::searchByName(category.toStdString());
 
+    qDebug() << "[ProductModel] Found" << products.size() << "products in category";
+
     setProducts(products);
+}
+
+void ProductModel::refresh() {
+    qDebug() << "[ProductModel] Refreshing products... ";
+    loadProducts();
 }
 
 void ProductModel::setProducts(const std::vector<std::shared_ptr<ProductDTO>>& products) {

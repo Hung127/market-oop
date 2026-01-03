@@ -6,7 +6,8 @@
 #include <memory>
 
 class UserDTO;
-class ProductModel;  // Add this
+class ProductModel;
+class CartController;  // Add this
 
 class AuthController : public QObject {
     Q_OBJECT
@@ -15,9 +16,8 @@ class AuthController : public QObject {
     Q_PROPERTY(QString currentUserEmail READ currentUserEmail NOTIFY currentUserChanged)
     Q_PROPERTY(QString currentUserRole READ currentUserRole NOTIFY currentUserChanged)
     Q_PROPERTY(double currentBalance READ currentBalance NOTIFY currentUserChanged)
-
-    // Add ProductModel property
     Q_PROPERTY(ProductModel* productModel READ productModel CONSTANT)
+    Q_PROPERTY(CartController* cartController READ cartController CONSTANT)  // Add this
 
    public:
     explicit AuthController(QObject* parent = nullptr);
@@ -32,9 +32,12 @@ class AuthController : public QObject {
     QString currentUserRole() const;
     double currentBalance() const;
 
-    // Add ProductModel getter
     ProductModel* productModel() const {
         return m_productModel;
+    }
+
+    CartController* cartController() const {  // Add this
+        return m_cartController;
     }
 
     // Invokable methods
@@ -53,7 +56,8 @@ class AuthController : public QObject {
 
    private:
     std::shared_ptr<UserDTO> m_currentUser;
-    ProductModel* m_productModel;  // Add this
+    ProductModel* m_productModel;
+    CartController* m_cartController;  // Add this
 };
 
 #endif  // AUTHCONTROLLER_H

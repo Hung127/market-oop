@@ -7,10 +7,14 @@
 #include "../../include/DTO/SellerDTO.h"
 #include "../../include/DTO/UserDTO.h"
 #include "../../include/UserFactory.h"
-#include "../../include/models/ProductModel.h"  // Add this
+#include "../../include/controllers/CartController.h"
+#include "../../include/models/ProductModel.h"
 
 AuthController::AuthController(QObject* parent)
-    : QObject(parent), m_currentUser(nullptr), m_productModel(new ProductModel(this)) {
+    : QObject(parent),
+      m_currentUser(nullptr),
+      m_productModel(new ProductModel(this)),
+      m_cartController(new CartController(this)) {  // Add this
     qDebug() << "[AuthController] Initialized";
 
     // Load products on startup
@@ -50,8 +54,14 @@ void AuthController::login(const QString& email, const QString& password) {
         qDebug() << "  User:" << QString::fromStdString(m_currentUser->getName());
         qDebug() << "  Role:" << QString::fromStdString(m_currentUser->getRole());
 
-        emit isLoggedInChanged();
+        // If buyer, set up cart controller
+        if (auto buyer = std::dynamic_pointer_cast<BuyerDTO>(m_currentUser)) {
+            m_cartController->setBuyer(buyer);
+            qDebug() << "[AuthController] Cart controller initialized for buyer";
+        }
+
         emit currentUserChanged();
+        emit isLoggedInChanged();
         emit loginSuccess();
     } else {
         qDebug() << "[AuthController] ✗ Login failed:" << QString::fromStdString(result.error());
@@ -61,7 +71,7 @@ void AuthController::login(const QString& email, const QString& password) {
 
 void AuthController::registerUser(const QString& name, const QString& email,
                                   const QString& password, const QString& role) {
-    qDebug() << "[AuthController] Register attempt: ";
+    qDebug() << "[AuthController] Register attempt:  ";
     qDebug() << "  Name:" << name;
     qDebug() << "  Email:" << email;
     qDebug() << "  Role:" << role;
@@ -84,6 +94,7 @@ void AuthController::registerUser(const QString& name, const QString& email,
 void AuthController::logout() {
     qDebug() << "[AuthController] Logging out";
     m_currentUser.reset();
+    m_cartController->setBuyer(nullptr);  // Clear cart
     emit isLoggedInChanged();
     emit currentUserChanged();
 }

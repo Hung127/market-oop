@@ -1,11 +1,10 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import QtQuick. Layouts 1.12
+import QtQuick.Layouts 1.12
 
 Page {
     id: loginPage
 
-    // Signals to emit when login/register is clicked
     signal loginClicked(string email, string password)
     signal registerClicked()
     signal loginSucceeded(string role)
@@ -14,7 +13,8 @@ Page {
     Connections {
         target: authController
         
-        function onLoginSuccess(role) {
+        function onLoginSuccess() {
+            var role = authController.currentUserRole
             console.log("✓ Login success, role:", role)
             loginPage.loginSucceeded(role)
         }
@@ -22,6 +22,7 @@ Page {
         function onLoginFailed(error) {
             console.log("✗ Login failed:", error)
             errorLabel.text = error
+            errorLabel.visible = true
         }
     }
 
@@ -83,7 +84,7 @@ Page {
                         selectByMouse: true
                         
                         background: Rectangle {
-                            color: emailField.focus ? "#f0f8ff" : "#f5f5f5"
+                            color:  emailField.focus ? "#f0f8ff" : "#f5f5f5"
                             border.color: emailField.focus ? "#2196F3" : "#ddd"
                             border.width: 2
                             radius: 5
@@ -127,13 +128,13 @@ Page {
 
                 // Error message
                 Label {
-                    id:  errorLabel
+                    id: errorLabel
                     text: ""
                     color: "#f44336"
-                    font. pixelSize: 12
+                    font.pixelSize: 12
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
-                    visible: text !== ""
+                    visible: false
                 }
 
                 Item { Layout.preferredHeight: 10 }
@@ -151,10 +152,10 @@ Page {
                         font: loginButton.font
                         color: "white"
                         horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
+                        verticalAlignment: Text. AlignVCenter
                     }
                     
-                    background: Rectangle {
+                    background:  Rectangle {
                         color: loginButton.pressed ? "#1976D2" : (loginButton.hovered ? "#1E88E5" : "#2196F3")
                         radius: 5
                     }
@@ -163,25 +164,31 @@ Page {
                     
                     onClicked: {
                         errorLabel.text = ""
+                        errorLabel.visible = false
+                        
+                        console.log("[LoginPage] Login clicked")
                         
                         if (emailField.text === "") {
                             errorLabel.text = "Please enter your email"
+                            errorLabel.visible = true
                             return
                         }
                         
                         if (passwordField.text === "") {
                             errorLabel.text = "Please enter your password"
+                            errorLabel.visible = true
                             return
                         }
                         
                         // Call C++ controller
+                        console.log("[LoginPage] Calling authController.login")
                         authController.login(emailField.text, passwordField. text)
                     }
                 }
 
                 // Divider
                 RowLayout {
-                    Layout.fillWidth: true
+                    Layout. fillWidth: true
                     spacing: 10
 
                     Rectangle {
@@ -210,11 +217,11 @@ Page {
                     font.pixelSize: 14
                     
                     contentItem: Text {
-                        text:  parent.text
+                        text: parent.text
                         font: parent.font
                         color: "#2196F3"
                         horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
+                        verticalAlignment:  Text.AlignVCenter
                     }
                     
                     background: Rectangle {
@@ -240,5 +247,6 @@ Page {
         emailField.text = ""
         passwordField.text = ""
         errorLabel.text = ""
+        errorLabel.visible = false
     }
 }
