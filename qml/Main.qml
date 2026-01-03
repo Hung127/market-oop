@@ -2,13 +2,14 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
-import "components/layout"
-import "components/sections"
-import "components/products"
-import "components/common"
-import "components/dialogs"
-import "pages"
-import "styles"
+import "qrc:/qml/components/layout"
+import "qrc:/qml/components/sections"
+import "qrc:/qml/components/products"
+import "qrc:/qml/components/common"
+import "qrc:/qml/components/dialogs"
+import "qrc:/qml/pages"
+import "qrc:/qml/styles"
+
 
 
 ApplicationWindow {
