@@ -4,47 +4,37 @@
 <qresource prefix="/qml">
     <file>qml/Main.qml</file>
 
-    <!-- pages -->
-    <file>qml/pages/CartPage.qml</file>
-    <file>qml/pages/CheckoutPage.qml</file>
-    <file>qml/pages/HomePage.qml</file>
-    <file>qml/pages/ProductDetailPage.qml</file>
-    <file>qml/pages/ProfilePage.qml</file>
-
-    <!-- styles -->
-    <file>qml/styles/Colors.qml</file>
-    <file>qml/styles/Dimensions.qml</file>
-
-    <!-- components/common -->
     <file>qml/components/common/CustomButton.qml</file>
     <file>qml/components/common/FlashSaleTimer.qml</file>
     <file>qml/components/common/RatingStars.qml</file>
     <file>qml/components/common/SearchBar.qml</file>
 
-    <!-- components/dialogs -->
     <file>qml/components/dialogs/AddToCartDialog.qml</file>
     <file>qml/components/dialogs/LoginDialog.qml</file>
 
-    <!-- components/layout -->
-    <file>qml/components/layout/CategoryPanel.qml</file>
-    <file>qml/components/layout/FooterBar.qml</file>
     <file>qml/components/layout/HeaderBar.qml</file>
+    <file>qml/components/layout/FooterBar.qml</file>
+    <file>qml/components/layout/CategoryPanel.qml</file>
 
-    <!-- components/products -->
     <file>qml/components/products/ProductCard.qml</file>
     <file>qml/components/products/ProductGrid.qml</file>
     <file>qml/components/products/ProductListItem.qml</file>
 
-    <!-- components/sections -->
-    <file>qml/components/sections/BestSellingSection.qml</file>
-    <file>qml/components/sections/BrowseCategorySection.qml</file>
-    <file>qml/components/sections/ExploreProductsSection.qml</file>
-    <file>qml/components/sections/FlashSaleSection.qml</file>
     <file>qml/components/sections/HeroBanner.qml</file>
+    <file>qml/components/sections/FlashSaleSection.qml</file>
+    <file>qml/components/sections/BrowseCategorySection.qml</file>
+    <file>qml/components/sections/BestSellingSection.qml</file>
+    <file>qml/components/sections/ExploreProductsSection.qml</file>
     <file>qml/components/sections/ServicesStrip.qml</file>
-</qresource>
 
-<qresource prefix="/icons"/>
-<qresource prefix="/images"/>
+    <file>qml/pages/HomePage.qml</file>
+    <file>qml/pages/CartPage.qml</file>
+    <file>qml/pages/CheckoutPage.qml</file>
+    <file>qml/pages/ProductDetailPage.qml</file>
+    <file>qml/pages/ProfilePage.qml</file>
+
+    <file>qml/styles/Colors.qml</file>
+    <file>qml/styles/Dimensions.qml</file>
+</qresource>
 
 </RCC>
