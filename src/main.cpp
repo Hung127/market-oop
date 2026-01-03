@@ -42,7 +42,8 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("allProductsModel", &allProductsModel);
 
     // Đường dẫn QML với RESOURCE_PREFIX /
-    const QUrl url(QStringLiteral("qrc:/qml/Main.qml"));
+    const QUrl url(QStringLiteral("qrc:/qml/qml/Main.qml"));
+
 
     QObject::connect(
         &engine, &QQmlApplicationEngine::objectCreated,
