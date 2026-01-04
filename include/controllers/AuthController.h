@@ -47,7 +47,7 @@ class AuthController : public QObject {
     Q_INVOKABLE void logout();
 
    signals:
-    void loginSuccess();
+    void loginSuccess(const QString& role);
     void loginFailed(const QString& error);
     void registerSuccess();
     void registerFailed(const QString& error);
@@ -57,7 +57,7 @@ class AuthController : public QObject {
    private:
     std::shared_ptr<UserDTO> m_currentUser;
     ProductModel* m_productModel;
-    CartController* m_cartController;  // Add this
+    CartController* m_cartController;
 };
 
 #endif  // AUTHCONTROLLER_H

@@ -13,16 +13,15 @@ Page {
     Connections {
         target: authController
         
-        function onLoginSuccess() {
-            var role = authController.currentUserRole
+        function onLoginSuccess(role) {
             console.log("✓ Login success, role:", role)
             loginPage.loginSucceeded(role)
         }
         
         function onLoginFailed(error) {
             console.log("✗ Login failed:", error)
-            errorLabel.text = error
-            errorLabel.visible = true
+            errorLabel. text = error
+            errorLabel. visible = true
         }
     }
 

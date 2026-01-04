@@ -50,19 +50,15 @@ void AuthController::login(const QString& email, const QString& password) {
 
     if (result.has_value()) {
         m_currentUser = result.value();
+        QString role = QString::fromStdString(m_currentUser->getRole());
+
         qDebug() << "[AuthController] ✓ Login successful";
         qDebug() << "  User:" << QString::fromStdString(m_currentUser->getName());
-        qDebug() << "  Role:" << QString::fromStdString(m_currentUser->getRole());
+        qDebug() << "  Role:" << role;
 
-        // If buyer, set up cart controller
-        if (auto buyer = std::dynamic_pointer_cast<BuyerDTO>(m_currentUser)) {
-            m_cartController->setBuyer(buyer);
-            qDebug() << "[AuthController] Cart controller initialized for buyer";
-        }
-
-        emit currentUserChanged();
         emit isLoggedInChanged();
-        emit loginSuccess();
+        emit currentUserChanged();
+        emit loginSuccess(role);
     } else {
         qDebug() << "[AuthController] ✗ Login failed:" << QString::fromStdString(result.error());
         emit loginFailed(QString::fromStdString(result.error()));
