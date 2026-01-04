@@ -1,6 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import QtQuick. Window 2.12
+import QtQuick.Window 2.12
 
 ApplicationWindow {
     id: root
@@ -9,12 +9,42 @@ ApplicationWindow {
     height: 800
     title: "Market App"
 
-    // Mock user data
-    property string currentUser: ""
-    property string currentEmail: ""
-    property string currentRole: ""
-    property bool isLoggedIn: false
-    property real currentBalance: 1000.00
+    Connections {
+        target:  authController
+        
+        function onLoginSuccess() {
+            console.log("[Main] ✓ Login success detected")
+            var role = authController.currentUserRole
+            console.log("[Main] User role:", role)
+            
+            // Navigate based on role
+            if (role === "BUYER") {
+                console.log("[Main] → Navigating to Buyer Home")
+                stackView.push(buyerHomePage)
+            } else if (role === "SELLER") {
+                console.log("[Main] → Navigating to Seller Dashboard")
+                stackView.push(sellerDashboard)
+            } else {
+                console.log("[Main] ✗ Unknown role:", role)
+            }
+        }
+        
+        function onRegisterSuccess() {
+            console.log("[Main] ✓ Registration success - going back to login")
+            // Auto-navigate back to login after 2 seconds
+            registerSuccessTimer.start()
+        }
+    }
+
+    // Timer for register success redirect
+    Timer {
+        id:  registerSuccessTimer
+        interval:  2000
+        repeat: false
+        onTriggered: {
+            stackView.pop()  // Go back to login
+        }
+    }
 
     // Stack view for page navigation
     StackView {
@@ -30,19 +60,7 @@ ApplicationWindow {
         id: loginPage
         
         LoginPage {
-            onLoginSucceeded: {
-                console. log("Main: Login succeeded, role =", role)
-                
-                if (role === "BUYER") {
-                    stackView.push(buyerHomePage)
-                } else if (role === "SELLER") {
-                    stackView.push(sellerDashboard)
-                }
-            }
-            
-            onRegisterClicked: {
-                stackView.push(registerPage)
-            }
+            // No need for signals - Main.qml listens to authController directly
         }
     }
 
@@ -50,7 +68,7 @@ ApplicationWindow {
     // REGISTER PAGE
     // ============================================
     Component {
-        id: registerPage
+        id:  registerPage
         
         RegisterPage {
             onBackToLoginClicked: {
@@ -63,45 +81,31 @@ ApplicationWindow {
     // BUYER HOME PAGE
     // ============================================
     Component {
-        id:  buyerHomePage
+        id: buyerHomePage
         
         BuyerHomePage {
-            userName: root.currentUser
-            
             onLogoutClicked: {
-                root.isLoggedIn = false
-                root.currentUser = ""
-                root.currentEmail = ""
-                root.currentRole = ""
-                stackView.push(loginPage)
+                authController.logout()
+                while (stackView. depth > 1) {
+                            stackView.pop()
+                }
             }
             
             onProductClicked: {
-                console.log("Product clicked:", productId)
+                console.log("[Main] Product clicked:", productId)
                 stackView.push(productDetailPage, {
-                    "productId": productId,
-                    "productName": "Laptop Pro 15",
-                    "productPrice": 1299.99,
-                    "productImage": "💻",
-                    "productDescription": "High-performance laptop with 15-inch display, Intel i7 processor, 16GB RAM, 512GB SSD.  Perfect for professionals, developers, and content creators.",
-                    "sellerName": "Tech Store",
-                    "stockQuantity": 5
+                    "productId": productId
                 })
             }
             
             onCartClicked: {
-                console.log("Cart clicked")
+                console.log("[Main] Cart clicked")
                 stackView.push(cartPage)
             }
             
             onProfileClicked: {
-                console. log("Profile clicked")
-                stackView.push(profilePage, {
-                    "userName": root.currentUser,
-                    "userEmail": root.currentEmail,
-                    "userRole": root.currentRole,
-                    "userBalance": root.currentBalance
-                })
+                console.log("[Main] Profile clicked")
+                stackView.push(profilePage)
             }
         }
     }
@@ -113,50 +117,30 @@ ApplicationWindow {
         id: sellerDashboard
         
         SellerDashboard {
-            userName: root.currentUser
-            
             onLogoutClicked: {
-                root.isLoggedIn = false
-                root. currentUser = ""
-                root. currentEmail = ""
-                root. currentRole = ""
+                authController.logout()
+                stackView.clear()
                 stackView.push(loginPage)
             }
             
             onAddProductClicked: {
-                console.log("Add product clicked")
+                console.log("[Main] Add product clicked")
                 stackView.push(addEditProductPage, {
                     "isEditMode": false
                 })
             }
             
             onEditProductClicked: {
-                console.log("Edit product:", productId)
-                stackView. push(addEditProductPage, {
-                    "isEditMode":  true,
+                console.log("[Main] Edit product:", productId)
+                stackView.push(addEditProductPage, {
+                    "isEditMode": true,
                     "productId": productId
                 })
-                
-                // Load product data (mock)
-                var page = stackView.currentItem
-                page.loadProduct(
-                    productId,
-                    "Laptop Pro 15",
-                    "High-performance laptop with 15-inch display",
-                    1299.99,
-                    5,
-                    "Electronics"
-                )
             }
             
             onProfileClicked: {
-                console. log("Profile clicked")
-                stackView.push(profilePage, {
-                    "userName": root. currentUser,
-                    "userEmail": root.currentEmail,
-                    "userRole": root. currentRole,
-                    "userBalance": root.currentBalance
-                })
+                console.log("[Main] Profile clicked")
+                stackView.push(profilePage)
             }
         }
     }
@@ -168,20 +152,13 @@ ApplicationWindow {
         id: cartPage
         
         CartPage {
-            userName: root.currentUser
-            
             onBackClicked: {
                 stackView.pop()
             }
             
             onCheckoutClicked: {
-                console.log("Proceed to checkout")
-                // TODO: Create checkout page
-                // stackView.push(checkoutPage)
-                
-                // For now, show success message
-                stackView.pop()
-                console.log("Order placed successfully!  (mock)")
+                console.log("[Main] Proceed to checkout")
+                stackView.push(checkoutPage)
             }
             
             onContinueShoppingClicked: {
@@ -202,14 +179,12 @@ ApplicationWindow {
             }
             
             onAddToCartClicked: {
-                console.log("Added to cart:", quantity, "items")
-                // TODO: Add to cart logic
+                console.log("[Main] Added to cart:", quantity, "items")
                 stackView.pop()
             }
             
             onBuyNowClicked: {
-                console.log("Buy now:", quantity, "items")
-                // TODO: Direct checkout
+                console.log("[Main] Buy now:", quantity, "items")
                 stackView.pop()
             }
         }
@@ -222,14 +197,12 @@ ApplicationWindow {
         id: addEditProductPage
         
         AddEditProductPage {
-            onBackClicked: {
+            onBackClicked:  {
                 stackView.pop()
             }
             
-            onSaveClicked:  {
-                console.log("Product saved:", name, description, price, stock, category)
-                
-                // Go back after 1.5 seconds
+            onSaveClicked: {
+                console.log("[Main] Product saved")
                 saveProductTimer.start()
             }
             
@@ -248,30 +221,32 @@ ApplicationWindow {
         id: profilePage
         
         ProfilePage {
+            userName: authController.currentUserName
+            userEmail: authController.currentUserEmail
+            userRole: authController.currentUserRole
+            userBalance: authController.currentBalance
+            
             onBackClicked: {
                 stackView.pop()
             }
             
             onSaveProfileClicked: {
-                console. log("Profile saved:", name, email)
-                root.currentUser = name
-                root.currentEmail = email
+                console.log("[Main] Profile saved")
             }
             
             onChangePasswordClicked: {
-                console.log("Password changed")
-                // TODO: Connect to backend
+                console.log("[Main] Password changed")
             }
             
             onLogoutClicked: {
-                root. isLoggedIn = false
-                root.currentUser = ""
-                root.currentEmail = ""
-                root.currentRole = ""
-                stackView.push(loginPage)
+                authController.logout()
+                while (stackView. depth > 1) {
+                            stackView.pop()
+                }
             }
         }
     }
+
     // ============================================
     // CHECKOUT PAGE
     // ============================================
@@ -284,8 +259,7 @@ ApplicationWindow {
             }
             
             onPlaceOrderClicked: {
-                console.log("Order placed!")
-                // TODO: Call BuyerBUS:: checkout
+                console.log("[Main] Order placed!")
                 stackView.pop()  // Go back to cart
                 stackView.pop()  // Go back to home
             }
@@ -299,15 +273,12 @@ ApplicationWindow {
         id: orderHistoryPage
         
         OrderHistoryPage {
-            userName: root.currentUser
-            
             onBackClicked: {
                 stackView.pop()
             }
             
             onViewOrderDetails: {
-                console.log("View order:", orderId)
-                // TODO: Create OrderDetailsPage
+                console.log("[Main] View order:", orderId)
             }
         }
     }
@@ -319,30 +290,24 @@ ApplicationWindow {
         id: sellerOrderManagementPage
         
         SellerOrderManagementPage {
-            userName: root.currentUser
-            
             onBackClicked: {
                 stackView.pop()
             }
             
             onConfirmOrder: {
-                console.log("Confirm order:", orderId, productId)
-                // TODO: Call SellerBUS::confirmOrderItem
+                console.log("[Main] Confirm order:", orderId, productId)
             }
             
             onShipOrder: {
-                console.log("Ship order:", orderId, productId)
-                // TODO: Call SellerBUS::shipOrderItem
+                console.log("[Main] Ship order:", orderId, productId)
             }
             
             onDeliverOrder: {
-                console.log("Deliver order:", orderId, productId)
-                // TODO: Call SellerBUS::deliverOrderItem
+                console.log("[Main] Deliver order:", orderId, productId)
             }
             
             onCancelOrder: {
-                console. log("Cancel order:", orderId, productId)
-                // TODO:  Call SellerBUS::cancelOrderItem
+                console.log("[Main] Cancel order:", orderId, productId)
             }
         }
     }

@@ -7,14 +7,10 @@
 #include "../../include/DTO/SellerDTO.h"
 #include "../../include/DTO/UserDTO.h"
 #include "../../include/UserFactory.h"
-#include "../../include/controllers/CartController.h"
 #include "../../include/models/ProductModel.h"
 
 AuthController::AuthController(QObject* parent)
-    : QObject(parent),
-      m_currentUser(nullptr),
-      m_productModel(new ProductModel(this)),
-      m_cartController(new CartController(this)) {  // Add this
+    : QObject(parent), m_currentUser(nullptr), m_productModel(new ProductModel(this)) {
     qDebug() << "[AuthController] Initialized";
 
     // Load products on startup
@@ -50,15 +46,13 @@ void AuthController::login(const QString& email, const QString& password) {
 
     if (result.has_value()) {
         m_currentUser = result.value();
-        QString role = QString::fromStdString(m_currentUser->getRole());
-
         qDebug() << "[AuthController] ✓ Login successful";
         qDebug() << "  User:" << QString::fromStdString(m_currentUser->getName());
-        qDebug() << "  Role:" << role;
+        qDebug() << "  Role:" << QString::fromStdString(m_currentUser->getRole());
 
         emit isLoggedInChanged();
         emit currentUserChanged();
-        emit loginSuccess(role);
+        emit loginSuccess();  // ✅ This signal is emitted correctly
     } else {
         qDebug() << "[AuthController] ✗ Login failed:" << QString::fromStdString(result.error());
         emit loginFailed(QString::fromStdString(result.error()));
@@ -90,7 +84,6 @@ void AuthController::registerUser(const QString& name, const QString& email,
 void AuthController::logout() {
     qDebug() << "[AuthController] Logging out";
     m_currentUser.reset();
-    m_cartController->setBuyer(nullptr);  // Clear cart
     emit isLoggedInChanged();
     emit currentUserChanged();
 }

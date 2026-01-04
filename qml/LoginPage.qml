@@ -5,23 +5,21 @@ import QtQuick.Layouts 1.12
 Page {
     id: loginPage
 
-    signal loginClicked(string email, string password)
-    signal registerClicked()
-    signal loginSucceeded(string role)
-
     // Connect to AuthController signals
     Connections {
         target: authController
         
-        function onLoginSuccess(role) {
-            console.log("✓ Login success, role:", role)
-            loginPage.loginSucceeded(role)
+        function onLoginSuccess() {
+            console.log("[LoginPage] ✓ Login success detected")
+            console.log("[LoginPage] Role:", authController.currentUserRole)
+            // Clear form
+            clearForm()
         }
         
         function onLoginFailed(error) {
-            console.log("✗ Login failed:", error)
-            errorLabel. text = error
-            errorLabel. visible = true
+            console.log("[LoginPage] ✗ Login failed:", error)
+            errorLabel.text = error
+            errorLabel.visible = true
         }
     }
 
@@ -57,7 +55,7 @@ Page {
 
                 Label {
                     text: "Sign in to your account"
-                    font. pixelSize: 14
+                    font.pixelSize: 14
                     color: "#666"
                     Layout.alignment: Qt.AlignHCenter
                 }
@@ -83,8 +81,8 @@ Page {
                         selectByMouse: true
                         
                         background: Rectangle {
-                            color:  emailField.focus ? "#f0f8ff" : "#f5f5f5"
-                            border.color: emailField.focus ? "#2196F3" : "#ddd"
+                            color: emailField.focus ? "#f0f8ff" : "#f5f5f5"
+                            border.color: emailField.focus ? "#2196F3" :  "#ddd"
                             border.width: 2
                             radius: 5
                         }
@@ -128,9 +126,9 @@ Page {
                 // Error message
                 Label {
                     id: errorLabel
-                    text: ""
+                    text:  ""
                     color: "#f44336"
-                    font.pixelSize: 12
+                    font. pixelSize: 12
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                     visible: false
@@ -148,14 +146,14 @@ Page {
                     
                     contentItem: Text {
                         text: loginButton.text
-                        font: loginButton.font
+                        font:  loginButton.font
                         color: "white"
                         horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text. AlignVCenter
+                        verticalAlignment:  Text.AlignVCenter
                     }
                     
-                    background:  Rectangle {
-                        color: loginButton.pressed ? "#1976D2" : (loginButton.hovered ? "#1E88E5" : "#2196F3")
+                    background: Rectangle {
+                        color:  loginButton.pressed ? "#1976D2" : (loginButton.hovered ? "#1E88E5" : "#2196F3")
                         radius: 5
                     }
                     
@@ -163,9 +161,9 @@ Page {
                     
                     onClicked: {
                         errorLabel.text = ""
-                        errorLabel.visible = false
+                        errorLabel. visible = false
                         
-                        console.log("[LoginPage] Login clicked")
+                        console.log("[LoginPage] Login button clicked")
                         
                         if (emailField.text === "") {
                             errorLabel.text = "Please enter your email"
@@ -173,21 +171,20 @@ Page {
                             return
                         }
                         
-                        if (passwordField.text === "") {
+                        if (passwordField. text === "") {
                             errorLabel.text = "Please enter your password"
-                            errorLabel.visible = true
+                            errorLabel. visible = true
                             return
                         }
                         
-                        // Call C++ controller
-                        console.log("[LoginPage] Calling authController.login")
+                        console.log("[LoginPage] Calling authController.login with:", emailField.text)
                         authController.login(emailField.text, passwordField. text)
                     }
                 }
 
                 // Divider
                 RowLayout {
-                    Layout. fillWidth: true
+                    Layout.fillWidth: true
                     spacing: 10
 
                     Rectangle {
@@ -220,7 +217,7 @@ Page {
                         font: parent.font
                         color: "#2196F3"
                         horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment:  Text.AlignVCenter
+                        verticalAlignment: Text.AlignVCenter
                     }
                     
                     background: Rectangle {
@@ -233,7 +230,8 @@ Page {
                     Layout.preferredHeight: 45
                     
                     onClicked: {
-                        loginPage.registerClicked()
+                        console.log("[LoginPage] Register button clicked")
+                        stackView.push(registerPage)
                     }
                 }
 
