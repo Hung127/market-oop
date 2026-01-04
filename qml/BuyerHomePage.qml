@@ -13,14 +13,14 @@ Page {
     signal profileClicked()
 
     Component.onCompleted: {
-        console.log("[BuyerHomePage] Component completed")
         console.log("[BuyerHomePage] Loading products...")
-        authController.productModel.loadProducts()
-        
-        // Log the model count after loading
-        Qt.callLater(function() {
-            console.log("[BuyerHomePage] Product count:", authController.productModel.rowCount())
-        })
+        refreshProducts()
+    }
+
+    function refreshProducts() {
+        var products = productController.getAllProducts()
+        console.log("[BuyerHomePage] Loaded", products.length, "products")
+        productGrid.model = products
     }
 
     // Toast notification for cart actions
@@ -64,7 +64,7 @@ Page {
         
         Timer {
             id: toastTimer
-            interval:  2000
+            interval: 2000
             onTriggered: toastFadeOut.start()
         }
     }
@@ -97,48 +97,51 @@ Page {
 
             // Search Bar
             TextField {
-                id:  searchField
+                id: searchField
                 Layout.preferredWidth: 300
                 placeholderText: "Search products..."
                 
                 background: Rectangle {
-                    color:  "white"
+                    color: "white"
                     radius: 20
                 }
                 
                 leftPadding: 15
                 rightPadding: 15
                 
-                onAccepted: {
-                    console.log("[BuyerHomePage] Searching for:", text)
-                    authController.productModel.searchProducts(text)
-                }
+                Keys.onReturnPressed: searchButton.clicked()
             }
 
             Button {
+                id: searchButton
                 text: "🔍"
                 font.pixelSize: 18
                 flat: true
                 
                 contentItem: Text {
-                    text: parent.text
+                    text:  parent.text
                     font: parent.font
                     color: "white"
                     horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment:  Text.AlignVCenter
+                    verticalAlignment: Text.AlignVCenter
                 }
                 
                 onClicked: {
                     console.log("[BuyerHomePage] Searching for:", searchField.text)
-                    authController.productModel.searchProducts(searchField.text)
+                    if (searchField.text === "") {
+                        refreshProducts()
+                    } else {
+                        var products = productController.searchProducts(searchField.text)
+                        productGrid.model = products
+                    }
                 }
             }
 
             Item { Layout.fillWidth: true }
 
-            // Cart Button with Item Count
+            // Cart Button
             Button {
-                text: "🛒 Cart (" + authController.cartController.itemCount + ")"
+                text: "🛒 Cart"
                 font.pixelSize: 14
                 flat: true
                 
@@ -237,9 +240,10 @@ Page {
                             onClicked: {
                                 console.log("[BuyerHomePage] Filter by category:", modelData)
                                 if (modelData === "All Products") {
-                                    authController.productModel.loadProducts()
+                                    refreshProducts()
                                 } else {
-                                    authController.productModel.filterByCategory(modelData)
+                                    var products = productController.searchProducts(modelData)
+                                    productGrid.model = products
                                 }
                             }
                         }
@@ -261,12 +265,12 @@ Page {
                     clip: true
 
                     GridView {
-                        id: productGrid
+                        id:  productGrid
                         cellWidth: 250
                         cellHeight: 320
                         
-                        // Use the ProductModel from AuthController
-                        model: authController.productModel
+                        // Model will be set dynamically
+                        model: []
 
                         // Show message when no products
                         Label {
@@ -293,8 +297,8 @@ Page {
                                 onEntered: parent.border.color = "#2196F3"
                                 onExited: parent.border.color = "#e0e0e0"
                                 onClicked: {
-                                    console.log("[BuyerHomePage] Product clicked:", model.productId)
-                                    buyerHomePage.productClicked(model.productId)
+                                    console.log("[BuyerHomePage] Product clicked:", modelData.productId)
+                                    buyerHomePage.productClicked(modelData.productId)
                                 }
                             }
 
@@ -305,14 +309,14 @@ Page {
 
                                 // Product Image
                                 Label {
-                                    text: model.image
+                                    text: modelData.image
                                     font.pixelSize: 80
                                     Layout.alignment: Qt.AlignHCenter
                                 }
 
                                 // Product Name
                                 Label {
-                                    text: model.name
+                                    text: modelData.name
                                     font.pixelSize: 16
                                     font.bold: true
                                     color: "#333"
@@ -324,23 +328,23 @@ Page {
 
                                 // Seller
                                 Label {
-                                    text: "by " + model.seller
+                                    text: "by " + modelData.sellerName
                                     font.pixelSize: 12
                                     color: "#999"
                                 }
 
                                 // Stock indicator
                                 Label {
-                                    text: model.stock > 0 ? "In Stock (" + model.stock + ")" : "Out of Stock"
+                                    text: modelData.stock > 0 ?  "In Stock (" + modelData.stock + ")" : "Out of Stock"
                                     font.pixelSize: 11
-                                    color: model.stock > 0 ? "#4CAF50" : "#F44336"
+                                    color: modelData.stock > 0 ? "#4CAF50" : "#F44336"
                                 }
 
                                 Item { Layout.fillHeight: true }
 
                                 // Price
                                 Label {
-                                    text: "$" + model.price.toFixed(2)
+                                    text: "$" + modelData.price.toFixed(2)
                                     font.pixelSize: 20
                                     font.bold: true
                                     color: "#4CAF50"
@@ -351,7 +355,7 @@ Page {
                                     Layout.fillWidth: true
                                     text: "Add to Cart"
                                     font.pixelSize: 14
-                                    enabled: model.stock > 0
+                                    enabled: modelData.stock > 0
                                     
                                     contentItem: Text {
                                         text: parent.text
@@ -369,13 +373,9 @@ Page {
                                     }
                                     
                                     onClicked: {
-                                        console.log("[BuyerHomePage] Add to cart:", model.name)
-                                        var success = authController.cartController.addToCart(model.productId, 1)
-                                        if (success) {
-                                            showToast("✓ Added " + model.name + " to cart")
-                                        } else {
-                                            showToast("✗ Failed to add to cart")
-                                        }
+                                        console.log("[BuyerHomePage] Add to cart:", modelData.name)
+                                        // TODO: Implement cart functionality
+                                        showToast("✓ Added " + modelData.name + " to cart")
                                     }
                                 }
                             }

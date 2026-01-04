@@ -7,14 +7,13 @@
 #include "../../include/DTO/SellerDTO.h"
 #include "../../include/DTO/UserDTO.h"
 #include "../../include/UserFactory.h"
-#include "../../include/models/ProductModel.h"
+#include "../../include/controllers/ProductController.h"
 
 AuthController::AuthController(QObject* parent)
-    : QObject(parent), m_currentUser(nullptr), m_productModel(new ProductModel(this)) {
+    : QObject(parent),
+      m_currentUser(nullptr),
+      m_productController(new ProductController(this)) {  // ✅ Create ProductController
     qDebug() << "[AuthController] Initialized";
-
-    // Load products on startup
-    m_productModel->loadProducts();
 }
 
 QString AuthController::currentUserName() const {
@@ -52,7 +51,7 @@ void AuthController::login(const QString& email, const QString& password) {
 
         emit isLoggedInChanged();
         emit currentUserChanged();
-        emit loginSuccess();  // ✅ This signal is emitted correctly
+        emit loginSuccess();
     } else {
         qDebug() << "[AuthController] ✗ Login failed:" << QString::fromStdString(result.error());
         emit loginFailed(QString::fromStdString(result.error()));
@@ -61,7 +60,7 @@ void AuthController::login(const QString& email, const QString& password) {
 
 void AuthController::registerUser(const QString& name, const QString& email,
                                   const QString& password, const QString& role) {
-    qDebug() << "[AuthController] Register attempt:  ";
+    qDebug() << "[AuthController] Register attempt: ";
     qDebug() << "  Name:" << name;
     qDebug() << "  Email:" << email;
     qDebug() << "  Role:" << role;
